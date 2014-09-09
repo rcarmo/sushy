@@ -1,0 +1,5 @@
+bottle>=0.12.7
+gevent>=1.0.1
+goless>=0.7.2
+hy>=0.10.0
+uWSGI>=2.0.7
