@@ -1,4 +1,9 @@
-(import [logging [getLogger]])
+(import 
+    [os [walk stat]]
+    [os.path [join]]
+    [stat [ST_MTIME]]
+    [logging [getLogger]]
+    [config [*ignored-folders* *base-filenames*]])
 
 (setv log (getLogger))
 
@@ -7,7 +12,7 @@
     
 (defn split-header-line [string]
     (let [[parts (strip-seq (.split string ":" 1))]]
-       [(.lower (get parts 0)) (get parts 1)]))
+        [(.lower (get parts 0)) (get parts 1)]))
             
 (defn parse-page [buffer]
     ; parse a page and return a header map and the raw markup
@@ -24,3 +29,22 @@
             (.exception log "Could not parse page")
             (throw (IOError "Invalid Page Format.")))))
 
+            
+(defn filtered-names [folder-list]
+    (filter (fn [folder-name] (not (in folder-name *ignored-folders*))) folder-list))
+
+(defn get-all-pages [root-path]
+    (let [[pages {}]]
+        (for [elements (walk root-path)]
+            (let [[folder     (get elements 0)]
+                  [subfolders (get elements 1)]
+                  [files      (get elements 2)]]
+                (setv subfolders (filtered-names subfolders))
+                (for [base *base-filenames*]
+                     (if (in base files)
+                         (assoc pages
+                             (slice folder (+ 1 (len root-path)))
+                             (get (stat (join folder base)) ST_MTIME))))))
+        pages))
+
+(print  (get-all-pages "/home/rcarmo/Dropbox/Sites/the.taoofmac.com/space"))
