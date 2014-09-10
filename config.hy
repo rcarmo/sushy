@@ -1,15 +1,17 @@
 (import
+    [os [environ]]
+    [os.path [join]]
     [logging [getLogger DEBUG INFO]])
 
 (setv log (getLogger))
+
+(def *store-path* (join (get environ "HOME") "Dropbox/Sites/the.taoofmac.com/space"))
 
 (def *page-path* "/space")
 
 (def *home-page* (+ *page-path* "/HomePage"))
 
 (def *debug-mode* true)
-
-(def *ignored-folders* [".hg" ".git"])
 
 (def *aliasing-chars* [" " "." "-" "_"])
 

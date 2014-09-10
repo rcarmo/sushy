@@ -3,7 +3,7 @@
     [os.path [join]]
     [stat [ST_MTIME]]
     [logging [getLogger]]
-    [config [*ignored-folders* *base-filenames*]])
+    [config [*ignored-folders* *base-filenames* *store-path*]])
 
 (setv log (getLogger))
 
@@ -39,6 +39,7 @@
             (let [[folder     (get elements 0)]
                   [subfolders (get elements 1)]
                   [files      (get elements 2)]]
+                ; setting this helps guide os.path.walk()
                 (setv subfolders (filtered-names subfolders))
                 (for [base *base-filenames*]
                      (if (in base files)
@@ -47,4 +48,4 @@
                              (get (stat (join folder base)) ST_MTIME))))))
         pages))
 
-(print  (get-all-pages "/home/rcarmo/Dropbox/Sites/the.taoofmac.com/space"))
+(print (get-all-pages *store-path*))
