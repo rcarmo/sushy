@@ -17,8 +17,8 @@
 
 (def *base-types*
     {"txt"      "text/plain"
-     "html"     "text/html"
      "htm"      "text/html"
+     "html"     "text/html"
      "md"       "text/x-markdown"
      "mkd"      "text/x-markdown"
      "mkdn"     "text/x-markdown"

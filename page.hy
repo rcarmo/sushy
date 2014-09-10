@@ -1,6 +1,6 @@
 (import 
     [os [walk stat]]
-    [os.path [join]]
+    [os.path [join exists]]
     [stat [ST_MTIME]]
     [logging [getLogger]]
     [config [*ignored-folders* *base-filenames* *store-path*]])
@@ -29,7 +29,13 @@
             (.exception log "Could not parse page")
             (throw (IOError "Invalid Page Format.")))))
 
-            
+
+(defn get-page [name]
+    (let [[path (join *store-path* name)]
+          [page (.next (filter (fn [item] (exists (join path item))) *base-filenames*))]]
+        (parse-page (.read (open (join *store-path* name page) "r")))))
+
+
 (defn filtered-names [folder-list]
     (filter (fn [folder-name] (not (in folder-name *ignored-folders*))) folder-list))
 
@@ -48,4 +54,3 @@
                              (get (stat (join folder base)) ST_MTIME))))))
         pages))
 
-(print (get-all-pages *store-path*))
