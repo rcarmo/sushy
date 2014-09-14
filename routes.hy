@@ -1,7 +1,7 @@
 (import 
     [logging [getLogger]]
     [bottle  [route view template request redirect]]
-    [config  [*home-page* *page-path*]])
+    [config  [*home-page* *page-route-base*]])
 
 (setv log (getLogger))
 
@@ -9,6 +9,6 @@
     (fn []
         (redirect *home-page*)))
 
-(route (+ *page-path* "/<page>") ["GET"]
+(route (+ *page-base-route* "/<page>") ["GET"]
     (fn [page] 
         {}))
