@@ -19,12 +19,9 @@
                                  "safe_mode" false})
                 raw))
                 
-(defn render-textile [markup]
+(defn render-textile [raw]
     (smartyPants (apply textile [raw] {"head_offset" 0
-                                       "validate"    0
-                                       "sanitize"    1
-                                       "encoding"    "utf-8"
-                                       "output"      "utf-8"})))
+                                       "html_type"   "html"})))
 
 (def render-map 
    {"text/plain"          render-plaintext
@@ -37,7 +34,7 @@
     
     
 (defn render-page [page]
-    (apply (get render-map (get (:headers page) "content-type") [(:body page)] {})))
+    (apply (get render-map (get (:headers page) "content-type")) [(:body page)] {}))
 
 
 (defn sanitize-title [title]
