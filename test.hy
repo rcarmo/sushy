@@ -13,3 +13,5 @@
 ;    (print (- (time) now)))
 
 (print (render-page (get-raw-page "HomePage")))
+(print (render-page (get-raw-page "links/2014/09/11/0602")))
+(print (render-page (get-raw-page "blog/2014/09/13/2030")))
