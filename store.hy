@@ -23,14 +23,15 @@
               [body         (get parts 1)]]
               (if (not (in "content-type" headers))
                 (assoc headers "content-type" "text/plain"))
-              {"headers" headers
-               "body"    body})
+              {:headers headers
+               :body    body})
         (catch [e Exception]
             (.exception log "Could not parse page")
             (throw (IOError "Invalid Page Format.")))))
 
 
-(defn get-page [name]
+(defn get-raw-page [name]
+    ; return the raw data for a page 
     (let [[path (join *store-path* name)]
           [page (.next (filter (fn [item] (exists (join path item))) *base-filenames*))]]
         (parse-page (.read (open (join *store-path* name page) "r")))))
@@ -39,7 +40,8 @@
 (defn filtered-names [folder-list]
     (filter (fn [folder-name] (not (in folder-name *ignored-folders*))) folder-list))
 
-(defn get-all-pages [root-path]
+
+(defn scan-pages [root-path]
     (let [[pages {}]]
         (for [elements (walk root-path)]
             (let [[folder     (get elements 0)]
@@ -51,6 +53,7 @@
                      (if (in base files)
                          (assoc pages
                              (slice folder (+ 1 (len root-path)))
-                             (get (stat (join folder base)) ST_MTIME))))))
+                             {:filename base
+                              :mtime (get (stat (join folder base)) ST_MTIME)})))))
         pages))
 
