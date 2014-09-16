@@ -9,6 +9,6 @@
     (fn []
         (redirect *home-page*)))
 
-(route (+ *page-base-route* "/<page>") ["GET"]
+(route (+ *page-route-base* "/<page>") ["GET"]
     (fn [page] 
         {}))
