@@ -13,7 +13,7 @@
        (let [[href (get a.attrib "href")]
              [schema (get (urlsplit href) 0)]]
              (if (= (get href 0) "#")
-                (assoc a.attrib "href" (join *page-route-base* pagename href))
+                (assoc a.attrib "href" (+ (join *page-route-base* pagename) href))
                 (if (= "" schema)
                    (assoc a.attrib "href" (join *page-route-base* href))))))
     doc)
