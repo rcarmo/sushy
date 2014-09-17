@@ -1,11 +1,11 @@
 (import
     [os [environ]]
     [os.path [join]]
-    [logging [getLogger DEBUG INFO]])
+    [logging [getLogger basicConfig DEBUG INFO]])
 
 (setv log (getLogger))
 
-(def *store-path* (join (get environ "HOME") "Dropbox/Sites/the.taoofmac.com/space"))
+(def *store-path* (join (get environ "HOME") "/Dropbox/Sites/the.taoofmac.com/space"))
 
 (def *page-route-base* "/space")
 
@@ -35,6 +35,5 @@
 (def *ignored-folders* ["CVS" ".hg" ".svn" ".git" ".AppleDouble" ".TemporaryItems"])
 
 (if *debug-mode*
-    (.setLevel log DEBUG)
-    (.setLevel log INFO))
-    
+    (apply basicConfig [] {"level" DEBUG})
+    (apply basicConfig [] {"level" INFO}))

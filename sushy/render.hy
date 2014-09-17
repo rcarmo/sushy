@@ -39,4 +39,3 @@
 
 (defn sanitize-title [title]
     (re.sub "[\W+]" "-" (.lower title)))
-    
