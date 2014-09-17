@@ -1,5 +1,11 @@
 BUNDLE=sushy.zip
 
+repl:
+	PYTHONPATH=$(BUNDLE) hy
+
+deps:
+	pip -r requirements.txt
+
 clean:
 	rm -f *.zip
 	rm -f sushy/*.pyc
