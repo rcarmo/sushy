@@ -3,6 +3,7 @@
     [os.path [join exists]]
     [stat [ST_MTIME]]
     [logging [getLogger]]
+    [codecs [open]]
     [config [*ignored-folders* *base-filenames* *store-path*]])
 
 (setv log (getLogger))
@@ -37,7 +38,7 @@
     ; return the raw data for a page 
     (let [[path (join *store-path* name)]
           [page (.next (filter (fn [item] (exists (join path item))) *base-filenames*))]]
-        (parse-page (.read (open (join *store-path* name page) "r")))))
+        (parse-page (.read (apply open [(join *store-path* name page)] {"mode" "r" "encoding" "utf-8"})))))
 
 
 (defn filtered-names [folder-list]
