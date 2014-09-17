@@ -5,7 +5,7 @@
 
 (setv log (getLogger))
 
-(def *store-path* (join (get environ "HOME") "/Dropbox/Sites/the.taoofmac.com/space"))
+(def *store-path* (join (get environ "HOME") "Dropbox/Sites/the.taoofmac.com/space"))
 
 (def *page-route-base* "/space")
 
