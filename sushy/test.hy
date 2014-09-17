@@ -14,4 +14,4 @@
 ;    (print (len (scan-pages *store-path*)))
 ;    (print (- (time) now)))
 
-(print (apply-transforms (render-page (get-raw-page "blog/2014/06/02/2130"))))
+(print (apply-transforms "blog/2014/06/02/2130" (render-page (get-raw-page "blog/2014/06/02/2130"))))
