@@ -1,6 +1,6 @@
 ## Sushy
 
-A wiki engine
+A wiki engine that runs off static files.
 
 
 ## Status
@@ -9,7 +9,7 @@ Currently putting together the basics of content storage and rendering. No nice 
 
 ## Why?
 
-I've been running a classical, OO-based Python Wiki (called [Yaki][y]) for the better part of a decade. It works, but it is comparatively big and has become unwieldy and cumbersome to tweak. So I decided to [rewrite it][y2]. [Again][gae]. And [again][clj].
+I've been running a classical, OO-based Python Wiki (called [Yaki][y]) for the better part of a decade. It works, but it is comparatively big and has become unwieldy and cumbersome to tweak. So I decided to [rewrite it][tng]. [Again][gae]. And [again][clj].
 
 ## Why [Hy][hy]?
 
