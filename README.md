@@ -23,6 +23,10 @@ Then [Hy][hy] came along, and I realized I could have my cake and eat it too.
 
 Although it's not the way I use it, there's no reason why it can't be easily modified to do so.
 
+# Requirements
+
+Thanks to [Hy][hy], this should run just as well under Python 2 and Python 3. My target environment is 2.7.8/PyPy, though, so your mileage may vary.
+
 ## Configuration
 
 In accordance with the [12 Factor][12] approach, runtime configuration will taken from environment variables:
