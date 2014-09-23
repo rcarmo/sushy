@@ -27,6 +27,12 @@ Although it's not the way I use it, there's no reason why it can't be easily mod
 
 Thanks to [Hy][hy], this should run just as well under Python 2 and Python 3. My target environment is 2.7.8/PyPy, though, so your mileage may vary.
 
+# Principle of Operation
+
+* All your Textile or Markdown content and lives in a filesystem tree, with a folder per page
+* Sushy grabs and renders those on demand with fine-tuned HTTP headers (assuming you do the sane thing and put Varnish or CloudFlare in front for caching)
+* It also (optionally) maintains a SQLite database with a full-text index of all your content (because I need this for private wikis).
+
 ## Configuration
 
 In accordance with the [12 Factor][12] approach, runtime configuration will be taken from environment variables:
