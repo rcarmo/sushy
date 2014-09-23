@@ -1,0 +1,9 @@
+From: Rui Carmo
+Title: Recently Visited
+Content-Type: text/x-textile
+X-Index: No
+X-Cache-Control: max-age=300
+
+The following table lists pages that have been recently visited:
+
+<plugin name="mostpopular" src="time"/>

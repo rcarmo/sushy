@@ -1,0 +1,90 @@
+From: Rui Carmo
+Date: Wed, 25 Jun 2003 23:44:55 GMT
+Last-Modified: 2008-12-07 23:42:30 
+X-Index: No
+Title: Inter-Wiki Map
+Tags: meta
+Content-Type: text/x-textile
+
+h2. iTunes
+
+<pre>
+Artist http://itunes.com/
+Developer http://itunes.com/
+AppStore http://itunes.com/app/
+ITMSMovie http://itunes.com/movie/
+ITMSTV http://itunes.com/tv/
+</pre>
+
+h2. Other Wikis
+
+<pre>
+E2 http://www.everything2.net/e2node/
+43F http://wiki.43folders.com/index.php/
+CocoaWiki http://www.cocoadev.com/index.pl?
+Fedora http://fedoraproject.org/wiki/
+Litux http://www.litux.org/wiki/
+Tao http://the.taoofmac.com/space/
+Ubuntu https://wiki.ubuntu.com/
+Lspace http://wiki.lspace.org/wiki/
+</pre>
+
+h2. Telco References
+
+<pre>
+3GPP http://the.taoofmac.com/3gpp_redirect.php?spec=
+ISO http://www.iso.org/iso/en/CombinedQueryResult.CombinedQueryResult?queryString=
+RFC http://www.faqs.org/rfcs/rfc
+VoIP http://www.voip-info.org/tiki-index.php?page=
+</pre>
+
+h2. Generic References
+
+<pre>
+Acronym http://www.acronymfinder.com/af-query.asp?String=exact&Acronym=
+Dictionary http://www.dictionary.com/cgi-bin/dict.pl?term=
+IMDB http://us.imdb.com/title/
+TV http://us.imdb.com/title/
+IMDBTitle http://www.imdb.com/title/
+IMDBName http://www.imdb.com/name/
+ISBN http://www.amazon.co.uk/gp/product/%s/ref=as_li_tf_tl?ie=UTF8&tag=thtaofma-21&linkCode=as2&camp=1634&creative=6738
+ASIN http://www.amazon.co.uk/gp/product/%s/ref=as_li_tf_tl?ie=UTF8&tag=thtaofma-21&linkCode=as2&camp=1634&creative=6738
+Game http://www.amazon.co.uk/gp/product/%s/ref=as_li_tf_tl?ie=UTF8&tag=thtaofma-21&linkCode=as2&camp=1634&creative=6738
+CD http://www.amazon.co.uk/gp/product/%s/ref=as_li_tf_tl?ie=UTF8&tag=thtaofma-21&linkCode=as2&camp=1634&creative=6738
+DVD http://www.amazon.co.uk/gp/product/%s/ref=as_li_tf_tl?ie=UTF8&tag=thtaofma-21&linkCode=as2&camp=1634&creative=6738
+JargonFile http://sunir.org/apps/meta.pl?wiki=JargonFile&redirect=
+Finance http://finance.google.com/finance?q=
+NASDAQ http://finance.google.com/finance?q=
+Thesaurus http://www.thesaurus.com/cgi-bin/search?config=roget&words=
+Twitter http://twitter.com/
+Wikipedia http://en.wikipedia.org/wiki/
+Wiktionary http://en.wiktionary.org/wiki/
+YouTube http://www.youtube.com/watch?v=
+KB http://support.apple.com/kb/
+</pre>
+
+h2. Web Services
+
+<pre>
+Geo http://maps.google.com/maps?t=k&q=
+GoogleGroups http://groups.google.com/groups?q=
+Google http://www.google.com/search?q=
+GoogleFinance http://finance.google.com/finance?q=
+Technorati http://www.technorati.com/search/
+</pre>
+
+h2. Coding
+
+<pre>
+CPAN http://search.cpan.org/search?query=
+FreshMeat http://freshmeat.net/
+Perl http://search.cpan.org/search?query=
+Python http://docs.python.org/lib/module-
+php-function http://www.php.net/manual/en/function.%s.php
+php-lookup http://www.php.net/manual-lookup.php?pattern=
+PEP http://www.python.org/dev/peps/pep-0
+PythonInfo http://www.python.org/cgi-bin/moinmoin/
+Radar rdar://problem/
+OpenRadar http://www.openradar.me/
+SourceForge http://sourceforge.net/
+</pre>

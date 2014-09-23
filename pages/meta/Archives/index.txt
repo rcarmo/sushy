@@ -1,0 +1,9 @@
+From: Rui Carmo
+Title: Archives
+Content-Type: text/x-textile
+X-Index: no
+X-Cache-Control: max-age=0
+
+This page lists blog (and linkblog) entries for:
+
+<plugin name="archive" src="blog|links">

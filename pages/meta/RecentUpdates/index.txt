@@ -1,0 +1,11 @@
+From: Rui Carmo
+Title: Recent Updates
+Content-Type: text/x-textile
+X-Index: No
+X-Cache-Control: max-age=300
+
+The following table lists recently updated pages on this site:
+
+<plugin name="recentchanges"/>
+
+<small><b>Note:</b> Minor edits and changes to images and media are not necessarily reflected here.</small>

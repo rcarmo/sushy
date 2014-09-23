@@ -1,0 +1,68 @@
+From: Rui Carmo
+Date: 2009-20-04 09:35:46
+X-Index: No
+Title: Highlights 
+Tags: meta
+Content-Type: text/x-textile
+
+This page holds links highlighted on the sidebar.
+
+h1. On My Mind
+
+<pre>
+blog/2011/09/01/2200 Tadpole
+blog/2011/08/25/1030 The Right Question
+blog/2011/08/20/2133 Roadkill
+blog/2011/07/08/2306 Twitch
+blog/2011/06/06/2222 Cloudy
+blog/2011/03/02/2122 On the iPad 2
+</pre>
+
+h1. Popular
+
+<pre>
+HOWTO/Switch Switching to the Mac?
+HOWTO/Setup/3G 3G/HSDPA/GPRS Guide
+com/Apple/iPhone The iPhone Timeline
+dev/Python/Grimoire The Python Grimoire
+blog/2004/11/08 The Blue Packet
+</pre>
+
+h1. Bookshelf
+
+<pre>
+ASIN:1848874480 REAMDE
+ASIN:0007448058 A Song of Ice and Fire
+ASIN:1857150953 Decline and Fall of the Roman Empire
+ASIN:0230750761 Embassytown
+ASIN:0596003137 Perl Cookbook
+ASIN:0330545620 Halo: Cryptum
+ASIN:1907519718 The Kings of Eternity
+ASIN:0393072223 The Shallows
+ASIN:0596809778 iPhone App Development
+ASIN:0230748775 Final Days
+ASIN:0441020348 Rule 34
+ASIN:0596517742 JS: The Good Parts
+</pre>
+
+h1. Persons Of Interest
+
+<pre>
+http://binarybonsai.com/ Binary Bonsai
+http://arrifana.org/blog/ Celso Martinho
+http://org.against.org/ MoiMeme
+http://www.simplicidade.org/notes/ Notes
+http://www.russellbeattie.com/ Russell Beattie
+http://www.schneier.com/blog/ Schneier on Security
+http://www.statusq.org/ Status-Q
+</pre>
+
+h1. Policy
+
+<pre>
+site/Disclaimer Disclaimer
+site/Press Press
+site/Sponsorship Sponsorship
+site/Syndication_Policy Syndication
+</pre>
+

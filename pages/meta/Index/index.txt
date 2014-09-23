@@ -1,0 +1,11 @@
+From: Rui Carmo
+Title: Alphabetical Index
+Date: 2007-04-07 21:02:13
+Content-Type: text/x-textile
+X-Index: no
+X-Cache-Control: max-age=3600
+
+These are all the pages contained in the "Wiki":Wiki:
+
+<plugin name="AllPages"/>
+

@@ -1,0 +1,61 @@
+From: Rui Carmo
+Title: Acronym Table
+Date: 2007-05-11 23:49:15
+Last-Modified: 2007-06-03 11:53:28
+Tags: meta
+Content-Type: text/x-textile
+
+h2. Generic Acronyms
+
+<pre>
+BLT Bacon, Lettuce and Tomato
+BTO Build-To-Order
+CEO Chief Executive Officer
+TLA Three-Letter Acronym
+TOC Table Of Contents
+IMHO In My Honest Opinion
+FUD Fear, Uncertainty and Doubt
+</pre>
+
+h2. Computing Acronyms
+
+<pre>
+CLI Command-Line Interface
+CSS Cascading Style Sheets
+PCB Printed Circuit Board
+RAM Random Access Memory
+RFC Request For Comments
+ROM Read-Only Memory
+RSS Real Simple Syndication
+SEO Search Engine Optimization
+USB Universal Serial Bus
+WYSIWYG What You See Is What You Get
+XML Extensible Markup Language
+</pre>
+
+h2. Networking Acronyms
+
+<pre>
+FTP File Transfer Protocol
+HTTP HyperText Transfer Protocol
+IP Internet Protocol or Intellectual Property
+SSH Secure Shell
+SFTP Secure File Transfer Protocol
+SMTP Simple Mail Transfer Protocol
+IMAP Internet Message Access Protocol
+TCP Transmission Control Protocol
+UDP User Datagram Protocol
+URL Uniform Resource Locator
+</pre>
+
+h2. Mobile Acronyms
+
+<pre>
+GSM Global System for Mobile communications
+HSDPA High Speed Downlink Packet Access
+IMS IP Multimedia Subsystem
+MMS Multimedia Message Service
+SMS Short Message Service
+UMTS Universal Mobile Telecommunications System
+WAP Wireless Application Protocol
+</pre>
