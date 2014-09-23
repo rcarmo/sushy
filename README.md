@@ -13,9 +13,9 @@ I've been running a classical, OO-based Python Wiki (called [Yaki][y]) for the b
 
 ## Why [Hy][hy]?
 
-Essentially because I've been doing a lot of Clojure lately for my other personal projects, and both the LISP syntax and functional programming feel quite natural to me.
+Essentially because I've been doing a lot of Clojure lately for my other personal projects, and both the LISP syntax and functional programming style feel quite natural to me.
 
-I thought long and hard about doing this in Clojure instead (and in fact have been poking at an [implementation][clj] for almost a year now), but the Java libraries for Markdown and Textile have a bunch of little irritating corner cases and I wanted to make sure all my content would render fine the first time, plus Python has an absolutely fantastic ecosystem that I am deeply into.
+I thought long and hard about doing this in Clojure instead (and in fact have been poking at an [implementation][clj] for almost a year now), but the Java libraries for Markdown and Textile have a bunch of irritating little corner cases and I wanted to make sure all my content would render fine the first time, plus Python has an absolutely fantastic ecosystem that I am deeply into.
 
 Then [Hy][hy] came along, and I realized I could have my cake and eat it too.
 
@@ -29,7 +29,7 @@ Thanks to [Hy][hy], this should run just as well under Python 2 and Python 3. My
 
 ## Configuration
 
-In accordance with the [12 Factor][12] approach, runtime configuration will taken from environment variables:
+In accordance with the [12 Factor][12] approach, runtime configuration will be taken from environment variables:
 
 * `CONTENT_ROOT`
 * `BASE_PREFIX`
