@@ -7,4 +7,4 @@ textile==2.1.8
 smartypants==1.8.6
 Markdown==2.5
 lxml==3.4.0
-peewee
+peewee==2.3.2
