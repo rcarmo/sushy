@@ -1,0 +1,7 @@
+From: Rui Carmo
+Title: Latest Posts
+Date: Sun Feb 18 16:15:00 2007
+X-Index: no
+X-Cache-Control: max-age=600
+
+<plugin name="Journal" size="12"/>

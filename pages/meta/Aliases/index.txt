@@ -1,0 +1,422 @@
+From: Rui Carmo
+Date: 2009-10-04 09:35:46
+Previously-Modified: 2010-01-28 23:22:36
+Last-Modified: 2010-08-01 14:58:29 
+X-Index: No
+Title: Aliases
+Tags: meta
+Content-Type: text/x-textile
+
+This page holds direct replacements for some shorthand I use in WikiLinks that often needs to expand to direct links to external sites or "to other Wikis":meta/InterWikiMap.
+
+Some are merely temporary until I can make references to some topics completely consistent across old content and clean them up.
+
+h2. Sites and Companies
+
+<pre>
+Adobe com/Adobe
+AOL http://www.aol.com
+Backpack http://backpackit.com
+BlackBerry com/RIM
+BoingBoing http://www.boingboing.net
+CentOS http://www.centos.org/
+Compaq com/Compaq
+Coral http://www.coralcdn.org
+Dell com/Dell
+Digg http://www.digg.com
+FNAC http://www.fnac.pt
+Friendfeed http://www.friendfeed.com
+Google com/Google
+Google/Buzz com/Google/Buzz
+Google/Checkout http://checkout.google.com
+Google/Chrome com/Google/Chrome
+Chrome Google/Chrome
+Google/Code http://code.google.com
+Google/Reader com/Google/Reader
+IKEA http://www.ikea.com
+INESC http://www.inesc.pt
+IST http://www.ist.utl.pt
+Iomega http://www.iomega.com
+Jaiku Wikipedia:Jaiku
+LG http://www.lge.com
+Last.fm http://last.fm
+LinkedIn http://www.linkedin.com
+Macromedia com/Macromedia
+Maxtor http://www.maxtor.com
+Netcabo http://www.zon.pt
+Newsweek http://www.newsweek.com
+Nintendo com/Nintendo
+Novatel http://www.novatelwireless.com
+Opera http://www.opera.com
+Ovi Wikipedia:Ovi_(Nokia)
+Philips http://www.philips.com
+Portugal_Telecom http;//www.telecom.pt
+SAP com/SAP
+Sanyo http://www.sanyo.com
+Sapo Portugal/Sapo
+Siemens http://www.siemens.com
+Slashdot http://slashdot.org
+Sonae http://sonae.pt
+Sybase com/Sybase
+Technorati http://www.technorati.com
+Usenet protocols/NNTP
+VAX Wikipedia:VAX
+Verizon http://www.verizonwireless.com
+Worten http://www.worten.pt
+YouTube http://www.youtube.com
+Yahoo/Pipes com/Yahoo/Pipes
+com/Adobe Wikipedia:Adobe_Systems
+com/Amazon Wikipedia:Amazon.com
+com/Asus http://www.asus.com
+com/Compaq Wikipedia:Compaq
+com/Google/Buzz Wikipedia:Google_Buzz
+com/Instapaper http://www.instapaper.com
+com/Macromedia Wikipedia:Macromedia
+com/Nintendo Wikipedia:Nintendo
+com/Quora Wikipedia:Quora
+com/SAP Wikipedia:SAP_AG
+com/Skyhook http://www.skyhook.com
+com/Skype http://www.skype.com
+apps/Skype com/Skype
+com/Sybase Wikipedia:Sybase
+com/Yahoo/Pipes http://pipes.yahoo.com
+com/Wacom http://www.wacom.com
+</pre>
+
+h2. Internal
+
+<pre>
+SiteDesigns site/Designs
+SiteHeaders site/Headers
+</pre>
+
+h2. Apple Stuff
+
+<pre>
+.Mac MobileMe
+10.4 com/Apple/OSX/Tiger
+10.5 com/Apple/OSX/Leopard
+10.6 com/Apple/OSX/Snow_Leopard
+AirPort/Express com/Apple/AirPort/Express
+AirPort/Extreme com/Apple/AirPort/Extreme
+Apple/TV com/Apple/TV
+Apple/iPhone/3G com/Apple/iPhone/3G
+Apple/iPhone/3Gs com/Apple/iPhone/3Gs
+Aqua Wikipedia:Aqua_(user_interface)
+Darwin Wikipedia:Darwin_(operating_system)
+G3 Wikipedia:PowerPC_G3
+G4 Wikipedia:PowerPC_G4
+G5 Wikipedia:PowerPC_G5
+iPhone/Post-Launch com/Apple/iPhone/Post-Launch
+iPhone/Safari com/Apple/iPhone/Safari
+Leopard 10.5
+Mac com/Apple/Mac
+Mac/mini com/Apple/Mac/mini
+MacBU Wikipedia:MacBU
+MacBook com/Apple/Mac/MacBook
+MacBook/Air com/Apple/Mac/MacBook/Air
+MacBook/Pro com/Apple/Mac/MacBook/Pro
+Mighty_Mouse com/Apple/Magic_Mouse
+NeXT com/NeXT
+OSX com/Apple/OSX
+PowerBook com/Apple/Mac/PowerBook
+Snow_Leopard 10.6
+Tiger 10.4
+Time_Capsule com/Apple/Time_Capsule
+Time_Machine com/Apple/Time_Machine
+WWDC Wikipedia:Apple_Worldwide_Developers_Conference
+iMac com/Apple/Mac/iMac 
+iPad com/Apple/iPad
+iPhone com/Apple/iPhone
+iPhone/3G com/Apple/iPhone/3G
+iPhone/3GS com/Apple/iPhone/3GS
+iPod com/Apple/iPod
+iPod/Shuffle com/Apple/iPod/Shuffle
+iPod/Touch com/Apple/iPod/Touch
+iPod/mini com/Apple/iPod/mini
+iPod/nano com/Apple/iPod/nano
+</pre>
+
+h2. Devices
+
+<pre>
+PC hw/PC
+WDTV hw/WDTV
+hw/WDTV http://wdtv.wetpaint.com/
+Palm/Pre com/Palm/Pre
+Blackberry com/RIM
+NSLU2 Linksys/NSLU2
+Linksys/NSLU2 com/Linksys/NSLU2
+Mini_9 com/Dell/Inspiron_Mini_9
+Dell/Inspiron/Mini_9 com/Dell/Inspiron/Mini_9
+Kindle Amazon/Kindle
+Amazon/Kindle com/Amazon/Kindle
+Clie Wikipedia:Clie
+PlayStation com/Sony/PlayStation
+PSP com/Sony/PlayStation/Portable
+PS3 PlayStation_2
+PlayStation_2 com/Sony/PlayStation/2
+PS3 PlayStation_3
+PlayStation_3 com/Sony/PlayStation/3
+Sony/Reader com/Sony/Reader
+</pre>
+
+h2. Microsoft 
+
+<pre>
+Exchange com/Microsoft/Exchange
+Outlook com/Microsoft/Outlook
+IE Internet_Explorer
+Sharepoint Wikipedia:Sharepoint
+Internet_Explorer com/Microsoft/Internet_Explorer
+NetMeeting com/Microsoft/NetMeeting
+NT Windows/NT
+Windows/NT com/Microsoft/Windows/NT
+XP Windows/XP
+Windows/XP com/Microsoft/Windows/XP
+Windows/7 com/Microsoft/Windows/7
+</pre>
+
+h2. Languages & Development
+
+<pre>
+AppleScript dev/AppleScript
+CVS Wikipedia:Concurrent_Versions_System
+git dev/SCM/git
+Lua http://www.lua.org/
+Java dev/Java
+Python dev/Python
+PHP dev/PHP
+Mercurial dev/SCM/Mercurial
+Subversion dev/SCM/Subversion
+Textile markup/Textile
+Markdown markup/Markdown
+</pre>
+
+h2. Linux
+
+<pre>
+Debian os/Linux/Distributions/Debian
+Fedora os/Linux/Distributions/Fedora
+Gentoo os/Linux/Distributions/Gentoo
+Jolicloud http://www.jolicloud.com/
+Linux os/Linux
+Maemo os/Linux/Distributions/Maemo
+MeeGo http://meego.com
+Moblin http://moblin.org
+NASLite os/Linux/Distributions/NASLite
+RedHat os/Linux/Distributions/RedHat
+SuSE os/Linux/Distributions/SuSe
+Ubuntu os/Linux/Distributions/Ubuntu
+</pre>
+
+h2. Acronyms and Buzzwords
+
+<pre>
+IEEE/802.1X Wikipedia:802.1X
+3G UMTS
+ACPI Wikipedia:Advanced_Configuration_and_Power_Interface
+API Wikipedia:Application_Programming_Interface
+APN Wikipedia:Access_Point_Name
+ARM Wikipedia:ARM_architecture
+ATM Wikipedia:Asynchronous_Transfer_Mode
+ActiveSync com/Microsoft/ActiveSync
+Ajax Wikipedia:Ajax_(programming)
+Android com/Google/Android
+BIOS Wikipedia:BIOS
+Blu-Ray Wikipedia:Blu-Ray
+Bonjour com/apple/Bonjour
+CGI Wikipedia:Common_Gateway_Interface
+CPU Wikipedia:CPU
+DisplayPort Wikipedia:DisplayPort
+DLNA Wikipedia:DLNA
+DOM Wikipedia:Document_Object_Model
+DRM Wikipedia:Digital_rights_management 
+DSL Wikipedia:DSL
+DVI Wikipedia:Digital_Visual_Interface
+EDGE Wikipedia:Enhanced_Data_Rates_for_GSM_Evolution
+EPUB Wikipedia:Epub
+EV-DO Wikipedia:EV-DO
+EXIF photography/EXIF
+E_Ink eBook_Readers
+FAT fs/FAT32
+GNU Wikipedia:GNU
+GTK http://www.gtk.org
+GUI Wikipedia:GUI
+Gantt Wikipedia:Gantt_chart
+HDMI Wikipedia:HDMI
+HFS Wikipedia:HFS_Plus
+HSDPA HSPA
+HSPA Wikipedia:High_Speed_Packet_Access
+HSUPA HSPA
+HTTP protocols/HTTP
+HTTPS protocols/HTTPS
+IBM com/IBM
+ICANN Wikipedia:ICANN
+IDE Wikipedia:Integrated_development_environment
+IMS telco/IMS
+IPTC photography/IPTC
+IPv6 Wikipedia:IPv6
+ISDN Wikipedia:Integrated_Services_Digital_Network
+ISDN:Wikipedia:Integrated_services_digital_network
+ISO Wikipedia:ISO_(disambiguation)
+IrDA Wikipedia:Infrared_Data_Association
+JPEG photography/JPEG
+LCD Wikipedia:Liquid_crystal_display
+LOTR Wikipedia:The_Lord_of_the_Rings
+MAPI Wikipedia:Messaging_Application_Programming_Interface
+MemoryStick Wikipedia:Memory_Stick
+Memory_Stick Wikipedia:Memory_Stick
+MP4 Wikipedia:MPEG-4_Part_14
+MPEG Wikipedia:Moving_Picture_Experts_Group
+NDA Wikipedia:Non-disclosure_agreement
+NDIS Wikipedia:Network_Driver_Interface_Specification
+NFS Wikipedia:Network_File_System_(protocol)
+Oracle com/Oracle
+P2P Wikipedia:Peer-to-peer
+PAL Wikipedia:PAL
+PCMCIA Wikipedia:PC_Card
+PDA Wikipedia:Personal_digital_assistant
+PMI http://www.pmi.org
+PVR Wikipedia:Personal_video_recorder
+Qt Wikipedia:Qt_(framework)
+RAM Wikipedia:RAM
+REST Wikipedia:Representational_State_Transfer
+RDP protocols/RDP
+SDK Wikipedia:SDK
+SSH cli/SSH
+SSD Wikipedia:Solid-state_drive
+SSID Wikipedia:Service_set_(802.11_network)
+Series_40 com/Nokia/S40
+Series_60 com/Nokia/S60
+TCP/IP Wikipedia:Internet_Protocol_Suite
+TIFF Wikipedia:Tagged_Image_File_Format
+TNEF com/Microsoft/TNEF
+Trackback Wikipedia:Trackback
+TrueType Wikipedia:TrueType
+UI Wikipedia:User_interface
+UK Wikipedia:United_Kingdom
+UMTS Wikipedia:UMTS
+UNIX os/UNIX
+UPNP protocols/UPNP
+URL Wikipedia:URL
+US Wikipedia:United_States
+USB hw/USB
+UTF-8 Wikipedia:UTF-8
+Unicode Wikipedia:Unicode
+VF-PT com/Vodafone/Portugal
+VNC protocols/VNC
+VRML Wikipedia:VRML
+Vista com/Microsoft/Windows/Vista
+WebKit Wikipedia:WebKit
+Web_2.0 Wikipedia:Web_2.0
+Wiki Wikipedia:Wiki
+Win32 Wikipedia:Win32
+Windows/7 com/Microsoft/Windows/7
+Windows/CE com/Microsoft/Windows/CE
+WYSIWYG Wikipedia:WYSIWYG
+ZIP Wikipedia:ZIP_(file_format)
+com/Oracle Wikipedia:Oracle_Corporation
+eBook Wikipedia:E-book
+ePub EPUB
+vCalendar Wikipedia:ICalendar
+vCard Wikipedia:VCard
+</pre>
+
+h2. People
+
+<pre>
+Leo_Laporte people/Leo_Laporte
+Om_Malik people/Om_Malik
+RuiCarmo people/Rui_Carmo
+Douglas_Adams people/Douglas_Adams
+people/Amit_Singh http://www.kernelthread.com/
+people/Andy_Ihnatko Wikipedia:Andy_Ihnatko
+people/Arthur_Dent Wikipedia:Arthur_Dent
+people/Bob_Ippolito http://bob.pythonmac.org/
+people/Celso_Martinho http://celso.arrifana.org/
+people/Charles_Stross Wikipedia:Charles_Stross
+people/David_Liss Wikipedia:David_Liss
+people/David_Pogue Wikipedia:David_Pogue
+people/Douglas_Adams Wikipedia:Douglas_Adams
+people/Fraser_Speirs http://speirs.org
+people/Gary_Gibson Wikipedia:Gary_Gibson
+people/Iain_Banks Wikipedia:Iain_Banks
+people/Jared_Tarbell http://levitated.net
+people/Joao_Craveiro http://weblog.jcraveiro.com
+people/John_Siracusa http://arstechnica.com/authors/john-siracusa/
+people/Jonathan_Ive Wikipedia:Jonathan_Ive
+people/Leo_Laporte Wikipedia:Leo_Laporte
+people/Marco_Arment http://www.marco.org/
+people/Michael_Heilemann http://binarybonsai.com
+people/Michael_Mace http://www.mikemace.com/
+people/Neal_Stephenson Wikipedia:Neal_Stephenson
+people/Nuno_Nunes http://nunonunes.org
+people/Om_Malik Wikipedia:Om_Malik
+people/Pedro_Pinheiro http://mat.su
+people/Pedro_Santos http://www.macacos.com
+people/Phil_Schiller Wikipedia:Phil_Schiller
+people/Reini_Urban Wikipedia:PhpWiki
+people/Rich_Burridge http://blogs.sun.com/richb/
+people/Russell_Beattie http://www.russellbeattie.com
+people/Scott_Adams Wikipedia:Scott_Adams
+people/Stephen_Fry Wikipedia:Stephen_Fry
+people/Steven_Levy Wikipedia:Steven_Levy
+people/Ted_Leung http://www.sauria.com/blog/
+people/Terence_Eden http://shkspr.mobi/blog/
+people/Terry_Pratchett Wikipedia:Terry_Pratchett
+people/Tim_Cook Wikipedia:Tim_Cook
+people/Tom_Hume http://www.tomhume.org/
+</pre>
+
+h2. Apps and Tools
+
+<pre>
+Acrobat Wikipedia:Adobe_Acrobat
+Confluence http://www.atlassian.com/software/confluence/
+DarwinPorts MacPorts
+Darwine apps/WineBottler
+Eclipse apps/Eclipse
+MacPorts apps/MacPorts
+apps/Pages apps/iWork
+apps/Numbers apps/iWork
+apps/iChat Wikipedia:iChat
+apps/VueScan http://www.hamrick.com/
+Eolas apps/Eolas
+GNUstep Wikipedia:GNUstep
+ImageMagick cli/ImageMagick
+Howl http://howlapp.com/
+Konfabulator http://widgets.yahoo.com/
+newspipe projects/newspipe
+RRDTool cli/RRDTool
+TiddlyWiki http://www.tiddlywiki.com/
+Tomcat http://tomcat.apache.org/
+git Wikipedia:Git_(software)
+Xen Wikipedia:Xen
+Whoosh https://bitbucket.org/mchaput/whoosh/
+</pre>
+
+h2. Concepts
+
+<pre>
+Artificial_Intelligence AI
+Economics Wikipedia:Economics
+Dilbert corporate/Dilbert
+Fire Wikipedia:Fire_(instant_messaging_client)
+Geek Wikipedia:Geek
+Hype corporate/Hype
+KISS Wikipedia:K.I.S.S.
+Management corporate/Management
+Mathematics math
+Marketing corporate/Marketing
+Open_Source Wikipedia:Open_source
+QA Wikipedia:Quality_assurance
+Web_Design design/web
+Zen Wikipedia:Zen
+</pre>
+
+h2. Entertainment
+
+<pre>
+TV/Stargate_Universe Wikipedia:Stargate_Universe
+</pre>

@@ -1,0 +1,21 @@
+From: Administrator
+Title: Quotes
+Content-Type: text/x-markdown
+X-Index: No
+X-TODO: Create plugin to parse this, based on the Highlights plugin
+
+### Scott Adams
+
+* Creativity is allowing yourself to make mistakes. Design is knowing which ones to keep.
+
+### Arlen Britton
+
+* Legibility is not the same thing as readability
+
+### Johann Wolfgang von Goethe
+
+* He who cannot draw on three thousand years is living from hand to mouth.
+
+### Mark Boulton
+
+* I think design covers so much more than the aesthetic. Design is fundamentally more. Design is usability. It is Information Architecture. It is Accessibility. This is all design.

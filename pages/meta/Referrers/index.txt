@@ -1,0 +1,16 @@
+From: Rui Carmo
+Title: Referrers
+Content-Type: text/x-textile
+X-Index: No
+X-Cache-Control: max-age=120
+
+The following table lists external referrers to this site for the last 24 hours or less: 
+
+<plugin name="referrers"/>
+
+Jump to:
+
+* "Hit Map":meta/HitMap
+* "Most Popular":meta/MostPopular
+
+*Note:* <small>Hit counts are, at best, an approximation due to heavy front-end caching.</small>

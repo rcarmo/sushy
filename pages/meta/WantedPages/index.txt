@@ -1,0 +1,10 @@
+From: Rui Carmo
+Title: Wanted Pages
+Date: 2007-04-07 21:02:13
+X-Cache-Control: max-age=120
+X-Index: No
+
+These pages are referenced in the "Wiki":Wiki but do not actually exist yet:
+
+<plugin name="WantedPages"/>
+

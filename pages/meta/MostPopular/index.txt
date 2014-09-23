@@ -1,0 +1,16 @@
+From: Rui Carmo
+Title: Most Popular
+Content-Type: text/x-textile
+X-Index: No
+X-Cache-Control: max-age=300
+
+The following table lists pages in descending order of popularity for the last 24 hours or less:
+
+<plugin name="mostpopular"/>
+
+Jump to:
+
+* "Hit Map":meta/HitMap
+* "Referrers":meta/Referrers
+
+*Note:* <small>Hit counts are, at best, an approximation due to heavy front-end caching.</small>
