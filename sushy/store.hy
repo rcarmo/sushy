@@ -39,8 +39,11 @@
     (.debug log (join *store-path* name))
     (let [[path         (join *store-path* name)]
           [page         (.next (filter (fn [item] (exists (join path item))) *base-filenames*))]
+          [filename      (join *store-path* name page)]
           [content-type (get *base-types* (get (splitext page) 1))]]
-        (parse-page (.read (apply open [(join *store-path* name page)] {"mode" "r" "encoding" "utf-8"})) content-type)))
+        (parse-page
+          (.read
+            (apply open [filename] {"mode" "r" "encoding" "utf-8"})) content-type)))
 
 
 (defn filtered-names [folder-list]
