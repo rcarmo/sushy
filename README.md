@@ -29,7 +29,7 @@ Thanks to [Hy][hy], this should run just as well under Python 2 and Python 3. My
 
 ## Principle of Operation
 
-* All your Textile or Markdown content and lives in a filesystem tree, with a folder per page
+* All your Textile or Markdown content lives in a filesystem tree, with a folder per page
 * Sushy grabs and renders those on demand with fine-tuned HTTP headers (assuming you do the sane thing and put Varnish or CloudFlare in front for caching)
 * It also (optionally) maintains a SQLite database with a full-text index of all your content (because I need this for private wikis).
 
