@@ -37,8 +37,16 @@ Thanks to [Hy][hy], this should run just as well under Python 2 and Python 3. My
 
 In accordance with the [12 Factor][12] approach, runtime configuration will be taken from environment variables:
 
-* `CONTENT_ROOT`
-* `BASE_PREFIX`
+* `CONTENT_PATH` - the folder your documents live in
+
+(more to come)
+
+## Trying it out
+
+```
+make serve
+```
+
 
 [12]: http://12factor.net/
 [hy]: http://hylang.org
