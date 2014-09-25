@@ -9,4 +9,5 @@
 (def app (default-app))
         
 (apply run []
-    {"app" app})
+    {"app" app
+     "debug" *debug-mode*})

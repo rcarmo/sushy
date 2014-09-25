@@ -38,7 +38,7 @@
     (.join " " (.split (.join "" children)))))
 
 
-(defn apply-transforms [pagename html]
+(defn apply-transforms [html pagename]
     ; remember that Hy's threading macro manipulates the first argument slot
     (-> html
         (HTML)

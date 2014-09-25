@@ -10,9 +10,9 @@ clean:
 	rm -f *.zip
 	rm -f sushy/*.pyc
 
-bundle:
+bundle: clean
 	hyc sushy/*.hy
 	zip -r9 $(BUNDLE) . -i *.py *.pyc
 
-test-bundle:
-	PYTHONPATH=$(BUNDLE) python -m sushy
+serve: bundle
+	PYTHONPATH=$(BUNDLE) CONTENT_PATH=pages python -m sushy

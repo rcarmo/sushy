@@ -1,10 +1,10 @@
 (import 
     [os [walk stat]]
-    [os.path [join exists]]
+    [os.path [join exists splitext]]
     [stat [ST_MTIME]]
     [logging [getLogger]]
     [codecs [open]]
-    [config [*ignored-folders* *base-filenames* *store-path*]])
+    [config [*ignored-folders* *base-types* *base-filenames* *store-path*]])
 
 (setv log (getLogger))
 
@@ -18,7 +18,7 @@
         [(.lower (get parts 0)) (get parts 1)]))
             
 
-(defn parse-page [buffer]
+(defn parse-page [buffer &optional [content-type "text/plain"]]
     ; parse a page and return a header map and the raw markup
     (try 
         (let [[parts        (.split buffer "\n\n" 1)]
@@ -26,7 +26,7 @@
               [headers      (dict (map split-header-line header-lines))]
               [body         (get parts 1)]]
               (if (not (in "content-type" headers))
-                (assoc headers "content-type" "text/plain"))
+                (assoc headers "content-type" content-type))
               {:headers headers
                :body    body})
         (catch [e Exception]
@@ -36,9 +36,11 @@
 
 (defn get-raw-page [name]
     ; return the raw data for a page 
-    (let [[path (join *store-path* name)]
-          [page (.next (filter (fn [item] (exists (join path item))) *base-filenames*))]]
-        (parse-page (.read (apply open [(join *store-path* name page)] {"mode" "r" "encoding" "utf-8"})))))
+    (.debug log (join *store-path* name))
+    (let [[path         (join *store-path* name)]
+          [page         (.next (filter (fn [item] (exists (join path item))) *base-filenames*))]
+          [content-type (get *base-types* (get (splitext page) 1))]]
+        (parse-page (.read (apply open [(join *store-path* name page)] {"mode" "r" "encoding" "utf-8"})) content-type)))
 
 
 (defn filtered-names [folder-list]
