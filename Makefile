@@ -10,7 +10,7 @@ clean:
 	rm -f *.zip
 	rm -f sushy/*.pyc
 
-bundle: clean
+bundle:
 	hyc sushy/*.hy
 	zip -r9 $(BUNDLE) . -i *.py *.pyc
 
