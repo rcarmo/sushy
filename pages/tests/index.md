@@ -1,8 +1,9 @@
 From: Rui Carmo
 Title: Tests
+Content-Type: text/x-markdown
 
-* [Acronyms](./acronyms)
-* [Aliases](./aliases)
-* [InterWiki Map](./interwiki)
-* [Syntax Highlighting](./highlight)
-* [Inline Images](./img)
+* [Acronyms](tests/acronyms)
+* [Aliases](tests/aliases)
+* [InterWiki Map](tests/interwiki)
+* [Syntax Highlighting](tests/highlight)
+* [Inline Images](tests/img)
