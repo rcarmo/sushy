@@ -2,7 +2,7 @@
     [logging   [getLogger]]
     [bottle    [get :as handle-get request redirect view :as render-view static-file]]
     [config    [*home-page* *page-route-base* *static-path*]]
-    [store     [get-raw-page]]
+    [store     [get-page]]
     [render    [render-page]]
     [transform [apply-transforms]])
 
@@ -24,12 +24,11 @@
         (apply static-file [filename] {"root" *static-path*})))
         
 (with-decorator 
-    (handle-get (+ *page-route-base* "/<page:path>"))
+    (handle-get (+ *page-route-base* "/<pagename:path>"))
     (render-view "wiki")
-    (fn [page] 
-        (-> page
-            (get-raw-page)
-            (render-page)
-            (apply-transforms page))
-            {"body" "foo" "headers" {"title" "pagetitle"}}
-        ))
+    (fn [pagename] 
+        (let [[page (get-page pagename)]]
+            {"headers" (:headers page)
+             "body"    (-> page 
+                           (render-page)
+                           (apply-transforms page))})))

@@ -1,2 +1,2 @@
-{{!data}}
-%rebase('layout', title=headers['title'])
+{{!body}}
+%rebase('layout', headers=headers)

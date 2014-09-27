@@ -3,8 +3,8 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>{{title}}</title>
-        <meta name="description" content="{{tags}}">
+        <title>{{!headers['title']}}</title>
+        <meta name="description" content="{{headers['tags'] if "tags" in headers else ""}}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="/static/css/site.css">
         <link href="http://fonts.googleapis.com/css?family=PT+Serif:400,700,400italic,700italic|Roboto+Slab" rel="stylesheet" type="text/css">

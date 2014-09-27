@@ -34,7 +34,7 @@
             (throw (IOError "Invalid Page Format.")))))
 
 
-(defn get-raw-page [name]
+(defn get-page [name]
     ; return the raw data for a page 
     (.debug log (join *store-path* name))
     (let [[path         (join *store-path* name)]

@@ -1,7 +1,6 @@
 (import 
     [time [time]]
     [logging [getLogger]]    
-    [store [get-raw-page scan-pages]]
     [textile [textile]]
     [smartypants [smartyPants]]
     [markdown [Markdown]])
