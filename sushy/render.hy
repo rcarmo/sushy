@@ -3,8 +3,9 @@
     [logging [getLogger]]    
     [textile [textile]]
     [smartypants [smartyPants]]
-    [markdown [Markdown]])
-    
+    [markdown [Markdown]]
+    [docutils.core [publish-parts]])
+        
 (setv log (getLogger))
 
 (defn render-html [raw]
@@ -13,6 +14,8 @@
 (defn render-plaintext [raw]
     (% "<pre>\n%s</pre>" raw))
     
+(defn render-restructured-text [raw]
+    (get (apply publish-parts [raw] {"writer_name" "html"}) "html_body"))
     
 (defn render-markdown [raw]
     (.convert 
@@ -31,6 +34,8 @@
 
 (def render-map 
    {"text/plain"          render-plaintext
+    "text/rst"            render-restructured-text ; unofficial, but let's be lenient
+    "text/x-rst"          render-restructured-text ; official
     "text/x-web-markdown" render-markdown
     "text/x-markdown"     render-markdown
     "text/markdown"       render-markdown

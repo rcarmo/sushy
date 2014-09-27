@@ -23,6 +23,7 @@
     {".txt"      "text/plain"
      ".htm"      "text/html"
      ".html"     "text/html"
+     ".rst"      "text/x-rst"
      ".md"       "text/x-markdown"
      ".mkd"      "text/x-markdown"
      ".mkdn"     "text/x-markdown"
