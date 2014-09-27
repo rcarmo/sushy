@@ -83,6 +83,8 @@ header {
   margin: 0;
   padding: 1em 4.1666667% 0 4.1666667%;
   /* 40px / 960px = 4.1666667% */
+  background: #f5f5f5;
+  background: rgba(245, 245, 245, 0.8);
   position: relative;
   overflow: visible;
 }
@@ -102,14 +104,13 @@ nav {
 #main {
   margin: 0;
   padding: 0 0 1em 0;
-  background: #f5f5f5;
-  background: rgba(245, 245, 245, 0.8);
+  background: white;
   clear: both;
 }
 
 #content {
   clear: right;
-  background-color: #f5f5f5;
+  background-color: white;
   margin: 0 auto;
   padding: 1em 4.1666667%;
   /* 40px / 960px = 4.1666667% */
@@ -145,11 +146,12 @@ footer {
   margin: 0;
   padding: 1em 4.1666667% 1em 4.1666667%;
   /* 40px / 960px = 4.1666667% */
-  background-color: #73271f;
+  background-color: #777;
   color: #fff;
   font-size: 1em;
   line-height: 1.125em;
 }
+footer a {color: #fff;}
 
 /* HTML Styles */
 body, caption, th, td, input, textarea, select, option, legend, fieldset {
@@ -225,7 +227,7 @@ h4 {
 
 p {
   padding-top: 0;
-  margin: 0 auto 1em auto;
+  margin: 0 0 1em 0;
 }
 @media (min-width: 43.75em) {
   p {
@@ -262,8 +264,6 @@ h1 {
     margin-bottom: 0.24444445em;
     /* (22px / 45px) * .5 */
     max-width: 14.4em;
-    margin-left: auto;
-    margin-right: auto;
   }
 }
 @media (min-width: 56.25em) {
@@ -278,9 +278,7 @@ h1 {
     margin-bottom: 0.22916667em;
     /* (22px / 48px) * .5 */
     max-width: 12.66667em;
-    margin-left: auto;
-    margin-right: auto;
-  }
+}
 }
 #page > header h1 {
   max-width: 100%;
@@ -306,8 +304,6 @@ h2 {
     margin-bottom: 0.34375em;
     /* (22px / 32px) * .5 */
     max-width: 18em;
-    margin-left: auto;
-    margin-right: auto;
   }
 }
 @media (min-width: 56.25em) {
@@ -320,8 +316,6 @@ h2 {
     margin-bottom: 0.34375em;
     /* (22px / 32px) * .5 */
     max-width: 16.88889em;
-    margin-left: auto;
-    margin-right: auto;
   }
 }
 

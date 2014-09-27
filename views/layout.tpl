@@ -12,7 +12,7 @@
     <body class="">
         <div id="page">
             <header role="banner" class="clearfix">
-                {{!headers['title']}}
+                <h1>{{!headers['title']}}</h1>
             </header>
             <div id="main" class="clearfix">
                 <div id="content" class="clearfix">
@@ -29,4 +29,5 @@
             </footer>
         </div>
     </body>
+    <!--<script src="/static/js/debug.js" type="text/javascript"></script>-->
 </html>
