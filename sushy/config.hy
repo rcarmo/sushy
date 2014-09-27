@@ -7,6 +7,8 @@
 
 (def *store-path* (get environ "CONTENT_PATH"))
 
+(def *static-path* (get environ "STATIC_PATH"))
+
 (def *page-route-base* "/space")
 
 (def *home-page* (+ *page-route-base* "/HomePage"))

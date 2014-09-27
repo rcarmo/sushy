@@ -1,7 +1,7 @@
 (import 
     [logging   [getLogger]]
-    [bottle    [route view template request redirect]]
-    [config    [*home-page* *page-route-base*]]
+    [bottle    [get :as handle-get request redirect view :as render-view static-file]]
+    [config    [*home-page* *page-route-base* *static-path*]]
     [store     [get-raw-page]]
     [render    [render-page]]
     [transform [apply-transforms]])
@@ -9,13 +9,27 @@
 
 (setv log (getLogger))
 
-(route "/" ["GET"]
+
+(defn dump [data]
+    (.debug log data))
+
+(with-decorator 
+    (handle-get "/")
     (fn []
         (redirect *home-page*)))
 
-(route (+ *page-route-base* "/<page:path>") ["GET"]
+(with-decorator 
+    (handle-get "/static/<filename:path>")
+    (fn [filename]
+        (apply static-file [filename] {"root" *static-path*})))
+        
+(with-decorator 
+    (handle-get (+ *page-route-base* "/<page:path>"))
+    (render-view "wiki")
     (fn [page] 
         (-> page
             (get-raw-page)
             (render-page)
-            (apply-transforms page))))
+            (apply-transforms page))
+            {"body" "foo" "headers" {"title" "pagetitle"}}
+        ))

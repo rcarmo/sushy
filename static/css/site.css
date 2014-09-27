@@ -1,0 +1,616 @@
+/* Based on http://typecast.com/blog/a-more-modern-scale-for-web-typography */
+/* apply a natural box layout model to all elements */
+* {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+/*
+ * Clearfix: contain floats
+ *
+ * For modern browsers
+ * 1. The space content is one way to avoid an Opera bug when the
+ *    `contenteditable` attribute is included anywhere else in the document.
+ *    Otherwise it causes space to appear at the top and bottom of elements
+ *    that receive the `clearfix` class.
+ * 2. The use of `table` rather than `block` is only necessary if using
+ *    `:before` to contain the top-margins of child elements.
+ */
+.clearfix:before,
+.clearfix:after {
+  content: " ";
+  /* 1 */
+  display: table;
+  /* 2 */
+}
+
+.clearfix:after {
+  clear: both;
+}
+
+/*
+ * For IE 6/7 only
+ * Include this rule to trigger hasLayout and contain floats.
+ */
+.clearfix {
+  *zoom: 1;
+}
+
+html,
+button,
+input,
+select,
+textarea {
+  color: #222;
+}
+
+body {
+  font-size: 100%;
+  background: white;
+  margin: 0;
+  padding: 0 0 2em 0;
+}
+
+/* Page furniture */
+#page {
+  width: 95%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding-top: 0;
+  border-radius: 0 0 1em 1em;
+  box-shadow: 0 0 20px rgba(50, 50, 50, 0.5);
+  overflow: hidden;
+}
+@media (min-width: 43.75em) {
+  #page {
+    max-width: 960px;
+  }
+}
+@media (min-width: 56.25em) {
+  #page {
+    max-width: 1050px;
+  }
+}
+@media (min-width: 81.25em) {
+  #page {
+    max-width: 1200px;
+  }
+}
+
+header {
+  background-size: 100%;
+  margin: 0;
+  padding: 1em 4.1666667% 0 4.1666667%;
+  /* 40px / 960px = 4.1666667% */
+  position: relative;
+  overflow: visible;
+}
+
+nav {
+  float: left;
+  width: 100%;
+  margin-left: 0;
+  margin-right: -100%;
+}
+@media (min-width: 43.75em) {
+  nav {
+    height: 3.6em;
+  }
+}
+
+#main {
+  margin: 0;
+  padding: 0 0 1em 0;
+  background: #f5f5f5;
+  background: rgba(245, 245, 245, 0.8);
+  clear: both;
+}
+
+#content {
+  clear: right;
+  background-color: #f5f5f5;
+  margin: 0 auto;
+  padding: 1em 4.1666667%;
+  /* 40px / 960px = 4.1666667% */
+  position: relative;
+}
+
+@media (min-width: 43.75em) {
+  #content #main-content {
+    margin: 0 auto;
+  }
+}
+@media (min-width: 81.25em) {
+  #content #main-content {
+    width: 75%;
+    float: left;
+    padding: 0 5% 0 0;
+  }
+}
+
+#content #comments {
+  max-width: 38em;
+  margin: 0 auto;
+}
+@media (min-width: 81.25em) {
+  #content #comments {
+    width: 25%;
+    float: left;
+    padding-top: 1em;
+  }
+}
+
+footer {
+  margin: 0;
+  padding: 1em 4.1666667% 1em 4.1666667%;
+  /* 40px / 960px = 4.1666667% */
+  background-color: #73271f;
+  color: #fff;
+  font-size: 1em;
+  line-height: 1.125em;
+}
+
+/* HTML Styles */
+body, caption, th, td, input, textarea, select, option, legend, fieldset {
+  font-family: "PT Serif", helvetica, arial, sans-serif;
+  font-size-adjust: 0.5;
+  font-weight: normal;
+  font-style: normal;
+}
+
+h1 {
+  font-family: "PT Serif", Georgia, "Times New Roman";
+  font-size-adjust: 0.5;
+  font-weight: bold;
+  font-style: normal;
+  color: #555;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+#page > header h1 {
+  font-family: "PT Serif", Georgia, "Times New Roman";
+  font-size-adjust: 0.5;
+  font-weight: bold;
+  font-style: normal;
+}
+
+h2 {
+  font-family: "PT Serif", Georgia, "Times New Roman";
+  font-size-adjust: 0.5;
+  font-weight: bold;
+  font-style: normal;
+  color: #555;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+h3 {
+  font-family: "PT Serif", Georgia, "Times New Roman";
+  font-size-adjust: 0.5;
+  font-weight: bold;
+  font-style: normal;
+  color: #555;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+h4 {
+  font-family: "PT Serif", Georgia, "Times New Roman";
+  font-size-adjust: 0.5;
+  font-weight: bold;
+  font-style: normal;
+  color: #555;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+.daterange {
+  font-size: .875em;
+  /* 14px / 16px = .875em */
+}
+
+/* TYPOGRAPHY */
+#page {
+  font-size: 1em;
+  /* equivalent to 16px */
+  line-height: 1.25;
+  /* equivalent to 20px */
+}
+@media (min-width: 43.75em) {
+  #page {
+    font-size: 1em;
+    /* equivalent to 16px */
+    line-height: 1.375;
+    /* equivalent to 22px */
+  }
+}
+
+p {
+  padding-top: 0;
+  margin: 0 auto 1em auto;
+}
+@media (min-width: 43.75em) {
+  p {
+    max-width: 36em;
+  }
+}
+@media (min-width: 56.25em) {
+  p {
+    max-width: 38em;
+  }
+}
+
+h1 {
+  font-size: 2em;
+  /* 2x body copy size = 32px */
+  letter-spacing: -1px;
+  /* tighten up 'display type' headers on smaller displays */
+  line-height: 1.25;
+  /* 45px / 36px */
+  margin-top: 0.9375em;
+  /* (20px / 32px) * 1.5 */
+  margin-bottom: 0.3125em;
+  /* (20px / 32px) * .5 */
+}
+@media (min-width: 43.75em) {
+  h1 {
+    font-size: 2.5em;
+    /* 2.5x body copy size = 40px */
+    letter-spacing: normal;
+    line-height: 1.125;
+    /* 45px / 40px */
+    margin-top: 0.73333334em;
+    /* (22px / 45px) * 1.5 */
+    margin-bottom: 0.24444445em;
+    /* (22px / 45px) * .5 */
+    max-width: 14.4em;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+@media (min-width: 56.25em) {
+  h1 {
+    font-size: 3em;
+    /* 3x body copy size = 48px */
+    letter-spacing: normal;
+    line-height: 1.05;
+    /* keep to a multiple of the 20px line height and something more appropriate for display headings */
+    margin-top: 0.6875em;
+    /* (22px / 48px) * 1.5 */
+    margin-bottom: 0.22916667em;
+    /* (22px / 48px) * .5 */
+    max-width: 12.66667em;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+#page > header h1 {
+  max-width: 100%;
+}
+
+h2 {
+  font-size: 1.625em;
+  /* 1.625x body copy size = 26px */
+  line-height: 1.15384615;
+  /* 30px / 26px */
+  margin-top: 1.15384616em;
+  /* (20px / 26px) * 1.5 */
+  margin-bottom: 0.38461539em;
+  /* (20px / 26px) * .5 */
+}
+@media (min-width: 43.75em) {
+  h2 {
+    font-size: 2em;
+    /* 2x body copy size = 32px */
+    line-height: 1.25;
+    margin-top: 1.03125em;
+    /* (22px / 32px) * 1.5 */
+    margin-bottom: 0.34375em;
+    /* (22px / 32px) * .5 */
+    max-width: 18em;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+@media (min-width: 56.25em) {
+  h2 {
+    font-size: 2.25em;
+    /* 2.25x body copy size = 36px */
+    line-height: 1.25;
+    margin-top: 1.03125em;
+    /* (22px / 32px) * 1.5 */
+    margin-bottom: 0.34375em;
+    /* (22px / 32px) * .5 */
+    max-width: 16.88889em;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+h3 {
+  font-size: 1.375em;
+  /* 1.375x body copy size = 22px */
+  line-height: 1.13636364;
+  /* 25px / 22px */
+  margin-top: 1.36363637em;
+  /* (20px / 22px) * 1.5 */
+  margin-bottom: 0.45454546em;
+  /* (20px / 22px) * .5 */
+}
+@media (min-width: 43.75em) {
+  h3 {
+    font-size: 1.5em;
+    /* 1.5x body copy size = 24px */
+    line-height: 1.25;
+    margin-top: 1.37500001em;
+    /* (22px / 24px) * 1.5 */
+    margin-bottom: 0.45833334em;
+    /* (22px / 24px) * .5 */
+    max-width: 26.18182em;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+@media (min-width: 56.25em) {
+  h3 {
+    font-size: 1.75em;
+    /* 1.75x body copy size = 28px */
+    line-height: 1.25;
+    margin-top: 1.37500001em;
+    /* (22px / 24px) * 1.5 */
+    margin-bottom: 0.45833334em;
+    /* (22px / 24px) * .5 */
+    max-width: 21.71429em;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+h4 {
+  font-size: 1.125em;
+  /* 1.125x body copy size = 18px */
+  line-height: 1.11111111;
+  margin-top: 1.66666667em;
+  /* (20px / 18px) * 1.5 */
+  margin-bottom: 0.55555556em;
+  /* (20px / 18px) * .5 */
+}
+@media (min-width: 43.75em) {
+  h4 {
+    line-height: 1.22222222;
+    /* (22px / 18px */
+    margin-top: 1.83333333em;
+    /* (22px / 18px) * 1.5 */
+    margin-bottom: 0.61111111em;
+    /* (22px / 18px) * .5 */
+    max-width: 32em;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+@media (min-width: 56.25em) {
+  h4 {
+    max-width: 33.77778em;
+  }
+}
+
+/* comments */
+#comments h3 {
+  margin-bottom: 0;
+}
+#comments .source {
+  font-size: .75em;
+  /* 12px / 16px */
+  line-height: 1.33333333em;
+  /* 16px / 12px - set the line height back to body copy size */
+  color: #a1a1a1;
+  display: block;
+  margin-bottom: 0.83333334em;
+  /* (20px / 12px) / 2: bring the title, comment closer together */
+}
+
+/* Blockquote styles */
+blockquote {
+  width: 85%;
+  margin-top: 1em;
+  /* (20px / 20px) */
+  margin-bottom: 1em;
+  /* (20px / 20px) * .5 */
+  margin-right: auto;
+  margin-left: auto;
+  font-size: 1.25em;
+  /* 20px / 16px */
+  line-height: 1.25;
+  /* 25px / 20px */
+  font-family: "PT Serif", Georgia, "Times New Roman";
+  font-weight: 300;
+  font-style: normal;
+  position: relative;
+}
+@media (min-width: 43.75em) {
+  blockquote {
+    font-size: 1.5em;
+    /* 24px / 16px = */
+    line-height: 1.45833333;
+    /* 35px / 24px */
+    width: 50%;
+    max-width: 11.6666667em;
+    /* 17.5em (or half the max paragraph width) / 1.5 = 11.6666667 */
+  }
+}
+
+@media (min-width: 43.75em) {
+  blockquote.left {
+    float: left;
+    margin-top: 0.68750001em;
+    /* ((22px / 24px) * 1.5): 1.37500001 - ((22px / 24px) * .75): 0.6875 - compensate for no margin collapse */
+    margin-bottom: 0.45833334em;
+    /* (22px / 24px) * .5 */
+    margin-right: .5em;
+    margin-left: -1em;
+    padding-left: .5em;
+  }
+}
+
+@media (min-width: 43.75em) {
+  blockquote.right {
+    float: right;
+    margin-top: 0.68750001em;
+    /* ((22px / 24px) * 1.5) / 2 - compensate for no margin collapse with paragraphy above */
+    margin-bottom: 0.45833334em;
+    /* (22px / 24px) * .5 */
+    margin-left: .5em;
+    margin-right: -1em;
+    padding-right: 1em;
+  }
+}
+
+.button {
+  font-size: 14px;
+  font-family: "Roboto Slab", Helvetica, Arial, sans-serif;
+  text-decoration: none;
+  font-weight: 500;
+  color: #383838;
+  background-color: #fefafa;
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffffff), color-stop(100%, #ede9e9));
+  background-image: -webkit-linear-gradient(#ffffff, #ede9e9);
+  background-image: -moz-linear-gradient(#ffffff, #ede9e9);
+  background-image: -o-linear-gradient(#ffffff, #ede9e9);
+  background-image: linear-gradient(#ffffff, #ede9e9);
+  padding: 0.25em;
+  -webkit-border-radius: 0.5em;
+  -moz-border-radius: 0.5em;
+  -ms-border-radius: 0.5em;
+  -o-border-radius: 0.5em;
+  border-radius: 0.5em;
+  -webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  -moz-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+.button:hover {
+  background-color: #e4e1e1;
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #fefafa), color-stop(100%, #cbc7c7));
+  background-image: -webkit-linear-gradient(#fefafa, #cbc7c7);
+  background-image: -moz-linear-gradient(#fefafa, #cbc7c7);
+  background-image: -o-linear-gradient(#fefafa, #cbc7c7);
+  background-image: linear-gradient(#fefafa, #cbc7c7);
+}
+
+.toggle-scale {
+  float: right;
+}
+.toggle-scale.on:after {
+  content: ": on";
+}
+.toggle-scale.off:after {
+  content: ": off";
+}
+
+h1 {
+  position: relative;
+}
+h1 label {
+  left: 0;
+  top: -2em;
+}
+h1 label span:before {
+  content: "2";
+}
+@media (min-width: 43.75em) {
+  h1 label span:before {
+    content: "2.5";
+  }
+}
+@media (min-width: 56.25em) {
+  h1 label span:before {
+    content: "3";
+  }
+}
+
+h2 {
+  position: relative;
+}
+h2 label {
+  left: 0;
+  top: -2em;
+}
+h2 label span:before {
+  content: "1.625";
+}
+@media (min-width: 43.75em) {
+  h2 label span:before {
+    content: "2";
+  }
+}
+@media (min-width: 56.25em) {
+  h2 label span:before {
+    content: "2.25";
+  }
+}
+
+h3 {
+  position: relative;
+}
+h3 label {
+  right: 0;
+  top: -2em;
+}
+h3 label span:before {
+  content: "1.375";
+}
+@media (min-width: 43.75em) {
+  h3 label span:before {
+    content: "1.5";
+  }
+}
+@media (min-width: 56.25em) {
+  h3 label span:before {
+    content: "1.75";
+  }
+}
+
+h4 {
+  position: relative;
+}
+h4 label {
+  left: 0;
+  top: -2em;
+}
+h4 label span:before {
+  content: "1.125";
+}
+@media (min-width: 43.75em) {
+  h4 label span:before {
+    content: "1.125";
+  }
+}
+@media (min-width: 56.25em) {
+  h4 label span:before {
+    content: "1.125";
+  }
+}
+
+blockquote {
+  position: relative;
+}
+blockquote label {
+  left: 0;
+  top: -2em;
+}
+blockquote label span:before {
+  content: "1.25";
+}
+@media (min-width: 43.75em) {
+  blockquote label span:before {
+    content: "1.5";
+  }
+}
+
+label {
+  display: none;
+}
+
+/* the following media query is a fix for a bug in older iOS devices on rotation */
+@media screen and (orientation: landscape) and (device-width: 320px) and (device-height: 480px) {
+  body {
+    width: 480px;
+  }
+}

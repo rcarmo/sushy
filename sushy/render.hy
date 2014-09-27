@@ -14,9 +14,16 @@
 (defn render-plaintext [raw]
     (% "<pre>\n%s</pre>" raw))
     
+    
 (defn render-markdown [raw]
-    (.convert (apply Markdown [] {"extensions" ["extra" "toc" "smarty" "codehilite" "meta" "sane_lists"]
-                                 "safe_mode" false})
+    (.convert 
+        (apply Markdown [] 
+            {"extensions" ["markdown.extensions.extra" 
+                           "markdown.extensions.toc" 
+                           "markdown.extensions.smarty" 
+                           "markdown.extensions.codehilite" 
+                           "markdown.extensions.meta" 
+                           "markdown.extensions.sane_lists"]})
                 raw))
                 
 (defn render-textile [raw]

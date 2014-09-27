@@ -1,4 +1,6 @@
 BUNDLE=sushy.zip
+HYFILES=sushy/*.hy
+PYFILES=sushy/*.py
 
 repl:
 	PYTHONPATH=$(BUNDLE) hy
@@ -10,9 +12,9 @@ clean:
 	rm -f *.zip
 	rm -f sushy/*.pyc
 
-bundle:
-	hyc sushy/*.hy
+bundle: $(HYFILES) $(PYFILES)
+	hyc $(HYFILES)
 	zip -r9 $(BUNDLE) . -i *.py *.pyc
 
 serve: bundle
-	PYTHONPATH=$(BUNDLE) CONTENT_PATH=pages python -m sushy
+	PYTHONPATH=$(BUNDLE) CONTENT_PATH=pages STATIC_PATH=static python -m sushy
