@@ -1,4 +1,4 @@
-Title: REStructured Text
+Title: ReStructured Text
 
 Chapter 1 Title
 ===============

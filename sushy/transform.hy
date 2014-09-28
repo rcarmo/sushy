@@ -19,6 +19,7 @@
                   (assoc a.attrib "href" (join *page-route-base* href))))))
   doc)
 
+; TODO: syntax highlighting, interwiki links, alias replacements, all the "legacy" Yaki handling
 
 (defn inner-html [doc]
   ; Returns the content of a doc without extraneous tags

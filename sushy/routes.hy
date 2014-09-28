@@ -9,10 +9,6 @@
 
 (setv log (getLogger))
 
-
-(defn dump [data]
-    (.debug log data))
-
 (with-decorator 
     (handle-get "/")
     (fn []
@@ -22,11 +18,14 @@
     (handle-get "/static/<filename:path>")
     (fn [filename]
         (apply static-file [filename] {"root" *static-path*})))
-        
+
+; TODO: page media handling        
+
 (with-decorator 
     (handle-get (+ *page-route-base* "/<pagename:path>"))
     (render-view "wiki")
     (fn [pagename] 
+        ; TODO: fuzzy URL matching, error handling
         (let [[page (get-page pagename)]]
             {"headers" (:headers page)
              "body"    (-> page 
