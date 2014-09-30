@@ -7,6 +7,7 @@
         <meta name="description" content="{{headers['tags'] if "tags" in headers else ""}}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="/static/css/site.css">
+        <link rel="stylesheet" href="/static/css/syntax.css">
         <link href="http://fonts.googleapis.com/css?family=PT+Serif:400,700,400italic,700italic|Roboto+Slab" rel="stylesheet" type="text/css">
     </head>
     <body class="">
