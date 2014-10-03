@@ -2,21 +2,19 @@
     [logging [getLogger]]
     [config [*page-route-base*]]
     [urlparse [urlsplit]]
-    [os.path [join]]
+    [os.path [join basename]]
     [store [open-asset]]
+    [messages [inline-message]]
     [pygments [highlight]]
     [pygments.lexers [get-lexer-by-name]]
     [pygments.formatters [HtmlFormatter]]
-    [lxml.etree [ElementTree HTML tostring fromstring]]
-)
+    [lxml.etree [ElementTree HTML tostring fromstring]])
 
 (setv log (getLogger))
 
 
 (defn base-href [doc pagename]
   ; inserts the base path into hrefs
-  (.debug log doc)
-  (.debug log pagename)
   (for [a (.xpath doc "//a[@href]")]
       (let [[href (get a.attrib "href")]
             [schema (get (urlsplit href) 0)]]
@@ -30,14 +28,13 @@
 (defn include-sources [doc pagename]
   ; searches for `pre` tags with a `src` attribute
   (for [tag (.xpath doc "//pre[@src]")]
-      (.debug log pagename)
-      (.debug log (tostring tag))
-      (.debug log (get tag.attrib "src"))
-      (try 
-        (let [[filename (get tag.attrib "src")]
-                [buffer (.read (open-asset pagename filename))]]
-            (setv tag.text buffer))
-        (catch [e Exception])))
+    (let [[filename (get tag.attrib "src")]]
+        (try 
+            (let [[buffer (.read (open-asset pagename filename))]]
+                (setv tag.text buffer))
+            (catch [e Exception]
+                (.replace (.getparent tag) tag
+                     (fromstring (inline-message "error" (% "Could not open file '%s'" (basename filename)))))))))
    doc)
 
 
@@ -48,10 +45,11 @@
             [lexer  (apply get-lexer-by-name [syntax] {"stripall" true})]
             [formatter (apply HtmlFormatter [] {"cssclass" "codehilite"})]]
           (if tag.text
-            (.replace (.getparent tag) tag (fromstring (highlight tag.text lexer formatter))))))
+              (.replace (.getparent tag) tag
+                  (fromstring (highlight tag.text lexer formatter))))))
   doc)
 
-; TODO: pre src=file, include, interwiki links, alias replacements, all the "legacy" Yaki handling
+; TODO: include, interwiki links, alias replacements, all the "legacy" Yaki handling
 
 (defn inner-html [doc]
   ; Returns the content of a doc without extraneous tags
@@ -71,10 +69,9 @@
     (.join " " (.split (.join "" children)))))
 
 
-(defn apply-transforms [page pagename]
+(defn apply-transforms [html pagename]
     ; remember that Hy's threading macro manipulates the first argument slot
-    (.debug log page)
-    (-> page
+    (-> html 
         (HTML)
         (base-href pagename)
         (include-sources pagename)
