@@ -46,9 +46,9 @@
   (for [tag (.xpath doc "//pre[@syntax]")]
       (let [[syntax (get tag.attrib "syntax")]
             [lexer  (apply get-lexer-by-name [syntax] {"stripall" true})]
-            [formatter (HtmlFormatter)]]
-          (.debug log syntax)
-          (.replace (.getparent tag) tag (fromstring (highlight tag.text lexer formatter)))))
+            [formatter (apply HtmlFormatter [] {"cssclass" "codehilite"})]]
+          (if tag.text
+            (.replace (.getparent tag) tag (fromstring (highlight tag.text lexer formatter))))))
   doc)
 
 ; TODO: pre src=file, include, interwiki links, alias replacements, all the "legacy" Yaki handling
