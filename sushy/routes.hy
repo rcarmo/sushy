@@ -28,6 +28,4 @@
         ; TODO: fuzzy URL matching, error handling
         (let [[page (get-page pagename)]]
             {"headers" (:headers page)
-             "body"    (-> page 
-                           (render-page)
-                           (apply-transforms page))})))
+             "body"    (apply-transforms (render-page page) pagename)})))

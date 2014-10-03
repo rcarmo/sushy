@@ -34,12 +34,17 @@
             (throw (IOError "Invalid Page Format.")))))
 
 
-(defn get-page [name]
+(defn open-asset [pagename asset]
+    (let [[filename (join *store-path* pagename asset)]]
+        (open filename "rb")))
+
+
+(defn get-page [pagename]
     ; return the raw data for a page 
-    (.debug log (join *store-path* name))
-    (let [[path         (join *store-path* name)]
+    (.debug log (join *store-path* pagename))
+    (let [[path         (join *store-path* pagename)]
           [page         (.next (filter (fn [item] (exists (join path item))) *base-filenames*))]
-          [filename      (join *store-path* name page)]
+          [filename     (join *store-path* pagename page)]
           [content-type (get *base-types* (get (splitext page) 1))]]
         (parse-page
           (.read
