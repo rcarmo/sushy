@@ -43,7 +43,7 @@
   (for [tag (.xpath doc "//pre[@syntax]")]
       (let [[syntax (get tag.attrib "syntax")]
             [lexer  (apply get-lexer-by-name [syntax] {"stripall" true})]
-            [formatter (apply HtmlFormatter [] {"cssclass" "codehilite"})]]
+            [formatter (apply HtmlFormatter [] {"cssclass" "highlight"})]]
           (if tag.text
               (.replace (.getparent tag) tag
                   (fromstring (highlight tag.text lexer formatter))))))

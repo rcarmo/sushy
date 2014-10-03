@@ -20,6 +20,7 @@
         <link rel="stylesheet" type="text/css" href="http://cdn.ink.sapo.pt/3.1.0/css/font-awesome.min.css">
 
         <link rel="stylesheet" href="/static/css/syntax.css">
+        <link rel="stylesheet" href="/static/css/site.css">
         
         <!-- load inkxs css for IE8 -->
         <!--[if lt IE 9 ]>

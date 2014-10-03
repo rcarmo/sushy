@@ -20,13 +20,14 @@
 (defn render-markdown [raw]
     (.convert 
         (apply Markdown [] 
-            {"extensions" ["markdown.extensions.extra" 
-                           "markdown.extensions.toc" 
-                           "markdown.extensions.smarty" 
-                           "markdown.extensions.codehilite" 
-                           "markdown.extensions.meta" 
-                           "markdown.extensions.sane_lists"]})
-                raw))
+            {"extensions"        ["markdown.extensions.extra" 
+                                  "markdown.extensions.toc" 
+                                  "markdown.extensions.smarty" 
+                                  "markdown.extensions.codehilite" 
+                                  "markdown.extensions.meta" 
+                                  "markdown.extensions.sane_lists"]
+             "extension_configs" {"markdown.extensions.codehilite" {"css_class" "highlight"}}})
+        raw))
                 
 (defn render-textile [raw]
     (smartyPants (apply textile [raw] {"head_offset" 0
