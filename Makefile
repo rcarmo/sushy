@@ -12,9 +12,10 @@ clean:
 	rm -f *.zip
 	rm -f sushy/*.pyc
 
-bundle: $(HYFILES) $(PYFILES)
+build: $(HYFILES) $(PYFILES)
 	hyc $(HYFILES)
-	zip -r9 $(BUNDLE) . -i *.py *.pyc
+	#zip -r9 $(BUNDLE) sushy/* -i *.py *.pyc
+	#rm -f sushy/*.pyc
 
-serve: bundle
-	PYTHONPATH=$(BUNDLE) CONTENT_PATH=pages STATIC_PATH=static python -m sushy
+serve: build
+	CONTENT_PATH=pages STATIC_PATH=static python -m sushy.app
