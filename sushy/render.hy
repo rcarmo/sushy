@@ -8,6 +8,16 @@
         
 (setv log (getLogger))
 
+; instantiate markdown renderer upon module load
+(def markdown-renderer
+     (apply Markdown [] {"extensions" ["markdown.extensions.extra" 
+                                       "markdown.extensions.toc" 
+                                       "markdown.extensions.smarty" 
+                                       "markdown.extensions.codehilite" 
+                                       "markdown.extensions.meta" 
+                                       "markdown.extensions.sane_lists"]
+                         "extension_configs" {"markdown.extensions.codehilite" {"css_class" "highlight"}}}))
+
 (defn render-html [raw]
     raw)
     
@@ -18,16 +28,7 @@
     (get (apply publish-parts [raw] {"writer_name" "html"}) "html_body"))
     
 (defn render-markdown [raw]
-    (.convert 
-        (apply Markdown [] 
-            {"extensions"        ["markdown.extensions.extra" 
-                                  "markdown.extensions.toc" 
-                                  "markdown.extensions.smarty" 
-                                  "markdown.extensions.codehilite" 
-                                  "markdown.extensions.meta" 
-                                  "markdown.extensions.sane_lists"]
-             "extension_configs" {"markdown.extensions.codehilite" {"css_class" "highlight"}}})
-        raw))
+    (.convert markdown-renderer raw))
                 
 (defn render-textile [raw]
     (smartyPants (apply textile [raw] {"head_offset" 0
