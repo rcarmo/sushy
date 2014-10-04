@@ -6,22 +6,27 @@ Index: no
 ## Inline Markdown 
 
 ```clojure
-(defn foo [bar]
-    baz)
+; parallel consumption of perishable resources
+(defn foo [bar drinks]
+    (pmap (:patrons bar) (lazy-seq drinks)))
 ```
 
 ## PRE tag with `syntax` attribute
 
 <pre syntax="python">
-import foo
+from bottle import view, request, abort
 
-def bar()
-    pass
+@view("rss")
+def render_feed()
+    if not items:
+        abort("418", "I'm a teapot")
+    else:
+        return {"items": items}
 </pre>
 
 ## From file via `src` attribute
 
-<pre syntax="javascript" src="test.txt"></pre>
+<pre syntax="javascript" src="animate_svg.js"></pre>
 
 ## From missing file via `src` attribute
 
