@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="js flexbox flexboxlegacy">
+<html lang="en">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -57,7 +57,7 @@
 
         <div id="topbar">
             <!-- Desktop navigation -->
-            <nav class="ink-navigation ink-grid hide-small hide-medium">
+            <nav class="ink-navigation ink-grid ie7">
                 <ul class="menu horizontal flat green">
                     <li class="title"><a href="/">Sushy</a></li>
                 </ul>
@@ -72,8 +72,10 @@
         <!-- TODO: masthead -->
 
         <!-- TODO: sidebar -->
-        <div id="main" class="ink-grid">
-            <h1>{{!headers["title"]}}</h1>
+        <div id="page-content" class="ink-grid content-drawer">
+            <div class="page-header">
+              <h1 class="slab">{{!headers["title"]}}</h1>
+            </div>
             {{!base}}
         </div>
         <!-- TODO: footer
