@@ -1,14 +1,14 @@
 (import
-    [logging [getLogger]]
-    [config [*page-route-base*]]
-    [urlparse [urlsplit]]
-    [os.path [join basename]]
-    [store [open-asset]]
-    [messages [inline-message]]
-    [pygments [highlight]]
-    [pygments.lexers [get-lexer-by-name]]
+    [logging             [getLogger]]
+    [config              [*page-route-base* *page-media-base*]]
+    [urlparse            [urlsplit]]
+    [os.path             [join basename]]
+    [store               [open-asset]]
+    [messages            [inline-message]]
+    [pygments            [highlight]]
+    [pygments.lexers     [get-lexer-by-name]]
     [pygments.formatters [HtmlFormatter]]
-    [lxml.etree [ElementTree HTML tostring fromstring]])
+    [lxml.etree          [ElementTree HTML tostring fromstring]])
 
 (setv log (getLogger))
 
@@ -49,6 +49,17 @@
                   (fromstring (highlight tag.text lexer formatter))))))
   doc)
 
+
+(defn image-sources [doc pagename]
+  ; searches for `img` tags with a `src` attribute and gives them an absolute URL path
+  (for [tag (.xpath doc "//img[@src]")]
+    (let [[src    (get tag.attrib "src")]
+          [schema (get (urlsplit src) 0)]]
+        (if (= "" schema)
+            (assoc tag.attrib "src" (join *page-media-base* pagename src)))))
+   doc) 
+
+
 ; TODO: include, interwiki links, alias replacements, all the "legacy" Yaki handling
 
 (defn inner-html [doc]
@@ -76,4 +87,5 @@
         (base-href pagename)
         (include-sources pagename)
         (syntax-highlight)
+        (image-sources pagename)
         (inner-html)))

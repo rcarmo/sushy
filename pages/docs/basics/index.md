@@ -4,7 +4,9 @@ Title: Content Basics
 
 ## Files and Folders
 
-Sushy expects you to organize your content _using a folder per page_ with an "index" document inside. The folder path determines the URL it's published under (so you get "nice" URLs by default), and this makes it easy to manage media assets on a per-post basis.
+Sushy expects you to organize your content _using a folder per page_ with an "index" document inside. The folder path determines the URL it's published under (so you get "nice" URLs by default), and this makes it easy to manage media assets on a per-post basis:
+
+![Folders](image.png)
 
 
 ## Markup Languages

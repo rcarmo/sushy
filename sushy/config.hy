@@ -11,6 +11,8 @@
 
 (def *page-route-base* "/space")
 
+(def *page-media-base* "/media")
+
 (def *home-page* (+ *page-route-base* "/HomePage"))
 
 (def *debug-mode* true)
