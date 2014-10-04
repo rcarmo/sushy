@@ -14,8 +14,10 @@
     
 
 (defn split-header-line [string]
-    (let [[parts (strip-seq (.split string ":" 1))]]
-        [(.lower (get parts 0)) (get parts 1)]))
+    (if (.startswith "---" string) ; handle Jekyll-style front matter delimiters
+       ["jekyll" "true"]
+       (let [[parts (strip-seq (.split string ":" 1))]]
+          [(.lower (get parts 0)) (get parts 1)])))
             
 
 (defn parse-page [buffer &optional [content-type "text/plain"]]
