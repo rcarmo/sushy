@@ -1,6 +1,7 @@
 BUNDLE=sushy.zip
-HYFILES=sushy/*.hy
-PYFILES=sushy/*.py
+HYFILES=$(wildcard sushy/*.hy)
+PYFILES=$(wildcard sushy/*.py)
+BYTECODE=$(HYFILES:.hy=.pyc)
 
 repl:
 	PYTHONPATH=$(BUNDLE) hy
@@ -10,12 +11,16 @@ deps:
 
 clean:
 	rm -f *.zip
-	rm -f sushy/*.pyc
+	rm -f $(BYTECODE)
 
-build: $(HYFILES) $(PYFILES)
-	hyc $(HYFILES)
-	#zip -r9 $(BUNDLE) sushy/* -i *.py *.pyc
-	#rm -f sushy/*.pyc
+%.pyc: %.hy
+	hyc $<
+
+build: $(BYTECODE)
+
+bundle: $(HYFILES) $(PYFILES)
+	zip -r9 $(BUNDLE) sushy/* -i *.py *.pyc
+	rm -f sushy/*.pyc
 
 serve: build
 	CONTENT_PATH=pages STATIC_PATH=static python -m sushy.app
