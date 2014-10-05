@@ -7,7 +7,7 @@
 (setv DEBUG *debug-mode*)
 
 (def app (default-app))
-        
+
 (apply run []
     {"app" app
      "debug" *debug-mode*})

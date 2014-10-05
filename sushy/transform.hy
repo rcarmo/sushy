@@ -1,9 +1,11 @@
 (import
+    [re                  [sub *ignorecase*]]
     [logging             [getLogger]]
-    [config              [*page-route-base* *page-media-base*]]
+    [config              [*page-route-base* *page-media-base* *interwiki-page*]]
     [urlparse            [urlsplit]]
     [os.path             [join basename]]
     [store               [open-asset]]
+    [utils               [get-mappings]]
     [messages            [inline-message]]
     [pygments            [highlight]]
     [pygments.lexers     [get-lexer-by-name]]
@@ -11,6 +13,7 @@
     [lxml.etree          [ElementTree HTML tostring fromstring]])
 
 (setv log (getLogger))
+
 
 
 (defn base-href [doc pagename]
@@ -23,6 +26,17 @@
               (if (= "" schema)
                   (assoc a.attrib "href" (join *page-route-base* href))))))
   doc)
+
+
+(defn interwiki-links [doc]
+    ; replaces interwiki hrefs
+    (let [[interwiki-map (get-mappings *interwiki-page*)]]
+        (for [a (.xpath doc "//a[@href]")]
+            (let [[href (get a.attrib "href")]
+                  [schema (get (urlsplit href) 0)]]
+                (if (in schema interwiki-map)
+                    (assoc a.attrib "href" (sub (+ schema ":") (get interwiki-map schema) href 1 *ignorecase*))))))
+    doc)
 
 
 (defn include-sources [doc pagename]
@@ -85,6 +99,7 @@
     (-> html 
         (HTML)
         (base-href pagename)
+        (interwiki-links)
         (include-sources pagename)
         (syntax-highlight)
         (image-sources pagename)

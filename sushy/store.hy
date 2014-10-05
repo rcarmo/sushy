@@ -24,7 +24,7 @@
     ; parse a page and return a header map and the raw markup
     (try 
         (let [[parts        (.split buffer "\n\n" 1)]
-              [header-lines (.split (get parts 0) "\n")]
+              [header-lines (.splitlines (get parts 0))]
               [headers      (dict (map split-header-line header-lines))]
               [body         (get parts 1)]]
               (if (not (in "content-type" headers))

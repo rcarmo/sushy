@@ -19,7 +19,9 @@
 
 (def *aliasing-chars* [" " "." "-" "_"])
 
-(def *aliasing-page* "meta/Aliases")
+(def *alias-page* "meta/Aliases")
+
+(def *interwiki-page* "meta/InterWikiMap")
 
 (def *base-types*
     {".txt"      "text/plain"

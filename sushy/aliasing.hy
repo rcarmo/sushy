@@ -1,6 +1,5 @@
 (import 
-    [config [*aliasing-chars*]]
-    [store [scan-pages]])
+    [config [*aliasing-chars* *alias-map*]])
     
     
 (defn resolve-alias [alias] 
