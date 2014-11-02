@@ -16,7 +16,7 @@
 (defn split-header-line [string]
     (if (.startswith "---" string) ; handle Jekyll-style front matter delimiters
        ["jekyll" "true"]
-       (let [[parts (strip-seq (.split string ":" 1))]]
+       (let [[parts (list (strip-seq (.split string ":" 1)))]]
           [(.lower (get parts 0)) (get parts 1)])))
             
 
