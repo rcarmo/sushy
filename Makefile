@@ -7,7 +7,7 @@ repl:
 	PYTHONPATH=$(BUNDLE) hy
 
 deps:
-	pip install -r requirements.txt
+	pip install -r requirements.minimal.txt
 
 clean:
 	rm -f *.zip

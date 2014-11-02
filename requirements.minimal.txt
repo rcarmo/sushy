@@ -1,0 +1,9 @@
+bottle>=0.12.7
+hy>=0.10.1
+textile>=2.1.8
+smartypants>=1.8.6
+Markdown>=2.5.1
+lxml>=3.4.0
+peewee>=2.3.2
+pygments>=1.6
+docutils>=0.12

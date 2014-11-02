@@ -4,7 +4,7 @@ A wiki engine that runs off static files.
 
 ## Status
 
-Currently putting together the basics of content storage and rendering, with minimal CSS and very little error handling yet.
+Currently working out-of-the box (indexing and a few rendering transforms are coming up next, as are my trademark HTTP tweaks).
 
 ## Why?
 
@@ -26,7 +26,7 @@ Although it's not the way I use it, there's no reason why it can't be easily mod
 
 Thanks to [Hy][hy], this should run just as well under Python 2 and Python 3. My target environment is 2.7.8/PyPy, though, so your mileage may vary.
 
-## Principle of Operation
+## Principles of Operation
 
 * All your Textile, Markdown or ReStructured Text content lives in a filesystem tree, with a folder per page
 * Sushy grabs and renders those on demand with fine-tuned HTTP headers (assuming you do the sane thing and put Varnish or CloudFlare in front for caching)
@@ -38,12 +38,17 @@ In accordance with the [12 Factor][12] approach, runtime configuration will be t
 
 * `CONTENT_PATH` - the folder your documents live in
 * `STATIC_PATH`  - static asset path (JS/CSS/etc.)
+* `BIND_ADDRESS` - IP address to bind the development server to
+* `HTTP_PORT`    - TCP port to bind the develoment server to
 
 (more to come)
 
 ## Trying it out
 
 ```
+# install dependencies
+make deps
+# run the standalone server
 make serve
 ```
 

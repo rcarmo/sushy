@@ -78,15 +78,8 @@
             </div>
             {{!base}}
         </div>
-        <!-- TODO: footer
-        <div class="screen-size-helper">
-            <p class="title">Screen size:</h1>
-            <ul class="unstyled">
-                <li class="hide-medium hide-large show-small small">SMALL</li>
-                <li class="hide-small show-medium hide-large medium">MEDIUM</li>
-                <li class="hide-small hide-medium show-large large">LARGE</li>
-            </ul>
-        </div>
-        -->
+        <footer>
+            Source on <a href="https://github.com/rcarmo/sushy">Github</a> | Made with <a href="http://ink.sapo.pt">Ink</a>
+        </footer>
     </body>
 </html>
