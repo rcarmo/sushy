@@ -17,7 +17,7 @@ This is a simple WSGI entry point, doing double duty as a [Bottle][b]-based deve
 
 ### `config`
 
-The `config` module is (predictably) where Sushy is configured. Most configurable options come from environment variables, but some conventions like URL routes, meta[^1] pages and ignored folders are set there.
+The `config` module is (predictably) where Sushy is configured. Most configurable options come from environment variables, but some conventions like URL routes, meta pages and ignored folders are set there.
 
 ### `render`
 
@@ -46,4 +46,3 @@ This is a small grab bag of utility functions (some of which are straight ports 
 [utils]: https://github.com/rcarmo/python-utils
 [b]: http://bottlepy.org
 
-[^1]: Meta pages are a Wiki convention that allows you to configure some aspects of Sushy by providing extra data inside predefined pages.
