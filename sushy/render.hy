@@ -1,3 +1,4 @@
+; Render supported markup as HTML
 (import 
     [time [time]]
     [logging [getLogger]]    

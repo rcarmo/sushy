@@ -1,3 +1,4 @@
+; Find, retrieve and parse raw page markup
 (import 
     [os [walk stat]]
     [os.path [join exists splitext]]
@@ -10,10 +11,12 @@
 
 
 (defn strip-seq [string-sequence]
+    ; strip whitespace from a sequence of strings
     (map (fn [buffer] (.strip buffer)) string-sequence))
     
 
 (defn split-header-line [string]
+    ; parse a header line from front matter
     (if (.startswith "---" string) ; handle Jekyll-style front matter delimiters
        ["jekyll" "true"]
        (let [[parts (list (strip-seq (.split string ":" 1)))]]

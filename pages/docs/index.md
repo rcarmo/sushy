@@ -4,3 +4,4 @@ Title: Sushy Documentation
 
 * [Basics](docs/basics)
 * [Content Formatting](docs/content)
+* [Internals](docs/internals)
