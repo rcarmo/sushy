@@ -29,6 +29,7 @@
     (get (apply publish-parts [raw] {"writer_name" "html"}) "html_body"))
     
 (defn render-markdown [raw]
+    (.reset markdown-renderer)
     (.convert markdown-renderer raw))
                 
 (defn render-textile [raw]
