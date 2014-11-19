@@ -7,7 +7,7 @@ X-Cache-Control: max-age=600
 
 ## What is this?
 
-Sushy is a wiki engine that runs off static files, rendering them on the fly in an optimized fashion.
+Sushy is a wiki engine that runs off static files, rendering them on the fly to enriched HTML.
 
 ## Principles of Operation
 

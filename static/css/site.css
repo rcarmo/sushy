@@ -4,6 +4,7 @@
     width: 100%;
     background: #4c9220;
     -webkit-transform: scale3d(1,1,1);
+    opacity: 0.95;
     top: 0;
 }
 
@@ -37,13 +38,17 @@ footer {
     line-height: 1.6em;
     font-size: 1em;
     padding: 1em;
-    background: #4c9220;
+    background: #2c5200;
     color: white;
     text-align: right;
 }
-footer a {
+footer a, footer a:hover {
     color: white;
 }
 .footnote {
     font-size: 85%;
 }
+h1, h2, h3, h4 {
+    font-family:Roboto_slab,Arial,Helvetica,sans-serif;
+    font-weight: normal;
+]
