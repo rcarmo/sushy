@@ -8,8 +8,9 @@
 
 (def app (default-app))
 
-(apply run []
-    {"app"   app
-     "host"  *bind-address*
-     "port"  *http-port*
-     "debug" *debug-mode*})
+(defmain [&rest args]
+    (apply run []
+        {"app"   app
+         "host"  *bind-address*
+         "port"  *http-port*
+         "debug" *debug-mode*}))
