@@ -3,7 +3,7 @@
     [time          [time]]
     [logging       [getLogger]]    
     [textile       [textile]]
-    [smartypants   [smartyPants]]
+    [smartypants   [smartypants]]
     [markdown      [Markdown]]
     [docutils.core [publish-parts]])
         
@@ -33,7 +33,7 @@
     (.convert markdown-renderer raw))
                 
 (defn render-textile [raw]
-    (smartyPants (apply textile [raw] {"head_offset" 0
+    (smartypants (apply textile [raw] {"head_offset" 0
                                        "html_type"   "html"})))
 
 (def render-map 
