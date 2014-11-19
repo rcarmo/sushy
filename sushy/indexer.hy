@@ -1,6 +1,7 @@
 (import 
     [datetime  [datetime]]
     [config    [*store-path*]]
+    [logging   [getLogger]]
     [models    [create-db add-entry]]
     [store     [get-page gen-pages]]
     [render    [render-page]]
@@ -12,7 +13,7 @@
 (create-db)
 
 (defn build-index []
-    (for [item gen-pages]
+    (for [item (gen-pages *store-path*)]
         (let [[id       (:path item)]
               [page     (get-page id)]
               [headers  (:headers page)]
@@ -23,3 +24,6 @@
                  "title" (.get headers "title" "Untitled")
                  "tags"  (.get headers "tags" "")
                  "mtime" (.fromtimestamp datetime (:mtime item))}))))
+
+(defmain [&rest args]
+    (build-index))
