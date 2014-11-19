@@ -104,3 +104,10 @@
         (syntax-highlight)
         (image-sources pagename)
         (inner-html)))
+
+
+(defn extract-plaintext [html pagename]
+    ; remember that Hy's threading macro manipulates the first argument slot
+    (-> html 
+        (HTML)
+        (compact-plaintext)))
