@@ -62,17 +62,24 @@
 
 (defn scan-pages [root-path]
     (let [[pages {}]]
-        (for [elements (walk root-path)]
-            (let [[folder     (get elements 0)]
-                  [subfolders (get elements 1)]
-                  [files      (get elements 2)]]
-                ; setting this helps guide os.path.walk()
-                (setv subfolders (filtered-names subfolders))
-                (for [base *base-filenames*]
-                     (if (in base files)
-                         (assoc pages
-                             (slice folder (+ 1 (len root-path)))
-                             {:filename base
-                              :mtime (get (stat (join folder base)) ST_MTIME)})))))
+        (reduce
+          (fn [item]
+              (assoc pages (:path item) item))
+          (gen-pages root-path))
         pages))
 
+
+(defn gen-pages [root-path]
+    ; generate a sequence of page items
+    (for [elements (walk root-path)]
+        (let [[folder     (get elements 0)]
+              [subfolders (get elements 1)]
+              [files      (get elements 2)]]
+             ; setting this helps guide os.path.walk()
+             (setv subfolders (filtered-names subfolders))
+             (for [base *base-filenames*]
+                (if (in base files)
+                    (yield
+                        {:path (slice folder (+ 1 (len root-path)))
+                         :filename base
+                         :mtime (get (stat (join folder base)) ST_MTIME)}))))))
