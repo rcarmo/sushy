@@ -16,7 +16,6 @@
 (setv log (getLogger))
 
 
-
 (defn base-href [doc pagename]
   ; inserts the base path into hrefs
   (for [a (.xpath doc "//a[@href]")]
