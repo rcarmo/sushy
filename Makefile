@@ -27,3 +27,7 @@ bundle: $(HYFILES) $(PYFILES)
 # Run with the embedded web server
 serve: build
 	BIND_ADDRESS=0.0.0.0 HTTP_PORT=8080 CONTENT_PATH=pages STATIC_PATH=static python -m sushy.app
+
+# Run with the embedded web server
+index: build
+	BIND_ADDRESS=0.0.0.0 HTTP_PORT=8080 CONTENT_PATH=pages STATIC_PATH=static python -m sushy.indexer
