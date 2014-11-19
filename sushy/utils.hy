@@ -25,3 +25,9 @@
                         (if (= 2  (len pair))
                             (assoc mappings (.lower (get pair 0)) (get pair 1))))))
             mappings)))
+
+
+(defmacro timeit [block]
+    `(let [[t (time)]]
+        ~block
+        (print (- (time) t))))
