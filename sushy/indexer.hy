@@ -17,7 +17,7 @@
         (let [[id       (:path item)]
               [page     (get-page id)]
               [headers  (:headers page)]
-              [body     (extract-plaintext (render-page page id))]]
+              [body     (extract-plaintext (render-page page) id)]]
             (apply add-entry []
                 {"id"    id
                  "body"  body

@@ -45,7 +45,7 @@
     "text/markdown"       render-markdown
     "text/textile"        render-textile
     "text/x-textile"      render-textile
-    "text/htm"            render-html})
+    "text/html"           render-html})
     
     
 (defn render-page [page]
