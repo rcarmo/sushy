@@ -69,17 +69,27 @@
         pages))
 
 
+(defn walk-folders [root-path]
+    ; generate a sequence of folder data
+    (for [(, folder subfolders files) (walk root-path)]
+        ; setting this helps guide os.path.walk()
+        (setv subfolders (filtered-names subfolders))
+        (yield {:path folder
+                :files files})))
+
+
+(defn with-index [folder-seq root-path]
+    ; takes a sequence of folders and returns page info
+    (for [folder folder-seq]
+        (for [base *base-filenames*]
+            (if (in base (:files folder))
+                (yield
+                    {:path     (slice (:path folder) (+ 1 (len root-path)))
+                     :filename base
+                     :mtime    (get (stat (join (:path folder) base)) ST_MTIME)})))))
+
+
 (defn gen-pages [root-path]
-    ; generate a sequence of page items
-    (for [elements (walk root-path)]
-        (let [[folder     (get elements 0)]
-              [subfolders (get elements 1)]
-              [files      (get elements 2)]]
-             ; setting this helps guide os.path.walk()
-             (setv subfolders (filtered-names subfolders))
-             (for [base *base-filenames*]
-                (if (in base files)
-                    (yield
-                        {:path (slice folder (+ 1 (len root-path)))
-                         :filename base
-                         :mtime (get (stat (join folder base)) ST_MTIME)}))))))
+    (-> root-path
+        (walk-folders)
+        (with-index root-path)))
