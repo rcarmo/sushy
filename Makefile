@@ -4,7 +4,7 @@ PYFILES=$(wildcard sushy/*.py)
 BYTECODE=$(HYFILES:.hy=.pyc)
 
 repl:
-	PYTHONPATH=$(BUNDLE) hy
+	BIND_ADDRESS=0.0.0.0 HTTP_PORT=8080 CONTENT_PATH=pages STATIC_PATH=static PYTHONPATH=$(BUNDLE) hy
 
 deps:
 	pip install -r requirements.minimal.txt
