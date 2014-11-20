@@ -19,19 +19,27 @@
                                        "markdown.extensions.sane_lists"]
                          "extension_configs" {"markdown.extensions.codehilite" {"css_class" "highlight"}}}))
 
+
 (defn render-html [raw]
-    raw)
+    (let [[res (.strip raw)]]
+        (if (len res)
+            res 
+            "<body></body>")))
     
+
 (defn render-plaintext [raw]
     (% "<pre>\n%s</pre>" raw))
+
     
 (defn render-restructured-text [raw]
     (get (apply publish-parts [raw] {"writer_name" "html"}) "html_body"))
     
+
 (defn render-markdown [raw]
     (.reset markdown-renderer)
     (.convert markdown-renderer raw))
                 
+
 (defn render-textile [raw]
     (smartypants (apply textile [raw] {"head_offset" 0
                                        "html_type"   "html"})))

@@ -2,9 +2,17 @@ BUNDLE=sushy.zip
 HYFILES=$(wildcard sushy/*.hy)
 PYFILES=$(wildcard sushy/*.py)
 BYTECODE=$(HYFILES:.hy=.pyc)
+PYTHONCODE=$(HYFILES:.hy=.py)
+export BIND_ADDRESS=0.0.0.0
+export HTTP_PORT=8080
+export CONTENT_PATH=pages
+export STATIC_PATH=static
+export PYTHONPATH=$(BUNDLE)
+export DATABASE_PATH=index.db
+
 
 repl:
-	BIND_ADDRESS=0.0.0.0 HTTP_PORT=8080 CONTENT_PATH=pages STATIC_PATH=static PYTHONPATH=$(BUNDLE) hy
+	hy
 
 deps:
 	pip install -r requirements.minimal.txt
@@ -12,12 +20,18 @@ deps:
 clean:
 	rm -f *.zip
 	rm -f $(BYTECODE)
+	rm -f $(PYTHONCODE)
+	rm -f $(DATABASE_PATH)
 
 # Turn Hy files into bytecode so that we can use a standard Python interpreter
 %.pyc: %.hy
 	hyc $<
 
-build: $(BYTECODE)
+# Turn Hy files into Python source so that PyPy will be happy
+%.py: %.hy
+	hy2py $< > $@
+
+build: $(BYTECODE) 
 
 # Experimental bundle to see if we can deploy this solely as a ZIP file
 bundle: $(HYFILES) $(PYFILES)
@@ -26,8 +40,8 @@ bundle: $(HYFILES) $(PYFILES)
 
 # Run with the embedded web server
 serve: build
-	BIND_ADDRESS=0.0.0.0 HTTP_PORT=8080 CONTENT_PATH=pages STATIC_PATH=static python -m sushy.app
+	python -m sushy.app
 
 # Run with the embedded web server
 index: build
-	BIND_ADDRESS=0.0.0.0 HTTP_PORT=8080 CONTENT_PATH=pages STATIC_PATH=static python -m sushy.indexer
+	python -m sushy.indexer

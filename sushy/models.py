@@ -1,12 +1,13 @@
+import os, sys, logging
 from peewee import *
 from playhouse.sqlite_ext import *
 import datetime
 
 # Database models for metadata caching and full text indexing using SQLite3 (handily beats Whoosh and makes for a single index file)
 
-# TODO: enable WAL, port these to Hy (if at all possible given that this uses inner classes and stuff)
+# TODO: port these to Hy (if at all possible given that this uses inner classes and stuff)
 
-db = SqliteExtDatabase('fts.db', threadlocals=True)
+db = SqliteExtDatabase(os.environ['DATABASE_PATH'], threadlocals=True)
 
 class Entry(Model):
     """Metadata table"""
@@ -31,6 +32,7 @@ class FTSEntry(FTSModel):
 def create_db():
     Entry.create_table()
     FTSEntry.create_table()
+
 
 
 def add_entry(**kwargs):
@@ -75,5 +77,3 @@ def do_query(qstring, limit=50):
             "tags"        : entry.entry.tags,
             "id"          : entry.entry.id
         }
-
-
