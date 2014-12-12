@@ -44,8 +44,12 @@ serve: build
 
 # Run with uwsgi
 uwsgi: build
+	uwsgi --http :8080 --python-path . --wsgi sushy.app --callable app --gevent 2000 -l 1000 -p 1 
+
+# Run with uwsgi
+uwsgi-ini: build
 	uwsgi --ini uwsgi.ini
-    
+
 # Run with the embedded web server
 index: build
 	python -m sushy.indexer
