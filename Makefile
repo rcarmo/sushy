@@ -42,6 +42,10 @@ bundle: $(HYFILES) $(PYFILES)
 serve: build
 	python -m sushy.app
 
+# Run with uwsgi
+uwsgi: build
+	uwsgi --http :8080 --python-path . --wsgi sushy.app --callable app --gevent 2000 -l 1000 -p 1 -L
+
 # Run with the embedded web server
 index: build
 	python -m sushy.indexer

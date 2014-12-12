@@ -1,7 +1,8 @@
 (import 
+    [os [environ]]
     [logging   [getLogger]]
-    [bottle    [get :as handle-get request redirect view :as render-view static-file]]
-    [config    [*home-page* *page-route-base* *page-media-base* *static-path* *store-path*]]
+    [bottle    [get :as handle-get request redirect view :as render-view static-file abort]]
+    [config    [*home-page* *page-route-base* *page-media-base* *static-path* *store-path* *debug-mode*]]
     [store     [get-page]]
     [render    [render-page]]
     [transform [apply-transforms]])
@@ -15,14 +16,24 @@
     (fn []
         (redirect *home-page*)))
 
+; environment dump
+(with-decorator
+    (handle-get "/env")
+    (render-view "debug")
+    (fn []
+        (if *debug-mode*
+            {"headers" {"title" "Environment dump"}
+             "environ"  environ}
+            (abort 404 "Page Not Found"))))
 
+            
 ; static files
 (with-decorator 
     (handle-get "/static/<filename:path>")
     (fn [filename]
         (apply static-file [filename] {"root" *static-path*})))
 
-
+        
 ; page media
 (with-decorator 
     (handle-get (+ *page-media-base* "/<filename:path>"))
