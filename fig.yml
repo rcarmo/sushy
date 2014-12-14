@@ -1,0 +1,13 @@
+web:
+    build: .
+    command: uwsgi --uid www-data --gid www-data --http :8080 --python-path /code --wsgi sushy.app --callable app --gevent 2000 -l 128 -p 1 
+    links:
+        - indexer
+    ports:
+        - "8080:8080"
+    volumes:
+        - .:/code
+
+indexer:
+    build: .
+    command: hy indexer.hy
