@@ -86,7 +86,7 @@
 
 
 (defn compact-plaintext [doc]
-  ; Returns a compacted version of the plaintext without duplicate whitespace
+  ; Returns a compacted version of the plaintext without duplicate whitespace and with entities expanded (lxml's default)
   (let [[body (get (.xpath doc "//body") 0)]
         [children []]]
     (for [child (.iterchildren body)]
