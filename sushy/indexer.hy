@@ -12,6 +12,13 @@
 
 (create-db)
 
+(defn transform-tags [line]
+    ; expand tags to be "tag:value", which enables us to search for tags using FTS
+    (let [[tags (.split (.strip line) ",")]]
+        (if (!= tags [""])
+            (.join ", " (list (map (fn [tag] (+ "tag:" (.strip tag))) tags)))
+            "")))
+
 (defn build-index []
     (for [item (gen-pages *store-path*)]
         (let [[id       (:path item)]
@@ -22,7 +29,7 @@
                 {"id"    id
                  "body"  body
                  "title" (.get headers "title" "Untitled")
-                 "tags"  (.get headers "tags" "")
+                 "tags"  (transform-tags (.get headers "tags" ""))
                  "mtime" (.fromtimestamp datetime (:mtime item))}))))
 
 (defmain [&rest args]
