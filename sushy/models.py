@@ -74,6 +74,9 @@ def get_latest(limit=20):
 def search(qstring, limit=50):
     query = (FTSEntry.select(Entry,
                              FTSEntry,
+                             # this is not supported yet: FTSEntry.snippet(FTSEntry.content).alias('extract'),
+                             # so we hand-craft the SQL for it
+                             SQL('snippet(ftsentry) as extract'),
                              FTSEntry.bm25(FTSEntry.content).alias('score'))
                      .join(Entry)
                      .where(FTSEntry.match(qstring))
@@ -82,7 +85,7 @@ def search(qstring, limit=50):
 
     for entry in query:
         yield {
-            "content"     : entry.content,
+            "content"     : entry.extract,
             "title"       : entry.entry.title,
             "score"       : round(entry.score, 2),
             "mtime"       : entry.entry.mtime,

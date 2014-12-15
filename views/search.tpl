@@ -12,7 +12,7 @@
     <tr>
         <td>{{!r["score"]}}</td>
         <td><a href="/space/{{!r["id"]}}">{{!r["title"]}}</td>
-        <td>{{r["content"]}}</td>
+        <td>{{!r["content"]}}</td>
         <td>{{!r["mtime"]}}</td>
     </tr>
 %end
