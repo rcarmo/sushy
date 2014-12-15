@@ -58,9 +58,25 @@
         <div id="topbar">
             <!-- Desktop navigation -->
             <nav class="ink-navigation ink-grid ie7">
-                <ul class="menu horizontal flat green">
-                    <li class="title"><a href="/">Sushy</a></li>
-                </ul>
+                <div class="column-group horizontal-gutters">
+                    <div class="all-50">
+                        <ul class="menu horizontal flat green">
+                            <li class="title extralarge"><a href="/">Sushy</a></li>
+                        </ul>
+                    </div>
+                    <div class="all-50 align-right">
+                        <form action="/search" class="ink-form pull-right" style="margin-top: 1em;">
+                            <div class="column-group">
+                                <div class="control-group">
+                                    <div class="control append-button" role="search">
+                                        <span><input name="q" class="small" type="search"></span>
+                                        <button class="ink-button small"><i class="fa fa-search"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </nav>
             <!-- Mobile navigation -->
             <nav class="ink-navigation ink-grid hide-all show-medium show-small">
