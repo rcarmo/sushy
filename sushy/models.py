@@ -3,6 +3,8 @@ from peewee import *
 from playhouse.sqlite_ext import *
 import datetime
 
+log = logging.getLogger()
+
 # Database models for metadata caching and full text indexing using SQLite3 (handily beats Whoosh and makes for a single index file)
 
 # TODO: port these to Hy (if at all possible given that this uses inner classes and stuff)
@@ -30,19 +32,27 @@ class FTSEntry(FTSModel):
 
 
 def create_db():
-    Entry.create_table()
-    FTSEntry.create_table()
+    try:
+        Entry.create_table()
+        FTSEntry.create_table()
+    except OperationalError as e:
+        log.info(e)
+        FTSEntry.optimize()
 
 
 
 def add_entry(**kwargs):
-    entry = Entry.create(**kwargs)
-    content = []
-    for k in ['title', 'body', 'tags']:
-        if kwargs[k]:
-            content.append(kwargs[k])
-    FTSEntry.create(entry   = entry,
-                    content = '\n'.join(content))
+    with db.transaction():
+        try:
+            entry = Entry.create(**kwargs)
+        except IntegrityError:
+            entry = Entry.get(Entry.id == kwargs["id"])
+        content = []
+        for k in ['title', 'body', 'tags']:
+            if kwargs[k]:
+                content.append(kwargs[k])
+            FTSEntry.delete().where(FTSEntry.entry == entry).execute()
+            FTSEntry.create(entry = entry, content = '\n'.join(content))
 
 
 def get_entry(id):
