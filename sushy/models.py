@@ -51,6 +51,7 @@ def add_entry(**kwargs):
         for k in ['title', 'body', 'tags']:
             if kwargs[k]:
                 content.append(kwargs[k])
+            # Not too happy about this, but FTS update() seems to be buggy 
             FTSEntry.delete().where(FTSEntry.entry == entry).execute()
             FTSEntry.create(entry = entry, content = '\n'.join(content))
 
@@ -70,7 +71,7 @@ def get_latest(limit=20):
         yield entry
 
 
-def do_query(qstring, limit=50):
+def search(qstring, limit=50):
     query = (FTSEntry.select(Entry,
                              FTSEntry,
                              FTSEntry.bm25(FTSEntry.content).alias('score'))

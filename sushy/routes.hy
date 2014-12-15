@@ -4,6 +4,7 @@
     [bottle    [get :as handle-get request redirect view :as render-view static-file abort]]
     [config    [*home-page* *page-route-base* *page-media-base* *static-path* *store-path* *debug-mode*]]
     [store     [get-page]]
+    [models    [search]]
     [render    [render-page]]
     [transform [apply-transforms]])
 
@@ -26,6 +27,15 @@
              "environ"  environ}
             (abort 404 "Page Not Found"))))
 
+; search
+(with-decorator
+    (handle-get "/search")
+    (render-view "search")
+    (fn []
+        (if (in "q" (.keys (. request query)))
+            {"results" (list (search (. request query q)))
+             "headers" {"title" "Search Results"}}
+            {"results" nil "headers" "No Results"})))
             
 ; static files
 (with-decorator 
