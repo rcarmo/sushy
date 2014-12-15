@@ -2,6 +2,7 @@
     [datetime  [datetime]]
     [config    [*store-path*]]
     [logging   [getLogger]]
+    [hashlib   [sha1]]
     [models    [create-db add-entry]]
     [store     [get-page gen-pages]]
     [render    [render-page]]
@@ -19,6 +20,7 @@
             (.join ", " (list (map (fn [tag] (+ "tag:" (.strip tag))) tags)))
             "")))
 
+
 (defn build-index []
     (for [item (gen-pages *store-path*)]
         (let [[id       (:path item)]
@@ -28,9 +30,11 @@
             (apply add-entry []
                 {"id"    id
                  "body"  body
+                 "hash"  (.hexdigest (sha1 body))
                  "title" (.get headers "title" "Untitled")
                  "tags"  (transform-tags (.get headers "tags" ""))
                  "mtime" (.fromtimestamp datetime (:mtime item))}))))
+
 
 (defmain [&rest args]
     (build-index))

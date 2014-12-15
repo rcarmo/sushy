@@ -7,7 +7,7 @@ log = logging.getLogger()
 
 # Database models for metadata caching and full text indexing using SQLite3 (handily beats Whoosh and makes for a single index file)
 
-# TODO: port these to Hy (if at all possible given that this uses inner classes and stuff)
+# TODO: port these to Hy (if at all possible given that Peewee relies on inner classes)
 
 db = SqliteExtDatabase(os.environ['DATABASE_PATH'], threadlocals=True)
 
@@ -15,7 +15,8 @@ class Entry(Model):
     """Metadata table"""
     id          = CharField(primary_key=True)
     title       = CharField()
-    tags        = CharField()
+    tags        = CharField() 
+    hash        = CharField() # plaintext hash, used for etags
     mtime       = DateTimeField()
 
     class Meta:
@@ -60,9 +61,9 @@ def get_entry(id):
     return Entry.get(Entry.id == id)._data
 
 
-def get_latest(limit=20):
+def get_latest(limit=20, months_ago=3):
     query = (Entry.select()
-                  .where(Entry.mtime >= (datetime.datetime.now() + datetime.timedelta(weeks=-12)))
+                  .where(Entry.mtime >= (datetime.datetime.now() + datetime.timedelta(months=-months_ago)))
                   .order_by(SQL('mtime').desc())
                   .limit(limit)
                   .dicts())
