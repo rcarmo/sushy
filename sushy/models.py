@@ -82,6 +82,7 @@ def search(qstring, limit=50):
 
     for entry in query:
         yield {
+            "content"     : entry.content,
             "title"       : entry.entry.title,
             "score"       : round(entry.score, 2),
             "mtime"       : entry.entry.mtime,

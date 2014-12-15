@@ -33,8 +33,8 @@
     (render-view "search")
     (fn []
         (if (in "q" (.keys (. request query)))
-            {"results" (list (search (. request query q)))
-             "headers" {"title" "Search Results"}}
+            {"results" (search (. request query q))
+             "headers" {"title" (% "Search Results for '%s'" (. request query q))}}
             {"results" nil "headers" "No Results"})))
             
 ; static files
