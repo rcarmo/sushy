@@ -32,7 +32,8 @@ class FTSEntry(FTSModel):
         database = db
 
 
-def create_db():
+def init_db():
+    """Initialize the database"""
     try:
         Entry.create_table()
         FTSEntry.create_table()

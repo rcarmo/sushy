@@ -1,7 +1,7 @@
 (import
+    [logging [getLogger basicConfig DEBUG INFO]]
     [os [environ]]
-    [os.path [join]]
-    [logging [getLogger basicConfig DEBUG INFO]])
+    [os.path [join]])
 
 (setv log (getLogger))
 

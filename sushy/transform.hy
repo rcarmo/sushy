@@ -1,17 +1,17 @@
 ; Perform HTML transforms
 (import
-    [re                  [sub *ignorecase*]]
+    [config              [*interwiki-page* *page-media-base* *page-route-base*]]
     [logging             [getLogger]]
-    [config              [*page-route-base* *page-media-base* *interwiki-page*]]
-    [urlparse            [urlsplit]]
-    [os.path             [join basename]]
-    [store               [open-asset]]
-    [utils               [get-mappings]]
+    [lxml.etree          [ElementTree HTML fromstring tostring]]
     [messages            [inline-message]]
+    [os.path             [basename join]]
     [pygments            [highlight]]
     [pygments.lexers     [get-lexer-by-name]]
     [pygments.formatters [HtmlFormatter]]
-    [lxml.etree          [ElementTree HTML tostring fromstring]])
+    [re                  [*ignorecase* sub]]
+    [store               [open-asset]]
+    [utils               [get-mappings]]
+    [urlparse            [urlsplit]])
 
 (setv log (getLogger))
 

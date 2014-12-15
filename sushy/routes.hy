@@ -1,21 +1,25 @@
 (import 
-    [os [environ]]
+    [bottle    [abort get :as handle-get request redirect static-file view :as render-view]]
+    [config    [*debug-mode* *home-page* *page-media-base* *page-route-base* *static-path* *store-path*]]
     [logging   [getLogger]]
-    [bottle    [get :as handle-get request redirect view :as render-view static-file abort]]
-    [config    [*home-page* *page-route-base* *page-media-base* *static-path* *store-path* *debug-mode*]]
-    [store     [get-page]]
     [models    [search]]
+    [os        [environ]]
     [render    [render-page]]
+    [store     [get-page]]
     [transform [apply-transforms]])
 
 
 (setv log (getLogger))
+
+
+; TODO: etags and HTTP header handling for caching
 
 (with-decorator 
     (handle-get "/")
     (handle-get *page-route-base*)
     (fn []
         (redirect *home-page*)))
+
 
 ; environment dump
 (with-decorator
@@ -27,15 +31,18 @@
              "environ"  environ}
             (abort 404 "Page Not Found"))))
 
+
 ; search
 (with-decorator
     (handle-get "/search")
     (render-view "search")
     (fn []
         (if (in "q" (.keys (. request query)))
+            ; TODO: proper reporting of search result length, move messages to template
             {"results" (search (. request query q))
              "headers" {"title" (% "Search Results for '%s'" (. request query q))}}
             {"results" nil "headers" "No Results"})))
+
             
 ; static files
 (with-decorator 

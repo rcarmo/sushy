@@ -1,11 +1,11 @@
 ; Find, retrieve and parse raw page markup
 (import 
-    [os [walk stat]]
-    [os.path [join exists splitext]]
-    [stat [ST_MTIME]]
+    [codecs  [open]]
+    [config  [*base-filenames* *base-types* *ignored-folders* *store-path*]]
     [logging [getLogger]]
-    [codecs [open]]
-    [config [*ignored-folders* *base-types* *base-filenames* *store-path*]])
+    [os      [walk stat]]
+    [os.path [join exists splitext]]
+    [stat    [ST_MTIME]])
 
 (setv log (getLogger))
 
@@ -40,8 +40,16 @@
 
 
 (defn open-asset [pagename asset]
+    ; open a page asset/attachment
     (let [[filename (join *store-path* pagename asset)]]
         (open filename "rb")))
+
+
+(defn is-page? [path]
+    ; test if a given path contains an index filename
+    (if (len (list (filter (fn [item] (exists (join path item))) *base-filenames*)))
+        true
+        false))
 
 
 (defn get-page [pagename]
@@ -57,15 +65,17 @@
 
 
 (defn filtered-names [folder-list]
+    ; remove ignored folders from a list
     (filter (fn [folder-name] (not (in folder-name *ignored-folders*))) folder-list))
 
 
 (defn scan-pages [root-path]
+    ; gather all existing pages
     (let [[pages {}]]
         (reduce
-          (fn [item]
-              (assoc pages (:path item) item))
-          (gen-pages root-path))
+            (fn [item]
+                (assoc pages (:path item) item))
+            (gen-pages root-path))
         pages))
 
 
@@ -90,6 +100,7 @@
 
 
 (defn gen-pages [root-path]
+    ; generate a lazy sequence of pages
     (-> root-path
         (walk-folders)
         (with-index root-path)))

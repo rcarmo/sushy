@@ -13,7 +13,7 @@ Sushy is a wiki engine that runs off static files, rendering them on the fly to 
 
 * All your Textile, Markdown or ReStructured Text content lives in a filesystem tree, with a folder per page
 * Sushy grabs and renders those on demand with fine-tuned HTTP headers (assuming you do the sane thing and put Varnish or CloudFlare in front for caching)
-* It also (optionally) maintains a SQLite database with a full-text index of all your content (because I need this for private wikis).
+* It also maintains a SQLite database with a full-text index of all your content (because I need this for private wikis).
 
 ## [Documentation](docs)
 

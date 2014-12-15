@@ -1,7 +1,7 @@
 (import
-    [logging [getLogger]]
     [bottle  [DEBUG default-app run route view template]]
     [config  [*debug-mode* *bind-address* *http-port*]]
+    [logging [getLogger]]
     routes)
 
 (setv DEBUG *debug-mode*)

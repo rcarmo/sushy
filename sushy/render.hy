@@ -1,11 +1,11 @@
 ; Render supported markup as HTML
 (import 
-    [time          [time]]
+    [docutils.core [publish-parts]]
     [logging       [getLogger]]    
+    [markdown      [Markdown]]
     [textile       [textile]]
     [smartypants   [smartypants]]
-    [markdown      [Markdown]]
-    [docutils.core [publish-parts]])
+    [time          [time]])
         
 (setv log (getLogger))
 

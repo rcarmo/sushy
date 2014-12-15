@@ -10,3 +10,4 @@ lxml>=3.4.1
 peewee>=2.3.2
 pygments>=1.6
 docutils>=0.12
+watchdog>=0.8.2

@@ -1,7 +1,8 @@
 (import 
-    [store [get-page]]
-    [lxml.etree [ElementTree HTML tostring fromstring]] 
-    [render [render-page]])
+    [lxml.etree [ElementTree HTML fromstring tostring]] 
+    [render     [render-page]]
+    [store      [get-page]])
+
 
 (defn memoize [func]
     (setv cache {})

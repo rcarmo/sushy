@@ -50,6 +50,10 @@ uwsgi: build
 uwsgi-ini: build
 	uwsgi --ini uwsgi.ini
 
-# Run with the embedded web server
+# Run indexer
 index: build
 	python -m sushy.indexer
+
+# Run indexer and watch for changes
+index-watch: build
+	python -m sushy.indexer watch
