@@ -4,7 +4,7 @@ PYFILES=$(wildcard sushy/*.py)
 BYTECODE=$(HYFILES:.hy=.pyc)
 PYTHONCODE=$(HYFILES:.hy=.py)
 export BIND_ADDRESS=0.0.0.0
-export HTTP_PORT=8080
+export PORT=8080
 export CONTENT_PATH=pages
 export STATIC_PATH=static
 export PYTHONPATH=$(BUNDLE)
@@ -44,7 +44,7 @@ serve: build
 
 # Run with uwsgi
 uwsgi: build
-	uwsgi --http :8080 --python-path . --wsgi sushy.app --callable app --gevent 2000 -l 1000 -p 1 
+	uwsgi --http :$(PORT) --python-path . --wsgi sushy.app --callable app --gevent 2000 -p 1 
 
 # Run with uwsgi
 uwsgi-ini: build

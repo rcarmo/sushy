@@ -6,7 +6,7 @@
     [os        [environ]]
     [render    [render-page]]
     [store     [get-page]]
-    [transform [apply-transforms]])
+    [transform [apply-transforms inner-html]])
 
 
 (setv log (getLogger))
@@ -66,4 +66,4 @@
         ; TODO: fuzzy URL matching, error handling
         (let [[page (get-page pagename)]]
             {"headers" (:headers page)
-             "body"    (apply-transforms (render-page page) pagename)})))
+             "body"    (inner-html (apply-transforms (render-page page) pagename))})))

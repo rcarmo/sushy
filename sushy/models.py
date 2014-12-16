@@ -11,9 +11,9 @@ log = logging.getLogger()
 
 db = SqliteExtDatabase(os.environ['DATABASE_PATH'], threadlocals=True)
 
-class Entry(Model):
+class Page(Model):
     """Metadata table"""
-    id          = CharField(primary_key=True)
+    name        = CharField(primary_key=True)
     title       = CharField()
     tags        = CharField() 
     hash        = CharField() # plaintext hash, used for etags
@@ -23,9 +23,18 @@ class Entry(Model):
         database = db
 
 
-class FTSEntry(FTSModel):
+class Link(Model):
+    """Links between pages - doesn't use ForeignKeys since pages may not exist"""
+    page = CharField(unique=False, index=True)
+    link = CharField(unique=False, index=True)
+
+    class Meta:
+        database = db
+
+
+class FTSPage(FTSModel):
     """Full text indexing table"""
-    entry = ForeignKeyField(Entry, primary_key=True)
+    page = ForeignKeyField(Page, primary_key=True)
     content = TextField()
 
     class Meta:
@@ -35,62 +44,74 @@ class FTSEntry(FTSModel):
 def init_db():
     """Initialize the database"""
     try:
-        Entry.create_table()
-        FTSEntry.create_table()
+        Page.create_table()
+        Link.create_table()
+        FTSPage.create_table()
     except OperationalError as e:
         log.info(e)
-        FTSEntry.optimize()
 
 
+def add_wiki_link(**kwargs):
+    with db.transaction():
+        link = Link.create(**kwargs)
 
-def add_entry(**kwargs):
+
+def del_wiki_page(page):
+    with db.transaction():
+        page = Page.get(Page.name == page)
+        FTSPage.delete().where(FTSPage.page == page).execute()
+        Page.delete().where(Page.name == page).execute()
+        Link.delete().where(Link.page == page).execute()
+
+
+def add_wiki_page(**kwargs):
     with db.transaction():
         try:
-            entry = Entry.create(**kwargs)
+            page = Page.create(**kwargs)
         except IntegrityError:
-            entry = Entry.get(Entry.id == kwargs["id"])
+            page = Page.get(Page.name == kwargs["name"])
         content = []
         for k in ['title', 'body', 'tags']:
             if kwargs[k]:
                 content.append(kwargs[k])
             # Not too happy about this, but FTS update() seems to be buggy 
-            FTSEntry.delete().where(FTSEntry.entry == entry).execute()
-            FTSEntry.create(entry = entry, content = '\n'.join(content))
+            FTSPage.delete().where(FTSPage.page == page).execute()
+            FTSPage.create(page = page, content = '\n'.join(content))
 
 
-def get_entry(id):
-    return Entry.get(Entry.id == id)._data
+def get_wiki_page(id):
+    return Page.get(Page.id == id)._data
 
 
 def get_latest(limit=20, months_ago=3):
-    query = (Entry.select()
-                  .where(Entry.mtime >= (datetime.datetime.now() + datetime.timedelta(months=-months_ago)))
-                  .order_by(SQL('mtime').desc())
-                  .limit(limit)
-                  .dicts())
+    query = (Page.select()
+                .where(Page.mtime >= (datetime.datetime.now() + datetime.timedelta(months=-months_ago)))
+                .order_by(SQL('mtime').desc())
+                .limit(limit)
+                .dicts())
 
-    for entry in query:
-        yield entry
+    for page in query:
+        yield page
 
 
 def search(qstring, limit=50):
-    query = (FTSEntry.select(Entry,
-                             FTSEntry,
-                             # this is not supported yet: FTSEntry.snippet(FTSEntry.content).alias('extract'),
+    query = (FTSPage.select(Page,
+                             FTSPage,
+                             # this is not supported yet: FTSPage.snippet(FTSPage.content).alias('extract'),
                              # so we hand-craft the SQL for it
-                             SQL('snippet(ftsentry) as extract'),
-                             FTSEntry.bm25(FTSEntry.content).alias('score'))
-                     .join(Entry)
-                     .where(FTSEntry.match(qstring))
+                             SQL('snippet(ftspage) as extract'),
+                             FTSPage.bm25(FTSPage.content).alias('score'))
+                     .join(Page)
+                     .where(FTSPage.match(qstring))
                      .order_by(SQL('score').desc())
                      .limit(limit))
 
-    for entry in query:
+    for page in query:
         yield {
-            "content"     : entry.extract,
-            "title"       : entry.entry.title,
-            "score"       : round(entry.score, 2),
-            "mtime"       : entry.entry.mtime,
-            "tags"        : entry.entry.tags,
-            "id"          : entry.entry.id
+            "content"     : page.extract,
+            "title"       : page.page.title,
+            "score"       : round(page.score, 2),
+            "mtime"       : page.page.mtime,
+            "tags"        : page.page.tags,
+            "name"        : page.page.name
         }

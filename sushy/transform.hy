@@ -85,13 +85,21 @@
         (.join "" children)))
 
 
-(defn compact-plaintext [doc]
-    ; Returns a compacted version of the plaintext without duplicate whitespace and with entities expanded (lxml's default)
+(defn extract-plaintext [doc]
+    ; Returns a compacted version of the plaintext without duplicate whitespace and with converted entities (lxml's default)
     (let [[body (get (.xpath doc "//body") 0)]
         [children []]]
         (for [child (.iterchildren body)]
             (.append children (apply tostring [child] {"method" "text" "encoding" "unicode"})))
         (.join " " (.split (.join "" children)))))
+
+
+(defn extract-internal-links [doc]
+    ; Returns a list of internal links
+    (map 
+        (fn [tag] 
+            (slice (get tag.attrib "href") (+ 1 (len *page-route-base*))))
+        (.xpath doc (+ "//a[starts-with(@href,'" *page-route-base* "')]"))))
 
 
 (defn apply-transforms [html pagename]
@@ -102,12 +110,4 @@
         (interwiki-links)
         (include-sources pagename)
         (syntax-highlight)
-        (image-sources pagename)
-        (inner-html)))
-
-
-(defn extract-plaintext [html pagename]
-    ; remember that Hy's threading macro manipulates the first argument slot
-    (-> html 
-        (HTML)
-        (compact-plaintext)))
+        (image-sources pagename)))

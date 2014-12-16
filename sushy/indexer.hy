@@ -3,12 +3,12 @@
     [datetime           [datetime]]
     [hashlib            [sha1]]
     [logging            [getLogger]]
-    [models             [add-entry init-db]]
+    [models             [add-wiki-link add-wiki-page init-db]]
     [os.path            [basename dirname]]
     [render             [render-page]]
-    [store              [ is-page? gen-pages get-page]]
+    [store              [is-page? gen-pages get-page]]
     [time               [sleep time]]
-    [transform          [extract-plaintext]]
+    [transform          [apply-transforms extract-internal-links extract-plaintext]]
     [watchdog.observers [Observer]]
     [watchdog.events    [FileSystemEventHandler]])
 
@@ -26,13 +26,19 @@
 
 (defn update-one [pagename mtime]
     ; update a single page - TODO: intra-wiki links for SeeAlso
-    (let [[page    (get-page pagename)]
-          [headers (:headers page)]
-          [body    (extract-plaintext (render-page page) pagename)]]
-        (apply add-entry []
-            {"id"    pagename
-             "body"  body
-             "hash"  (.hexdigest (sha1 (.encode body "utf-8")))
+    (let [[page       (get-page pagename)]
+          [headers    (:headers page)]
+          [doc        (apply-transforms (render-page page) pagename)]
+          [plaintext  (extract-plaintext doc)]
+          [links      (extract-internal-links doc)]]
+        (for [link links]
+            (apply add-wiki-link []
+                {"page" pagename 
+                 "link" link}))
+        (apply add-wiki-page []
+            {"name"  pagename
+             "body"  plaintext
+             "hash"  (.hexdigest (sha1 (.encode plaintext "utf-8")))
              "title" (.get headers "title" "Untitled")
              "tags"  (transform-tags (.get headers "tags" ""))
              "mtime" (.fromtimestamp datetime mtime)})))
