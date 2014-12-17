@@ -1,10 +1,12 @@
 # Sushy
 
-A wiki/blogging engine with a static file back-end.
+A wiki/blogging engine with a static file back-end. 
+
+Demo site: <a href="http://sushy.no-bolso.com">http://sushy.no-bolso.com</a>.
 
 ## Status
 
-Currently working out-of-the box, with full-text indexing and most rendering transforms.
+Currently working out-of-the box, with full-text indexing and markup support already in place. Deployable to [Dokku][dokku]/[Heroku][heroku].
 
 Coming up next are my trademark HTTP tweaks and a number of navigation features:
 
@@ -16,7 +18,7 @@ Coming up next are my trademark HTTP tweaks and a number of navigation features:
 * RSS feeds
 * Image thumbnailing
 * Site thumbnailing (for taking screenshots of external links)
-* Docker deployment (currently using [fig][fig] for development, so this should be fairly straightforward)
+* Docker deployment (currently using [fig][fig] for development and deploying on [Dokku][dokku], so this will be merely another iteration.
 
 ### Done
 
@@ -24,7 +26,7 @@ Coming up next are my trademark HTTP tweaks and a number of navigation features:
 * Full-text indexing and search
 * Syntax highlighting for inline code samples
 * [Ink][ink]-based site layout and templates
-* Baseline markup rendering
+* Baseline markup rendering (Textile, Markdown and ReST)
 
 ### Stuff that will never happen:
 
@@ -92,6 +94,8 @@ Sushy supports plaintext, HTML and Textile for legacy reasons, and Markdown as i
 
 All markup formats MUST be preceded by "front matter" handled like RFC2822 headers (see the `pages` folder for examples and test cases). Sushy uses the file extension to determine a suitable renderer, but that can be overriden if you specify a `Content-Type` header (see `config.hy` for the mappings).
 
+[heroku]: https://www.heroku.com/
+[dokku]: https://github.com/progrium/dokku
 [fig]: http://www.fig.sh
 [12]: http://12factor.net/
 [hy]: http://hylang.org
