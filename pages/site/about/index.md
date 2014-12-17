@@ -1,11 +1,9 @@
 From: Rui Carmo
 Title: About This Site
-Tags: python, about, yaki
-Date: 2011-09-29 16:49:34
+Tags: python, about, sushy
+Date: 2014-12-17 10:49:34
 
-This site is running on a high-performance [Python][p]-based CMS/Wiki called [Yaki][y].
-
-[Yaki][y] is entirely flat-file based and relies on several internal caching mechanisms to withstand things like sustained referrals from [Slashdot][s] (where all the old folk read news), [Hacker News][hn] (where all the kids read news) and the general ebb and flow of Internet tsunamis of various descriptions.
+This site is running on a [Python][p]-based CMS/Wiki called [Sushy][s].
 
 It supports [Textile][t], [Markdown][m] and plain [HTML][h] as markup, has magical inter-page linking, full-text indexing and searching, extensive syntax highlighting support for source code and technical docs, and generally avoids breaking your content by default.
 
@@ -13,7 +11,6 @@ It supports [Textile][t], [Markdown][m] and plain [HTML][h] as markup, has magic
 [m]: Wikipedia:Markdown
 [h]: Wikipedia:HTML
 [p]: lang/Python
-[y]: https://github.com/rcarmo/Yaki
-[yl]: apps/Yaki
+[s]: https://github.com/rcarmo/sushy
 [s]: http://slashdot.org
 [hn]: http://news.ycombinator.com
