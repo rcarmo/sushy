@@ -11,7 +11,7 @@ Sushy is a wiki engine that runs off static files, rendering them on the fly to 
 
 ## Principles of Operation
 
-* All your Textile, Markdown or ReStructured Text content lives in a filesystem tree, with a folder per page
+* All your Textile, Markdown or ReStructured Text content lives in a filesystem tree, with a folder per page (if you use [Jekyll][j], you should be able to drop in your current content with minimal tweaks)
 * Sushy grabs and renders those on demand with fine-tuned HTTP headers (assuming you do the sane thing and put Varnish or CloudFlare in front for caching)
 * It also maintains a SQLite database with a full-text index of all your content (because I need this for private wikis).
 
@@ -22,3 +22,5 @@ Sushy is (naturally) [self-documenting](docs).
 ## Demo Content
 
 There is a set of [formatting tests](tests) you can look at to get a feel for the way things work.
+
+[j]: http://jekyllrb.com

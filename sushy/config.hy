@@ -11,7 +11,7 @@
 
 (def *bind-address* (get environ "BIND_ADDRESS"))
 
-(def *http-port* (get environ "HTTP_PORT"))
+(def *http-port* (get environ "PORT"))
 
 (def *page-route-base* "/space")
 
