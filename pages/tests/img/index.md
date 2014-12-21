@@ -1,5 +1,5 @@
 From: Rui Carmo
-Title: Inline Image
+Title: Inline Images
 
 Inserted using [Markdown](Wikipedia:Markdown):
 
