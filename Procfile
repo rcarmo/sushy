@@ -1,2 +1,2 @@
 web: make index; make uwsgi
-worker: make index-watch
+worker: sleep 60; make index-watch
