@@ -39,9 +39,17 @@
             (throw (IOError "Invalid Page Format.")))))
 
 
+(defn asset-path [pagename asset]
+    (join *store-path* pagename asset))
+
+
+(defn asset-exists? [pagename asset]
+    (exists (asset-path pagename asset)))
+
+
 (defn open-asset [pagename asset]
     ; open a page asset/attachment
-    (let [[filename (join *store-path* pagename asset)]]
+    (let [[filename (asset-path pagename asset)]]
         (open filename "rb")))
 
 

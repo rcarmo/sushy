@@ -1,7 +1,7 @@
 (import 
-    [functools [wraps]]
-    [struct [unpack]]
-    [collections [OrderedDict]])
+    [collections [OrderedDict]]
+    [functools   [wraps]]
+    [PIL         [Image]])
 
 (defn memoize [func]
     (setv cache {})
@@ -27,6 +27,16 @@
             (setv (get cache *args) result)
             result))
     cached-fn)
+
+
+(with-decorator lru-cache
+    (defn get-image-size [path]
+        (try
+            (let [[im   (.open Image path)]
+                  [size (. im size)]]
+                size)
+        (catch [e Exception]
+            nil))))
 
 
 (defmacro timeit [block]

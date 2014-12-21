@@ -9,9 +9,9 @@
     [pygments.lexers     [get-lexer-by-name]]
     [pygments.formatters [HtmlFormatter]]
     [re                  [*ignorecase* sub]]
-    [store               [get-page open-asset]]
+    [store               [asset-exists? asset-path get-page open-asset]]
     [render              [render-page]]
-    [utils               [memoize]]
+    [utils               [memoize get-image-size]]
     [urlparse            [urlsplit]])
 
 (setv log (getLogger))
@@ -82,10 +82,25 @@
 (defn image-sources [doc pagename]
     ; searches for `img` tags with a `src` attribute and gives them an absolute URL path
     (for [tag (.xpath doc "//img[@src]")]
-        (let [[src    (get tag.attrib "src")]
+        (let [[src    (get (. tag attrib) "src")]
               [schema (get (urlsplit src) 0)]]
+            ; if this is a local image
             (if (= "" schema)
-                (assoc tag.attrib "src" (join *page-media-base* pagename src)))))
+                ; and we can actually find it on disk
+                (if (asset-exists? pagename src)
+                    ; ...but nobody bothered to specify the size
+                    (if (not (in "width" (. tag attrib)))
+                        ; ...get it from the image file
+                        (let [[size (get-image-size (asset-path pagename src))]]
+                            (if size 
+                                (do
+                                    (assoc (. tag attrib) "width" (str (get size 0)))
+                                    (assoc (. tag attrib) "height" (str (get size 1))))
+                                (.replace (.getparent tag) tag
+                                    (fromstring (inline-message "error" (% "Could not read size from '%s'" src)))))))
+                    (.replace (.getparent tag) tag
+                        (fromstring (inline-message "error" (% "Could not find image '%s'" src))))))
+            (assoc (. tag attrib) "src" (join *page-media-base* pagename src))))
     doc) 
 
 
