@@ -6,9 +6,7 @@ Demo site: <a href="http://sushy.no-bolso.com">http://sushy.no-bolso.com</a>.
 
 ## Status
 
-Currently working out-of-the box, with full-text indexing and markup support already in place. Deployable to [Dokku][dokku]/[Heroku][heroku].
-
-Coming up next are my trademark HTTP tweaks and a number of navigation features:
+Currently working out-of-the box, with full-text indexing and markup support already in place. Deployable _now_ to [Dokku-alt][da]/[Dokku][dokku]/[Heroku][heroku].
 
 ### Roadmap
 
@@ -16,13 +14,16 @@ Coming up next are my trademark HTTP tweaks and a number of navigation features:
 * Internal link tracking (`SeeAlso` functionality, as seen on [Yaki][y])
 * Blog homepage/excerpts/archive navigation
 * RSS feeds
+* Sitemap
 * Image thumbnailing
 * Site thumbnailing (for taking screenshots of external links)
-* Docker deployment (currently using [fig][fig] for development and deploying on [Dokku][dokku], so this will be merely another iteration.
+* Docker deployment (currently deploying on [Dokku-alt][da] using a `Procfile`, waiting for the dust to settle to build a proper reference container)
 
 ### Done
 
-* Deployable under [uWSGI][uwsgi]
+* Automatic insertion of image sizes in `img` tags
+* Deployable under [Dokku-alt][da]
+* Run under [uWSGI][uwsgi] using `gevent` workers
 * Full-text indexing and search
 * Syntax highlighting for inline code samples
 * [Ink][ink]-based site layout and templates
@@ -30,25 +31,39 @@ Coming up next are my trademark HTTP tweaks and a number of navigation features:
 
 ### Stuff that will never happen:
 
-* Web-based UI for editing pages (you're supposed to do this off-band)
+* Web-based UI for editing pages (you're supposed to do this out-of-band)
 * Revision history (you're supposed to manage your content with [Dropbox][db] or `git`)
 * Commenting
 
-## FAQ
+### Principles of Operation
 
-### Why?
+* All your Textile, Markdown or ReStructured Text content lives in a filesystem tree, with a folder per page
+* Sushy grabs and renders those on demand with fine-tuned HTTP headers (this is independently of whether or not you put Varnish or CloudFlare in front for caching)
+* It also maintains a SQLite database with a full-text index of all your content, updated live.
+
+### Markup Support
+
+Sushy supports plaintext, HTML and Textile for legacy reasons, and Markdown as its preferred format. ReStructured Text is also supported, but since I don't use it for anything (and find it rather a pain to read, let alone write), I can't make any guarantees as to its reliability.
+
+All markup formats MUST be preceded by "front matter" handled like RFC2822 headers (see the `pages` folder for examples and test cases). Sushy uses the file extension to determine a suitable renderer, but that can be overriden if you specify a `Content-Type` header (see `config.hy` for the mappings).
+
+# FAQ
+
+## Why?
 
 I've been running a classical, OO-based Python Wiki (called [Yaki][y]) for the better part of a decade. It works, but it is comparatively big and has become unwieldy and cumbersome to tweak. So I decided to [rewrite it][tng]. [Again][gae]. And [again][clj].
 
+And I eventually decided to make it _smaller_ -- my intention is for the core to stop at around 1000 lines of code (as of this writing, it has a mere 705 LOC, excluding templates), so this is also an exercise in building tight, readable (and functional) code.
+
 ### Why [Hy][hy]?
 
-Because I've been doing a lot of Clojure lately for my other personal projects, and both the LISP syntax and functional programming style feel quite natural to me.
+Because I've been doing a lot of Clojure lately for my other personal projects, and both the LISP syntax and functional programming style are quite natural to me.
 
 I thought long and hard about doing this in Clojure instead (and in fact have been poking at an [implementation][clj] for almost a year now), but the Java libraries for Markdown and Textile have a bunch of irritating little corner cases and I wanted to make sure all my content would render fine the first time, plus Python has an absolutely fantastic ecosystem that I am deeply into.
 
-Then [Hy][hy] came along, and I realized I could have my cake and eat it too. Also, it helps make the codebase exceedingly compact and easy to maintain.
+Then [Hy][hy] came along, and I realized I could have my cake and eat it too.
 
-### Can this do static sites?
+## Can this do static sites?
 
 I've used a fair amount of static site generators, and they all come up short on a number of things (namely trivially easy updates that don't involve re-generating hundreds of tiny files and trashing the filesystem) -- which, incidentally, is one of the reasons why Sushy relies on a single SQLite file for temporary data.
 
@@ -56,28 +71,28 @@ But there's no reason why this can't be easily modified to pre-render and save t
 
 ## Requirements
 
-Thanks to [Hy][hy], this should run just as well under Python 2 and Python 3. My target environment is 2.7.8/PyPy, though, so your mileage may vary.
+Thanks to [Hy][hy], this should run just as well under Python 2 and Python 3. My target environment is 2.7.8/PyPy, though, so your mileage may vary. Check the `requirements.txt` file - I've taken pains to make sure dependencies are there _for a reason_ and not just because they're trendy.
 
-## Usage
+# Deployment
 
-### Principles of Operation
+This repository is deployable as-is on [Dokku-alt][da], and will instantiate a production-ready [uWSGI][uwsgi] server and a background indexing worker. 
 
-* All your Textile, Markdown or ReStructured Text content lives in a filesystem tree, with a folder per page
-* Sushy grabs and renders those on demand with fine-tuned HTTP headers (this is independently of whether or not you put Varnish or CloudFlare in front for caching)
-* It also maintains a SQLite database with a full-text index of all your content (because I need this for private wikis), updated live upon file changes.
+Vanilla [Dokku][dokku] may work as well with the `foreman` plugin, but I haven't tested it.
 
-### Configuration
+As is (for development) the content ships with the code repo. Changing things to work off a separate mount point (or a shared container volume) is trivial.
 
-In accordance with the [12 Factor][12] approach, runtime configuration will be taken from environment variables:
+## Configuration
+
+In accordance with the [12 Factor][12] approach, runtime configuration is taken from environment variables:
 
 * `CONTENT_PATH` - the folder your documents live in
 * `STATIC_PATH`  - static asset path (JS/CSS/etc.)
 * `BIND_ADDRESS` - IP address to bind the development server to
-* `HTTP_PORT`    - TCP port to bind the develoment server to
+* `PORT`         - TCP port to bind the server to
 
-(more to come)
+These are set in the `Makefile` (which I use for a variety of purposes).
 
-### Trying it out
+## Trying it out
 
 ```
 # install dependencies
@@ -88,13 +103,8 @@ make index-watch &
 make serve
 ```
 
-### Markup Support
-
-Sushy supports plaintext, HTML and Textile for legacy reasons, and Markdown as its preferred format. ReStructured Text is also supported, but since I don't use it for anything (and find it rather a pain to read, let alone write), I can't make any guarantees as to its reliability.
-
-All markup formats MUST be preceded by "front matter" handled like RFC2822 headers (see the `pages` folder for examples and test cases). Sushy uses the file extension to determine a suitable renderer, but that can be overriden if you specify a `Content-Type` header (see `config.hy` for the mappings).
-
 [heroku]: https://www.heroku.com/
+[da]: http://dokku-alt.github.io
 [dokku]: https://github.com/progrium/dokku
 [fig]: http://www.fig.sh
 [12]: http://12factor.net/
