@@ -1,31 +1,32 @@
 (import 
-    [lxml.etree [ElementTree HTML fromstring tostring]] 
-    [render     [render-page]]
-    [store      [get-page]])
-
+    [functools [wraps]]
+    [struct [unpack]]
+    [collections [OrderedDict]])
 
 (defn memoize [func]
     (setv cache {})
 
-    (defn memoized_fn [*args]
+    (defn memoized-fn [*args]
         (if (in *args cache)
             (.get cache *args)
             (.setdefault cache *args (func *args))))
-    memoized_fn)
+    memoized-fn)
 
 
-(with-decorator memoize
-    (defn get-mappings [page]
-        ; searches for `pre` tags and builds key/value pairs
-        (let [[mappings {}]
-            [doc (HTML (render-page (get-page page)))]]
-            (for [tag (.xpath doc "//pre")]
-                (let [[lines (.splitlines tag.text)]
-                    [pairs (map (fn [x] (.split x)) lines)]]
-                    (for [pair pairs]
-                        (if (= 2  (len pair))
-                            (assoc mappings (.lower (get pair 0)) (get pair 1))))))
-            mappings)))
+(defn lru-cache [func &optional [limit 100]]
+    (setv cache (OrderedDict))
+
+    (defn cached-fn [*args]
+        (let [[result nil]]
+            (try 
+                (setv result (.pop cache *args))
+            (catch [e KeyError]
+                (setv result (func *args))
+                (if (> (len cache) limit)
+                    (.popitem cache 0))))
+            (setv (get cache *args) result)
+            result))
+    cached-fn)
 
 
 (defmacro timeit [block]

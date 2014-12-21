@@ -9,11 +9,26 @@
     [pygments.lexers     [get-lexer-by-name]]
     [pygments.formatters [HtmlFormatter]]
     [re                  [*ignorecase* sub]]
-    [store               [open-asset]]
-    [utils               [get-mappings]]
+    [store               [get-page open-asset]]
+    [render              [render-page]]
+    [utils               [memoize]]
     [urlparse            [urlsplit]])
 
 (setv log (getLogger))
+
+
+(with-decorator memoize
+    (defn get-mappings [page]
+        ; searches for `pre` tags and builds key/value pairs
+        (let [[mappings {}]
+            [doc (HTML (render-page (get-page page)))]]
+            (for [tag (.xpath doc "//pre")]
+                (let [[lines (.splitlines tag.text)]
+                    [pairs (map (fn [x] (.split x)) lines)]]
+                    (for [pair pairs]
+                        (if (= 2  (len pair))
+                            (assoc mappings (.lower (get pair 0)) (get pair 1))))))
+            mappings)))
 
 
 (defn base-href [doc pagename]
