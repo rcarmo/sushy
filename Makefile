@@ -1,22 +1,26 @@
+# Set these if not defined already
+export BIND_ADDRESS?=0.0.0.0
+export PORT?=8080
+export DEBUG?=False
+export CONTENT_PATH?=pages
+export STATIC_PATH?=static
+export DATABASE_PATH?=index.db
+
+# Experimental zip bundle
 BUNDLE=sushy.zip
+export PYTHONPATH=$(BUNDLE)
+
+# Source code
 HYFILES=$(wildcard sushy/*.hy)
 PYFILES=$(wildcard sushy/*.py)
 BYTECODE=$(HYFILES:.hy=.pyc)
 PYTHONCODE=$(HYFILES:.hy=.py)
-export BIND_ADDRESS=0.0.0.0
-export PORT?=8080
-export DEBUG?=False
-export CONTENT_PATH?=pages
-export STATIC_PATH=static
-export PYTHONPATH=$(BUNDLE)
-export DATABASE_PATH=index.db
-
 
 repl:
 	hy
 
 deps:
-	pip install -r requirements.minimal.txt
+	pip install -r requirements.txt
 
 clean:
 	rm -f *.zip
