@@ -5,7 +5,7 @@ BYTECODE=$(HYFILES:.hy=.pyc)
 PYTHONCODE=$(HYFILES:.hy=.py)
 export BIND_ADDRESS=0.0.0.0
 export PORT?=8080
-export CONTENT_PATH=pages
+export CONTENT_PATH?=pages
 export STATIC_PATH=static
 export PYTHONPATH=$(BUNDLE)
 export DATABASE_PATH=index.db
