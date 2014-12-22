@@ -26,6 +26,7 @@
 
 (defn update-one [pagename mtime]
     ; update a single page - TODO: intra-wiki links for SeeAlso
+    (.debug log (% "Updating %s" pagename))
     (let [[page       (get-page pagename)]
           [headers    (:headers page)]
           [doc        (apply-transforms (render-page page) pagename)]
@@ -67,6 +68,7 @@
     (if (in "watch" args)
         (let [[observer (Observer)]
               [handler  (IndexingHandler)]]
+            (.debug log (% "Preparing to watch %s" *store-path*))
             (apply .schedule [observer handler *store-path*] {"recursive" true})
             (.start observer)
             (try
