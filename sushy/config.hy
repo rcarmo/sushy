@@ -5,13 +5,13 @@
 
 (setv log (getLogger))
 
-(def *store-path* (get environ "CONTENT_PATH"))
+(def *store-path* (.get environ "CONTENT_PATH" "pages"))
 
-(def *static-path* (get environ "STATIC_PATH"))
+(def *static-path* (.get environ "STATIC_PATH" "static"))
 
-(def *bind-address* (get environ "BIND_ADDRESS"))
+(def *bind-address* (.get environ "BIND_ADDRESS" "127.0.0.1"))
 
-(def *http-port* (get environ "PORT"))
+(def *http-port* (.get environ "PORT" "8080"))
 
 (def *page-route-base* "/space")
 
@@ -19,7 +19,7 @@
 
 (def *home-page* (+ *page-route-base* "/HomePage"))
 
-(def *debug-mode* true)
+(def *debug-mode* (= (.lower (.get environ "DEBUG" "false")) "true"))
 
 (def *aliasing-chars* [" " "." "-" "_"])
 
