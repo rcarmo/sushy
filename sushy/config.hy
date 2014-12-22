@@ -28,7 +28,7 @@
 (def *interwiki-page* "meta/InterWikiMap")
 
 (def *base-types*
-    {".txt"      "text/plain"
+    {".txt"      "text/x-textile"; TODO: this should be reverted to text/plain later in the testing cycle
      ".htm"      "text/html"
      ".html"     "text/html"
      ".rst"      "text/x-rst"
