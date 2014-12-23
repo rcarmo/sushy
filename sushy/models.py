@@ -75,9 +75,9 @@ def add_wiki_page(**kwargs):
         for k in ['title', 'body', 'tags']:
             if kwargs[k]:
                 content.append(kwargs[k])
-            # Not too happy about this, but FTS update() seems to be buggy 
-            FTSPage.delete().where(FTSPage.page == page).execute()
-            FTSPage.create(page = page, content = '\n'.join(content))
+        # Not too happy about this, but FTS update() seems to be buggy 
+        FTSPage.delete().where(FTSPage.page == page).execute()
+        FTSPage.create(page = page, content = '\n'.join(content))
 
 
 def get_wiki_page(id):

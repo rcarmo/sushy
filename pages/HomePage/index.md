@@ -2,7 +2,6 @@ From: Rui Carmo
 Title: Welcome to Sushy
 Date: Sun Feb 18 16:15:00 2007
 Last-Modified: 2014-11-02 22:30:00
-X-Index: no
 X-Cache-Control: max-age=600
 
 ## What is this?

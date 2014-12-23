@@ -21,7 +21,7 @@ import multiprocessing
 log = logging.getLogger(__name__)
 
 DEFAULT_PRIORITY = 0
-MAX_WORKERS = multiprocessing.cpu_count() * 2
+MAX_WORKERS = multiprocessing.cpu_count()
 channels = {}
 closed = {}
 
@@ -203,6 +203,9 @@ def halt(signal, frame):
     default_pool.kill_all()
     sys.exit()
 
+def stop():
+    default_pool.stop()
+    default_pool.kill_all()
 
 def start(daemonize = False):
     signal(SIGINT, halt)
