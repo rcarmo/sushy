@@ -21,6 +21,8 @@
 
 (def *debug-mode* (= (.lower (.get environ "DEBUG" "false")) "true"))
 
+(def *profiler* (= (.lower (.get environ "PROFILER" "false")) "true"))
+
 (def *aliasing-chars* [" " "." "-" "_"])
 
 (def *alias-page* "meta/Aliases")

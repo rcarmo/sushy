@@ -1,5 +1,5 @@
 (import 
-    [config             [*base-filenames* *store-path*]]
+    [config             [*base-filenames* *store-path* *profiler*]]
     [cProfile           [Profile]]
     [datetime           [datetime]]
     [hashlib            [sha1]]
@@ -101,14 +101,17 @@
 
 (defmain [&rest args]
     (let [[p (Profile)]]
+        (if *profiler*
+            (.enable p))
         (init-db)
         (index-pass *store-path* false)
         (.info log "First pass done.")
-        (.enable p)
         (index-pass *store-path* true)
-        (.disable p)
         (.info log "Second pass done.")
-        (.dump_stats (Stats p) "out.pstats"))
+        (if *profiler* 
+            (do
+                (.disable p)
+                (.dump_stats (Stats p) "indexer.pstats")))
     (if (in "watch" args)
         (do
             (.info log "Starting watcher...")
