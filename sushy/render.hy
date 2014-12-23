@@ -3,7 +3,7 @@
     [docutils.core [publish-parts]]
     [logging       [getLogger]]    
     [markdown      [Markdown]]
-    [textile       [textile]]
+    [textile       [Textile]]
     [smartypants   [smartypants]]
     [time          [time]])
         
@@ -18,6 +18,9 @@
                                        "markdown.extensions.meta" 
                                        "markdown.extensions.sane_lists"]
                          "extension_configs" {"markdown.extensions.codehilite" {"css_class" "highlight"}}}))
+
+(def textile-renderer
+    (apply Textile [] {"html_type" "html5"}))
 
 
 (defn render-html [raw]
@@ -41,8 +44,8 @@
                 
 
 (defn render-textile [raw]
-    (smartypants (apply textile [raw] {"head_offset" 0
-                                       "html_type"   "html"})))
+    (smartypants (apply textile-renderer.parse [raw] {"head_offset" 0})))
+
 
 (def render-map 
    {"text/plain"          render-plaintext

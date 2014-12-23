@@ -1,10 +1,12 @@
 (import 
     [config             [*base-filenames* *store-path*]]
+    [cProfile           [Profile]]
     [datetime           [datetime]]
     [hashlib            [sha1]]
     [logging            [getLogger Formatter]]
     [models             [add-wiki-link add-wiki-page index-wiki-page init-db]]
     [os.path            [basename dirname]]
+    [pstats             [Stats]]
     [render             [render-page]]
     [store              [is-page? gen-pages get-page]]
     [time               [sleep time]]
@@ -24,13 +26,13 @@
 
 
 (defn hide-from-search? [headers]
-    (reduce 
-        (fn [header acc]
-            (or acc 
-                (if (and (in header headers) (in (.lower (get headers header)) ["off" "no"]))
+    (reduce (fn [x y] (or x y))
+        (map (fn [header]
+                (if (and (in header headers) 
+                         (in (.lower (get headers header)) ["off" "no"]))
                     true
-                    false)))
-        ["x-index" "index" "search"]
+                    false))
+            ["x-index" "index" "search"])
         false))
 
 
@@ -98,13 +100,18 @@
 
 
 (defmain [&rest args]
-    (init-db)
-    (index-pass *store-path* false)
-    (.info log "First pass done.")
-    (index-pass *store-path* true)
-    (.info log "Second pass done.")
+    (let [[p (Profile)]]
+        (init-db)
+        (index-pass *store-path* false)
+        (.info log "First pass done.")
+        (.enable p)
+        (index-pass *store-path* true)
+        (.disable p)
+        (.info log "Second pass done.")
+        (.dump_stats (Stats p) "out.pstats"))
     (if (in "watch" args)
         (do
             (.info log "Starting watcher...")
             (observer *store-path*))))
+
 
