@@ -24,9 +24,9 @@
             "")))
 
 
-(defn update-one [item]
+(defn index-one [item]
     ; update a single page
-    (.info log (% "Updating %s" item))
+    (.info log (% "Indexing %s" (:path item)))
     (let [[pagename   (:path item)]
           [mtime      (:mtime item)]
           [page       (get-page pagename)]
@@ -47,18 +47,19 @@
              "mtime" (.fromtimestamp datetime mtime)})))
 
 
-(defn build-index [page-channel path]
-    ; index all pages
+(defn walk-filesystem-task [page-channel path]
+    ; worker task for walking the filesystem
     (for [item (gen-pages path)]
         (.send page-channel item))
-    (.info log "Done.")
+    (.info log "Indexing done.")
     (.close page-channel))
 
 
 (defn index-task [page-channel]
+    ; worker task for indexing single items
     (for [item page-channel]
         (try
-            (update-one item)
+            (index-one item)
             (catch [e Exception]
                 (.error log (% "Error %s handling %s" (, e item)))))))
 
@@ -70,12 +71,13 @@
             (let [[filename (basename (. event src-path))]
                   [path     (dirname  (. event src-path))]]
                 (if (in filename *base-filenames*)
-                    (update-one
+                    (index-one
                         {:path (slice path (+ 1 (len *store-path*)))
                          :mtime (time)}))))]])
 
 
 (defn observer [path]
+    ; file change observer setup
     (let [[observer (Observer)]
           [handler  (IndexingHandler)]]
         (.debug log (% "Preparing to watch %s" path))
@@ -92,7 +94,7 @@
 (defmain [&rest args]
     (init-db)
     (let [[page-channel (chan *max-workers*)]]
-        (go build-index page-channel *store-path*)
+        (go walk-filesystem-task page-channel *store-path*)
         (for [i (range *max-workers*)]
             (go index-task page-channel))
         (start))
