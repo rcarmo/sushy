@@ -3,11 +3,10 @@
     [datetime           [datetime]]
     [hashlib            [sha1]]
     [logging            [getLogger Formatter]]
-    [models             [add-wiki-link add-wiki-page init-db]]
+    [models             [add-wiki-link add-wiki-page index-wiki-page init-db]]
     [os.path            [basename dirname]]
     [render             [render-page]]
     [store              [is-page? gen-pages get-page]]
-    [scheduler          [go chan start stop *max-workers*]]
     [time               [sleep time]]
     [transform          [apply-transforms extract-internal-links extract-plaintext]]
     [watchdog.observers [Observer]]
@@ -24,6 +23,17 @@
             "")))
 
 
+(defn hide-from-search? [headers]
+    (reduce 
+        (fn [header acc]
+            (or acc 
+                (if (and (in header headers) (in (.lower (get headers header)) ["off" "no"]))
+                    true
+                    false)))
+        ["x-index" "index" "search"]
+        false))
+
+
 (defn index-one [item]
     ; update a single page
     (.info log (% "Indexing %s" (:path item)))
@@ -38,30 +48,26 @@
             (apply add-wiki-link []
                 {"page" pagename 
                  "link" link}))
-        (apply add-wiki-page []
+        (apply index-wiki-page []
             {"name"  pagename
-             "body"  plaintext
+             "body"  (if (hide-from-search? headers) "" plaintext)
              "hash"  (.hexdigest (sha1 (.encode plaintext "utf-8")))
              "title" (.get headers "title" "Untitled")
              "tags"  (transform-tags (.get headers "tags" ""))
              "mtime" (.fromtimestamp datetime mtime)})))
 
 
-(defn walk-filesystem-task [page-channel path]
-    ; worker task for walking the filesystem
+(defn index-pass [path perform-indexing]
+    ; walk the filesystem
     (for [item (gen-pages path)]
-        (.send page-channel item))
-    (.info log "Indexing done.")
-    (.close page-channel))
-
-
-(defn index-task [page-channel]
-    ; worker task for indexing single items
-    (for [item page-channel]
-        (try
-            (index-one item)
-            (catch [e Exception]
-                (.error log (% "Error %s handling %s" (, e item)))))))
+        (if perform-indexing
+            (try
+                (index-one item)
+                (catch [e Exception]
+                    (.error log (% "Error %s handling %s" (, e item)))))
+            (apply add-wiki-page []
+                {"name"  (:path item)
+                 "mtime" (:mtime item)}))))
 
 
 (defclass IndexingHandler [FileSystemEventHandler]
@@ -93,12 +99,12 @@
 
 (defmain [&rest args]
     (init-db)
-    (let [[page-channel (chan *max-workers*)]]
-        (go walk-filesystem-task page-channel *store-path*)
-        (for [i (range *max-workers*)]
-            (go index-task page-channel))
-        (start))
-    (.info log "Starting watcher...")
+    (index-pass *store-path* false)
+    (.info log "First pass done.")
+    (index-pass *store-path* true)
+    (.info log "Second pass done.")
     (if (in "watch" args)
-        (observer *store-path*)))
+        (do
+            (.info log "Starting watcher...")
+            (observer *store-path*))))
 

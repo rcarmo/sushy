@@ -14,10 +14,10 @@ db = SqliteExtDatabase(os.environ['DATABASE_PATH'], threadlocals=True)
 class Page(Model):
     """Metadata table"""
     name        = CharField(primary_key=True)
-    title       = CharField()
-    tags        = CharField() 
-    hash        = CharField() # plaintext hash, used for etags
-    mtime       = DateTimeField()
+    title       = CharField(null=True, index=True)
+    tags        = CharField(null=True, index=True) 
+    hash        = CharField(null=True, index=True) # plaintext hash, used for etags
+    mtime       = DateTimeField(index=True)
 
     class Meta:
         database = db
@@ -71,13 +71,26 @@ def add_wiki_page(**kwargs):
             page = Page.create(**kwargs)
         except IntegrityError:
             page = Page.get(Page.name == kwargs["name"])
-        content = []
+            page.update(**kwargs)
+        return page
+
+def index_wiki_page(**kwargs):
+    with db.transaction():
+        page = Page.get(Page.name == kwargs["name"])
+        values = {}
+        for k in ["title", "tags", "hash", "mtime"]:
+            values[k] = kwargs[k]
+        page.update(**values)
+        parts = []
         for k in ['title', 'body', 'tags']:
             if kwargs[k]:
-                content.append(kwargs[k])
-        # Not too happy about this, but FTS update() seems to be buggy 
+                parts.append(kwargs[k])
+        content = '\n'.join(parts)
+        # Not too happy about this, but FTS update() seems to be buggy and the database balloons
+        #FTSPage.delete().where(FTSPage.page == page).execute()
         FTSPage.delete().where(FTSPage.page == page).execute()
-        FTSPage.create(page = page, content = '\n'.join(content))
+        FTSPage.create(page = page, content = content)
+        return page
 
 
 def get_wiki_page(id):
