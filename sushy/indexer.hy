@@ -7,6 +7,7 @@
     [os.path            [basename dirname]]
     [render             [render-page]]
     [store              [is-page? gen-pages get-page]]
+    [scheduler          [go chan start *max-workers*]]
     [time               [sleep time]]
     [transform          [apply-transforms extract-internal-links extract-plaintext]]
     [watchdog.observers [Observer]]
@@ -24,10 +25,12 @@
             "")))
 
 
-(defn update-one [pagename mtime]
-    ; update a single page - TODO: intra-wiki links for SeeAlso
-    (.debug log (% "Updating %s" pagename))
-    (let [[page       (get-page pagename)]
+(defn update-one [item]
+    ; update a single page
+    (.debug log (% "Updating %s" item))
+    (let [[pagename   (:path item)]
+          [mtime      (:mtime item)]
+          [page       (get-page pagename)]
           [headers    (:headers page)]
           [doc        (apply-transforms (render-page page) pagename)]
           [plaintext  (extract-plaintext doc)]
@@ -45,35 +48,54 @@
              "mtime" (.fromtimestamp datetime mtime)})))
 
 
-(defn build-index []
+(defn build-index [page-channel path]
     ; index all pages
-    (for [item (gen-pages *store-path*)]
-        (update-one (:path item) (:mtime item))))
+    (for [item (gen-pages path)]
+        (.send page-channel item)))
 
 
 (defclass IndexingHandler [FileSystemEventHandler]
     ; handle file notifications
-    [[on-any-event ; TODO: handle deletions and moves separately
+    [[--init-- 
+        (fn [self page-channel]
+            (setv (. self channel) page-channel))]
+     [on-any-event ; TODO: handle deletions and moves separately
         (fn [self event]
             (let [[filename (basename (. event src-path))]
                   [path     (dirname  (. event src-path))]]
                 (if (in filename *base-filenames*)
-                    (update-one (slice path (+ 1 (len *store-path*))) 
-                        (time)))))]])
+                    (.send (. self channel)
+                        {:path (slice path (+ 1 (len *store-path*)))
+                         :mtime (time)}))))]])
+
+
+(defn index-task [page-channel]
+    (for [item page-channel]
+        (update-one item)))
+
+
+(defn observer [page-channel path]
+    (let [[observer (Observer)]
+          [handler  (IndexingHandler page-channel)]]
+        (.debug log (% "Preparing to watch %s" path))
+        (apply .schedule [observer handler path] {"recursive" true})
+        (.start observer)
+        (try
+            (while true
+                (sleep 1))
+            (catch [e KeyboardInterrupt]
+                (.stop observer)))
+        (.join observer)))
+
 
 
 (defmain [&rest args]
     (init-db)
-    (build-index)
-    (if (in "watch" args)
-        (let [[observer (Observer)]
-              [handler  (IndexingHandler)]]
-            (.debug log (% "Preparing to watch %s" *store-path*))
-            (apply .schedule [observer handler *store-path*] {"recursive" true})
-            (.start observer)
-            (try
-                (while true
-                    (sleep 1))
-                (catch [e KeyboardInterrupt]
-                    (.stop observer)))
-            (.join observer))))
+    (let [[page-channel (chan 8)]]
+        (if (in "watch" args)
+            (go observer page-channel *store-path*))
+        (go build-index page-channel *store-path*)
+        (for [i (range *max-workers*)]
+            (go index-task page-channel))
+        (start)))
+

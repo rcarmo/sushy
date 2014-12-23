@@ -47,6 +47,7 @@ def init_db():
         Page.create_table()
         Link.create_table()
         FTSPage.create_table()
+        db.execute_sql('PRAGMA journal_mode=WAL')
     except OperationalError as e:
         log.info(e)
 
