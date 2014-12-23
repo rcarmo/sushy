@@ -4,7 +4,7 @@ export PORT?=8080
 export DEBUG?=False
 export CONTENT_PATH?=pages
 export STATIC_PATH?=static
-export DATABASE_PATH?=index.db
+export DATABASE_PATH?=/tmp/sushy.db
 
 # Experimental zip bundle
 BUNDLE=sushy.zip
