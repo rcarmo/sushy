@@ -74,6 +74,7 @@ def add_wiki_page(**kwargs):
             page.update(**kwargs)
         return page
 
+
 def index_wiki_page(**kwargs):
     with db.transaction():
         page = Page.get(Page.name == kwargs["name"])
