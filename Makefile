@@ -2,6 +2,7 @@
 export BIND_ADDRESS?=0.0.0.0
 export PORT?=8080
 export DEBUG?=False
+export PROFILER?=False
 export CONTENT_PATH?=pages
 export STATIC_PATH?=static
 export DATABASE_PATH?=/tmp/sushy.db
@@ -15,6 +16,8 @@ HYFILES=$(wildcard sushy/*.hy)
 PYFILES=$(wildcard sushy/*.py)
 BYTECODE=$(HYFILES:.hy=.pyc)
 PYTHONCODE=$(HYFILES:.hy=.py)
+PROFILES=$(wildcard *.pstats)
+CALL_DIAGRAMS=$(PROFILES:.pstats=.png)
 
 repl:
 	hy
@@ -62,3 +65,9 @@ index: build
 # Run indexer and watch for changes
 index-watch: build
 	python -m sushy.indexer watch
+
+# Render pstats profiler files into nice PNGs (requires dot)
+%.png: %.pstats
+	python tools/gprof2dot.py -f pstats $< | dot -Tpng -o $@
+
+profile: $(CALL_DIAGRAMS)
