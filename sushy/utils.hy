@@ -3,19 +3,24 @@
     [functools   [wraps]]
     [PIL         [Image]])
 
+(setv log (getLogger))
 
-(defn memoize [func]
-    (setv cache {})
-    (defn memoized-fn [&rest args]
-        (let [[result nil]]
-            (if (in args cache)
-                (.get cache args)
-                (setv result (apply func args)))
-        (.setdefault cache args result)))
-    memoized-fn)
+(defn memoize []
+    ; memoization decorator
+    (defn inner [func]
+        (setv cache {})
+        (defn memoized-fn [&rest args]
+            (let [[result nil]]
+                (if (in args cache)
+                    (.get cache args)
+                    (setv result (apply func args)))
+            (.setdefault cache args result)))
+       memoized-fn)
+    inner)
 
 
 (defn lru-cache [&optional [limit 100]]
+    ; LRU cache memoization decorator
     (defn inner [func]
         (setv cache (OrderedDict))
         (defn cached-fn [&rest args]
@@ -33,12 +38,14 @@
 
 
 (with-decorator (lru-cache)
-    (defn get-image-size [path]
+    (defn get-image-size [filename]
+        ; extract image size information from a given filename
         (try
-            (let [[im   (.open Image path)]
+            (let [[im   (.open Image filename)]
                   [size (. im size)]]
                 size)
         (catch [e Exception]
+            (.warn log (% "Could not extract size from %s" filename))
             nil))))
 
 
