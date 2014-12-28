@@ -38,7 +38,7 @@
 
 (defn index-one [item]
     ; update a single page
-    (.info log (% "Indexing %s" (:path item)))
+    (.info log (:path item))
     (let [[pagename   (:path item)]
           [mtime      (:mtime item)]
           [page       (get-page pagename)]
@@ -59,17 +59,21 @@
              "mtime" (.fromtimestamp datetime mtime)})))
 
 
-(defn index-pass [path perform-indexing]
-    ; walk the filesystem
+(defn first-pass [path]
+    ; walk the filesystem and grab modification times so that the web UI can have nice sorted lists
     (for [item (gen-pages path)]
-        (if perform-indexing
-            (try
-                (index-one item)
-                (catch [e Exception]
-                    (.error log (% "Error %s handling %s" (, e item)))))
-            (apply add-wiki-page []
-                {"name"  (:path item)
-                 "mtime" (:mtime item)}))))
+        (apply add-wiki-page []
+            {"name"  (:path item)
+             "mtime" (:mtime item)})))
+
+
+(defn second-pass [path]
+    ; walk the filesystem again and perform full-text indexing so that search works
+    (for [item (gen-pages path)]
+        (try
+            (index-one item)
+            (catch [e Exception]
+                (.error log (% "%s:%s handling %s" (, (type e) e item)))))))
 
 
 (defclass IndexingHandler [FileSystemEventHandler]
@@ -104,17 +108,18 @@
         (if *profiler*
             (.enable p))
         (init-db)
-        (index-pass *store-path* false)
+        (first-pass *store-path*)
         (.info log "First pass done.")
-        (index-pass *store-path* true)
+        (second-pass *store-path*)
         (.info log "Second pass done.")
         (if *profiler* 
             (do
                 (.disable p)
+                (.info log "dumping stats")
                 (.dump_stats (Stats p) "indexer.pstats")))
     (if (in "watch" args)
         (do
             (.info log "Starting watcher...")
-            (observer *store-path*))))
+            (observer *store-path*)))))
 
 
