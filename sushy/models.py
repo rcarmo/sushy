@@ -18,6 +18,7 @@ class Page(Model):
     tags        = CharField(null=True, index=True) 
     hash        = CharField(null=True, index=True) # plaintext hash, used for etags
     mtime       = DateTimeField(index=True)
+    pubtime     = DateTimeField(index=True)
 
     class Meta:
         database = db
@@ -66,53 +67,51 @@ def del_wiki_page(page):
         Link.delete().where(Link.page == page).execute()
 
 
-def add_wiki_page(**kwargs):
-    """Adds a wiki page"""
+def index_wiki_page(**kwargs):
+    """Adds wiki page metatada and FTS data."""
     with db.transaction():
+        log.debug(kwargs)
         try:
             page = Page.create(**kwargs)
         except IntegrityError:
             page = Page.get(Page.name == kwargs["name"])
-            page.update(**kwargs)
-        return page
-
-
-def index_wiki_page(**kwargs):
-    """Adds wiki page metatada and FTS data. Page MUST exist beforehand"""
-    with db.transaction():
-        page = Page.get(Page.name == kwargs["name"])
         values = {}
-        for k in ["title", "tags", "hash", "mtime"]:
+        for k in [u"title", u"tags", u"hash", u"mtime", u"pubtime"]:
             values[k] = kwargs[k]
-        page.update(**values)
-        parts = []
-        for k in ['title', 'body', 'tags']:
-            if kwargs[k]:
-                parts.append(kwargs[k])
-        content = '\n'.join(parts)
-        # Not too happy about this, but FTS update() seems to be buggy and indexes keep growing
-        FTSPage.delete().where(FTSPage.page == page).execute()
-        FTSPage.create(page = page, content = content)
+        log.debug(values)
+        q = page.update(**values)
+        if len(kwargs['body']):
+            parts = []
+            for k in ['title', 'body', 'tags']:
+                if kwargs[k]:
+                    parts.append(kwargs[k])
+            content = '\n'.join(parts)
+            # Not too happy about this, but FTS update() seems to be buggy and indexes keep growing
+            FTSPage.delete().where(FTSPage.page == page).execute()
+            FTSPage.create(page = page, content = content)
         return page
 
 
 def get_wiki_page(id):
-    return Page.get(Page.id == id)._data
+    with db.transaction():
+        return Page.get(Page.id == id)._data
 
 
 def get_latest(limit=20, months_ago=3):
-    query = (Page.select()
+    with db.transaction():
+        query = (Page.select()
                 .where(Page.mtime >= (datetime.datetime.now() + datetime.timedelta(months=-months_ago)))
                 .order_by(SQL('mtime').desc())
                 .limit(limit)
                 .dicts())
 
-    for page in query:
-        yield page
+        for page in query:
+            yield page
 
 
 def search(qstring, limit=50):
-    query = (FTSPage.select(Page,
+    with db.transaction():
+        query = (FTSPage.select(Page,
                              FTSPage,
                              # this is not supported yet: FTSPage.snippet(FTSPage.content).alias('extract'),
                              # so we hand-craft the SQL for it
@@ -123,12 +122,12 @@ def search(qstring, limit=50):
                      .order_by(SQL('score').desc())
                      .limit(limit))
 
-    for page in query:
-        yield {
-            "content"     : page.extract,
-            "title"       : page.page.title,
-            "score"       : round(page.score, 2),
-            "mtime"       : page.page.mtime,
-            "tags"        : page.page.tags,
-            "name"        : page.page.name
-        }
+        for page in query:
+            yield {
+                "content"     : page.extract,
+                "title"       : page.page.title,
+                "score"       : round(page.score, 2),
+                "mtime"       : page.page.mtime,
+                "tags"        : page.page.tags,
+                "name"        : page.page.name
+            }

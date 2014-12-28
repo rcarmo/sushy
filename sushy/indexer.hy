@@ -2,9 +2,10 @@
     [config             [*base-filenames* *store-path* *profiler*]]
     [cProfile           [Profile]]
     [datetime           [datetime]]
+    [dateutil.parser    [parse :as parse-date]]
     [hashlib            [sha1]]
     [logging            [getLogger Formatter]]
-    [models             [add-wiki-link add-wiki-page index-wiki-page init-db]]
+    [models             [add-wiki-link index-wiki-page init-db]]
     [os.path            [basename dirname]]
     [pstats             [Stats]]
     [render             [render-page]]
@@ -40,7 +41,7 @@
     ; update a single page
     (.info log (:path item))
     (let [[pagename   (:path item)]
-          [mtime      (:mtime item)]
+          [mtime      (.fromtimestamp datetime (:mtime item))]
           [page       (get-page pagename)]
           [headers    (:headers page)]
           [doc        (apply-transforms (render-page page) pagename)]
@@ -50,25 +51,23 @@
             (apply add-wiki-link []
                 {"page" pagename 
                  "link" link}))
+
         (apply index-wiki-page []
-            {"name"  pagename
-             "body"  (if (hide-from-search? headers) "" plaintext)
-             "hash"  (.hexdigest (sha1 (.encode plaintext "utf-8")))
-             "title" (.get headers "title" "Untitled")
-             "tags"  (transform-tags (.get headers "tags" ""))
-             "mtime" (.fromtimestamp datetime mtime)})))
+            {"name"    pagename
+             "body"    (if (hide-from-search? headers) "" plaintext)
+             "hash"    (.hexdigest (sha1 (.encode plaintext "utf-8")))
+             "title"   (.get headers "title" "Untitled")
+             "tags"    (transform-tags (.get headers "tags" ""))
+             "mtime"   mtime
+             "pubtime" (try 
+                            (parse-date (.get headers "date"))
+                            (catch [e Exception]
+                                (.warn log (% "Could not parse date from %s" pagename))
+                                mtime))})))
 
 
-(defn first-pass [path]
-    ; walk the filesystem and grab modification times so that the web UI can have nice sorted lists
-    (for [item (gen-pages path)]
-        (apply add-wiki-page []
-            {"name"  (:path item)
-             "mtime" (:mtime item)})))
-
-
-(defn second-pass [path]
-    ; walk the filesystem again and perform full-text indexing so that search works
+(defn perform-indexing [path]
+    ; walk the filesystem and perform full-text and front matter indexing
     (for [item (gen-pages path)]
         (try
             (index-one item)
@@ -108,10 +107,8 @@
         (if *profiler*
             (.enable p))
         (init-db)
-        (first-pass *store-path*)
-        (.info log "First pass done.")
-        (second-pass *store-path*)
-        (.info log "Second pass done.")
+        (perform-indexing *store-path*)
+        (.info log "Indexing done.")
         (if *profiler* 
             (do
                 (.disable p)
