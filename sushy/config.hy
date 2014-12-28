@@ -48,5 +48,5 @@
 (def *ignored-folders* ["CVS" ".hg" ".svn" ".git" ".AppleDouble" ".TemporaryItems"])
 
 (if *debug-mode*
-    (apply basicConfig [] {"level" DEBUG "format" "%(asctime)s %(thread)d %(filename)s:%(funcName)s:%(lineno)d %(levelname)s %(message)s"})
-    (apply basicConfig [] {"level" INFO}))
+    (apply basicConfig [] {"level" DEBUG "format" "%(asctime)s %(levelname)s %(process)d %(filename)s:%(funcName)s:%(lineno)d %(message)s"})
+    (apply basicConfig [] {"level" INFO "format" "%(levelname)s:%(process)d:%(funcName)s %(message)s"}))
