@@ -32,7 +32,7 @@
     inner)
 
 
-(with-decorator lru-cache
+(with-decorator (lru-cache)
     (defn get-image-size [path]
         (try
             (let [[im   (.open Image path)]
