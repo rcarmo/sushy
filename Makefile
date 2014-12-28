@@ -23,7 +23,7 @@ repl:
 	hy
 
 deps:
-	pip install -r requirements.txt
+	pip install -U -r requirements.txt
 
 clean:
 	rm -f *.zip
