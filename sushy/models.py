@@ -43,18 +43,19 @@ class FTSPage(FTSModel):
 
 def init_db():
     """Initialize the database"""
+    db.execute_sql('PRAGMA journal_mode=WAL')
     try:
         Page.create_table()
         Link.create_table()
         FTSPage.create_table()
-        db.execute_sql('PRAGMA journal_mode=WAL')
     except OperationalError as e:
         log.info(e)
 
 
 def add_wiki_link(**kwargs):
-    with db.transaction():
-        link = Link.create(**kwargs)
+    """Adds a wiki link"""
+    with db.transaction(): # deferring transactions gives us a nice speed boost
+        return Link.create(**kwargs)
 
 
 def del_wiki_page(page):
@@ -66,6 +67,7 @@ def del_wiki_page(page):
 
 
 def add_wiki_page(**kwargs):
+    """Adds a wiki page"""
     with db.transaction():
         try:
             page = Page.create(**kwargs)
@@ -76,6 +78,7 @@ def add_wiki_page(**kwargs):
 
 
 def index_wiki_page(**kwargs):
+    """Adds wiki page metatada and FTS data. Page MUST exist beforehand"""
     with db.transaction():
         page = Page.get(Page.name == kwargs["name"])
         values = {}
@@ -87,8 +90,7 @@ def index_wiki_page(**kwargs):
             if kwargs[k]:
                 parts.append(kwargs[k])
         content = '\n'.join(parts)
-        # Not too happy about this, but FTS update() seems to be buggy and the database balloons
-        #FTSPage.delete().where(FTSPage.page == page).execute()
+        # Not too happy about this, but FTS update() seems to be buggy and indexes keep growing
         FTSPage.delete().where(FTSPage.page == page).execute()
         FTSPage.create(page = page, content = content)
         return page
