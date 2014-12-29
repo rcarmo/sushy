@@ -19,7 +19,7 @@ Sushy supports Markdown, Textile, raw HTML and ReStructuredText, and determines 
 
 ## Front Matter
 
-Your index document should start with a set of headers. Sushy isn't picky about anything except that header names should be followed by a colon and that the first blank line separates them from the body text:
+Your index document must start with a set of metadata headers. Sushy isn't picky about anything except that header names should be followed by a colon and that the first blank line separates them from the body text:
 
 ```text
 From: Rui Carmo
@@ -31,6 +31,17 @@ Content-Type: text/x-markdown
 
 Body text
 ```
+
+### Recognized Headers
+
+Sushy looks for the following headers:
+
+* `Content-Type` - allows you to override the markup language in use
+* `Date` - the original publishing date for your post. If missing, the file modification time is used.
+* `From` - the author name
+* `Index` - set this to `no` or `off` to remove a page from the full text index
+* `Last-Modified` - lets you override the file modification time explicitely and trumps the date for insertion in RSS feeds
+* `Title` - your page/post title
 
 Headers are case-insensitive, and Sushy will take posts written for [Jekyll][j] and simply ignore the triple dashes (as well as things like `layout`, at least for the moment):
 
