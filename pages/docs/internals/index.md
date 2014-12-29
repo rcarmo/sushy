@@ -1,5 +1,6 @@
 From: Rui Carmo
 Date: 2014-11-03 19:09:00
+Last-Modified: 2014-12-29 11:15:00
 Title: Internals
 
 <img src="hy.png" style="float:left; width: 120px; height: auto;">
@@ -19,6 +20,14 @@ This is a simple WSGI entry point, doing double duty as a [Bottle][b]-based deve
 
 The `config` module is (predictably) where Sushy is configured. Most configurable options come from environment variables, but some conventions like URL routes, meta pages and ignored folders are set there.
 
+### `indexer`
+
+Like its name entails, the `indexer` module handles full-text and link indexing.
+
+### `models`
+
+This is the only "pure" [Python][python] module. Its main purpose is to encapsulate database setup and access (which use the `peewee` ORM) into a small set of functional primitives.
+
 ### `render`
 
 This simply imports and abstracts away all markup processors, providing a single rendering function.
@@ -26,6 +35,10 @@ This simply imports and abstracts away all markup processors, providing a single
 ### `routes`
 
 URL routes and HTTP request handling, again courtesy of [Bottle][b].
+
+### `render`
+
+The `render` module encapsulates all the markup renderers, providing a uniform API for them.
 
 ### `store`
 
