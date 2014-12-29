@@ -38,7 +38,7 @@
 
 
 (defn index-one [item]
-    ; update a single page
+    ; index a single page
     (.info log (:path item))
     (let [[pagename   (:path item)]
           [mtime      (.fromtimestamp datetime (:mtime item))]
@@ -58,7 +58,13 @@
              "hash"    (.hexdigest (sha1 (.encode plaintext "utf-8")))
              "title"   (.get headers "title" "Untitled")
              "tags"    (transform-tags (.get headers "tags" ""))
-             "mtime"   mtime
+             ; this allows us to override the filesystem modification time through front matter
+             "mtime"   (try 
+                            (parse-date (.get headers "last-modified"))
+                            (catch [e Exception]
+                                (.debug log (% "Could not parse last-modified date from %s" pagename))
+                                mtime))
+             ; if there isn't any front matter info, fall back to mtime
              "pubtime" (try 
                             (parse-date (.get headers "date"))
                             (catch [e Exception]
