@@ -10,10 +10,13 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Roadmap
 
+* Page aliasing (i.e., multiple URLs for a page)
+* Closest-match URLs (i.e., fix typos)
 * HTTP caching (`Etag`, `Last-Modified`, `HEAD` support, etc.)
 * Internal link tracking (`SeeAlso` functionality, as seen on [Yaki][y])
 * Blog homepage/excerpts/archive navigation
 * RSS feeds
+* CSS inlining for RSS feeds
 * Sitemap
 * Image thumbnailing
 * Site thumbnailing (for taking screenshots of external links)
