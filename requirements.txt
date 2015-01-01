@@ -1,8 +1,7 @@
-bottle>=0.12.7
+bottle>=0.12.8
 gevent>=1.0.1
-goless>=0.7.2
 hy>=0.10.1
-uWSGI>=2.0.8
+uWSGI>=2.0.9
 textile>=2.2.1
 smartypants>=1.8.6
 Markdown>=2.5.2
@@ -11,4 +10,4 @@ peewee>=2.4.5
 pygments>=2.0.1
 docutils>=0.12
 watchdog>=0.8.2
-pillow>=2.6.1
+pillow>=2.7.0
