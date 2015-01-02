@@ -1,7 +1,9 @@
 (import 
     [collections [OrderedDict]]
     [functools   [wraps]]
-    [PIL         [Image]])
+    [logging     [getLogger]]
+    [PIL         [Image]]
+    [time        [time]])
 
 (setv log (getLogger))
 
@@ -32,6 +34,25 @@
                 (if (> (len cache) limit)
                     (.popitem cache 0))))
                 (setv (get cache args) result)
+                result))
+        cached-fn)
+    inner)
+
+
+(defn sticky-cache [&optional [ttl 30]]
+    ; timed cache memoization decorator that will return the same value for repeated 
+    ; invocations inside a specific time interval
+    (defn inner [func]
+        (setv cache {})
+        (defn cached-fn [&rest args]
+            (let [[now      (time)]
+                  [result   (if (in args cache)
+                                (let [[(, timestamp value) (.get cache args)]]
+                                    (if (< timestamp now)
+                                        (apply func args)
+                                        value))
+                                (apply func args))]]
+                (assoc cache args (, (+ now ttl) result))
                 result))
         cached-fn)
     inner)
