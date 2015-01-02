@@ -17,7 +17,7 @@
 (setv log (getLogger))
 
 
-(with-decorator memoize
+(with-decorator (memoize)
     (defn get-mappings [page]
         ; searches for `pre` tags and builds key/value pairs
         (let [[mappings {}]
