@@ -3,6 +3,7 @@
     [functools   [wraps]]
     [logging     [getLogger]]
     [PIL         [Image]]
+    [random      [sample]]
     [time        [time]])
 
 (setv log (getLogger))
@@ -39,24 +40,31 @@
     inner)
 
 
-(defn sticky-cache [&optional [ttl 30]]
-    ; timed cache memoization decorator that will return the same value for repeated 
-    ; invocations inside a specific time interval
+(defn ttl-cache [&optional [ttl 30]]
+    ; memoization decorator with time-to-live
     (defn inner [func]
         (setv cache {})
+            
         (defn cached-fn [&rest args]
             (let [[now      (time)]
-                  [result   (if (in args cache)
-                                (let [[(, timestamp value) (.get cache args)]]
-                                    (if (< timestamp now)
-                                        (apply func args)
-                                        value))
-                                (apply func args))]]
-                (assoc cache args (, (+ now ttl) result))
-                result))
+                  [to-check (sample (.keys cache) (int (/ (len cache) 4)))]]
+                ; check current arguments and 25% of remaining keys 
+                (.append to-check args)
+
+                (for [k to-check]
+                    (let [[(, good-until value) (.get cache k (, now nil))]]
+                        (if (< good-until now)
+                            (del (get cache k)))))
+
+                (if (in args cache)
+                    (let [[(, good-until value) (get cache args)]]
+                        value)
+                    (let [[value (apply func args)]]
+                        (assoc cache args (, (+ now ttl) value))
+                        value))))
         cached-fn)
     inner)
-
+    
 
 (with-decorator (lru-cache)
     (defn get-image-size [filename]
@@ -70,7 +78,8 @@
             nil))))
 
 
-(defmacro timeit [block]
+(defmacro timeit [block iterations]
     `(let [[t (time)]]
-        ~block
-        (print (- (time) t))))
+        (for [i (range ~iterations)]
+            ~block)
+        (print ~iterations (- (time) t))))
