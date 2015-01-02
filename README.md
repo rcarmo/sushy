@@ -10,6 +10,7 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Roadmap
 
+* Multiple theme support
 * Page aliasing (i.e., multiple URLs for a page)
 * Closest-match URLs (i.e., fix typos)
 * HTTP caching (`Etag`, `Last-Modified`, `HEAD` support, etc.)
