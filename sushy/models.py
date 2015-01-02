@@ -31,6 +31,15 @@ class Link(Model):
 
     class Meta:
         database = db
+        
+        
+class Cache(Model):
+    """Key-value store for arbitrary data"""
+    key   = CharField(primary_key=True)
+    value = BlobField(null=True)
+    
+    class Meta:
+        database = db
 
 
 class FTSPage(FTSModel):
@@ -49,6 +58,7 @@ def init_db():
         Page.create_table()
         Link.create_table()
         FTSPage.create_table()
+        Cache.create_table()
     except OperationalError as e:
         log.info(e)
 
