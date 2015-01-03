@@ -1,5 +1,5 @@
 (import
-    [logging [getLogger basicConfig DEBUG INFO]]
+    [logging [getLogger basicConfig *debug* *info*]]
     [os [environ]]
     [os.path [join]])
 
@@ -48,5 +48,5 @@
 (def *ignored-folders* ["CVS" ".hg" ".svn" ".git" ".AppleDouble" ".TemporaryItems"])
 
 (if *debug-mode*
-    (apply basicConfig [] {"level" DEBUG "format" "%(asctime)s %(levelname)s %(process)d %(filename)s:%(funcName)s:%(lineno)d %(message)s"})
-    (apply basicConfig [] {"level" INFO "format" "%(levelname)s:%(process)d:%(funcName)s %(message)s"}))
+    (apply basicConfig [] {"level" *debug* "format" "%(asctime)s %(levelname)s %(process)d %(filename)s:%(funcName)s:%(lineno)d %(message)s"})
+    (apply basicConfig [] {"level" *info* "format" "%(levelname)s:%(process)d:%(funcName)s %(message)s"}))
