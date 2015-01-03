@@ -79,7 +79,7 @@ Thanks to [Hy][hy], this should run just as well under Python 2 and Python 3. My
 
 # Deployment
 
-This repository is deployable as-is on [Dokku-alt][da], and will instantiate a production-ready [uWSGI][uwsgi] server and a background indexing worker. 
+This repository is deployable as-is on [Dokku-alt][da], and will instantiate a production-ready [uWSGI][uwsgi] server (using `gevent`) and a background indexing worker. 
 
 Vanilla [Dokku][dokku] may work as well with the `foreman` plugin, but I haven't tested it.
 
