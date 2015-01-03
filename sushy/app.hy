@@ -1,10 +1,10 @@
 (import
-    [bottle  [DEBUG default-app run route view template]]
+    [bottle  [*debug* default-app run route view template]]
     [config  [*debug-mode* *bind-address* *http-port*]]
     [logging [getLogger]]
     routes)
 
-(setv DEBUG *debug-mode*)
+(setv *debug* *debug-mode*)
 
 (def app (default-app))
 
