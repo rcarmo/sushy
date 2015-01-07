@@ -8,12 +8,11 @@
 
 (def *store-path* (.get environ "CONTENT_PATH" "pages"))
 
-(def *static-path* (join (.get environ "THEME_PATH" "static")))
+(def *theme-path* (.get environ "THEME_PATH" "themes/wiki"))
 
-(def *view-path* (join (.get environ "THEME_PATH" "views")))
+(def *static-path* (join *theme-path* "static"))
 
-; prepend the theme template path to bottle's search list
-(.insert *template-path* 0 (abspath *view-path*))
+(def *view-path* (join *theme-path* "views"))
 
 (def *bind-address* (.get environ "BIND_ADDRESS" "127.0.0.1"))
 
@@ -56,3 +55,6 @@
 (if *debug-mode*
     (apply basicConfig [] {"level" *debug* "format" "%(asctime)s %(levelname)s %(process)d %(filename)s:%(funcName)s:%(lineno)d %(message)s"})
     (apply basicConfig [] {"level" *info* "format" "%(levelname)s:%(process)d:%(funcName)s %(message)s"}))
+
+; prepend the theme template path to bottle's search list
+(.insert *template-path* 0 (abspath *view-path*))
