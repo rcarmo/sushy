@@ -1,13 +1,19 @@
 (import
+    [bottle  [*template-path*]]
     [logging [getLogger basicConfig *debug* *info*]]
-    [os [environ]]
-    [os.path [join]])
+    [os      [environ]]
+    [os.path [join abspath]])
 
 (setv log (getLogger))
 
 (def *store-path* (.get environ "CONTENT_PATH" "pages"))
 
-(def *static-path* (.get environ "STATIC_PATH" "static"))
+(def *static-path* (join (.get environ "THEME_PATH" "static")))
+
+(def *view-path* (join (.get environ "THEME_PATH" "views")))
+
+; prepend the theme template path to bottle's search list
+(.insert *template-path* 0 (abspath *view-path*))
 
 (def *bind-address* (.get environ "BIND_ADDRESS" "127.0.0.1"))
 

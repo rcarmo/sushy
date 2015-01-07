@@ -4,7 +4,7 @@ export PORT?=8080
 export DEBUG?=False
 export PROFILER?=False
 export CONTENT_PATH?=pages
-export STATIC_PATH?=static
+export THEME_PATH?=themes/wiki
 export DATABASE_PATH?=/tmp/sushy.db
 
 # Experimental zip bundle

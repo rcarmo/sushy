@@ -89,10 +89,11 @@ As is (for development) the content ships with the code repo. Changing things to
 
 In accordance with the [12 Factor][12] approach, runtime configuration is taken from environment variables:
 
-* `DEBUG` - Enable debug logs
-* `PROFILER` - Enable `cProfile` statistics (will slow down things appreciatively)
+* `DEBUG`        - Enable debug logs
+* `PROFILER`     - Enable `cProfile` statistics (will slow down things appreciatively)
 * `CONTENT_PATH` - the folder your documents live in
-* `STATIC_PATH`  - static asset path (JS/CSS/etc.)
+* `THEME_PATH`   - path under which static assets (JS/CSS/etc.)
+and templates/views are stored
 * `BIND_ADDRESS` - IP address to bind the development server to
 * `PORT`         - TCP port to bind the server to
 
