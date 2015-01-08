@@ -52,4 +52,8 @@ title: Blogging Like a Hacker
 ---
 ```
 
+## Themes
+
+Sushy supports multiple themes. Each theme must provide a `views` folder that contains the HTML templating (using Bottle templates) and a `static` folder for any static assets (CSS, JS, images, etc.) required by the theme.
+
 [j]: http://jekyllrb.com

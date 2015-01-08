@@ -10,7 +10,6 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Roadmap
 
-* Multiple theme support
 * Page aliasing (i.e., multiple URLs for a page)
 * Closest-match URLs (i.e., fix typos)
 * HTTP caching (`Etag`, `Last-Modified`, `HEAD` support, etc.)
@@ -25,6 +24,7 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Done
 
+* Multiple theme support (only the one theme for now)
 * Automatic insertion of image sizes in `img` tags
 * Deployable under [Dokku-alt][da]
 * Run under [uWSGI][uwsgi] using `gevent` workers
