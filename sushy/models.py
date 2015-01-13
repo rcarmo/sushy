@@ -107,6 +107,19 @@ def get_wiki_page(id):
         return Page.get(Page.id == id)._data
 
 
+def get_links(page_name):
+    with db.transaction():
+        query = (Page.select()
+                 .join(Link)
+                 .where((Link.name == page_name) &&
+                        (Page.name == Link.link))
+                 .order_by(SQL('mtime').desc())
+                 .dicts())
+
+        for page in query:
+             yield page
+
+
 def get_latest(limit=20, months_ago=3):
     with db.transaction():
         query = (Page.select()
