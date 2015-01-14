@@ -2,7 +2,7 @@
     [bottle    [abort get :as handle-get request redirect static-file view :as render-view]]
     [config    [*debug-mode* *home-page* *page-media-base* *page-route-base* *static-path* *store-path*]]
     [logging   [getLogger]]
-    [models    [search]]
+    [models    [search get-links]]
     [os        [environ]]
     [render    [render-page]]
     [store     [get-page]]
@@ -65,5 +65,7 @@
     (fn [pagename] 
         ; TODO: fuzzy URL matching, error handling
         (let [[page (get-page pagename)]]
-            {"headers" (:headers page)
-             "body"    (inner-html (apply-transforms (render-page page) pagename))})))
+            {"headers"  (:headers page)
+             "pagename" pagename
+             "seealso"  (get-links pagename)
+             "body"     (inner-html (apply-transforms (render-page page) pagename))})))
