@@ -26,10 +26,13 @@ class Page(Model):
 
 class Link(Model):
     """Links between pages - doesn't use ForeignKeys since pages may not exist"""
-    page = CharField(unique=False, index=True)
-    link = CharField(unique=False, index=True)
+    page = CharField()
+    link = CharField()
 
     class Meta:
+        indexes = (
+            (('page', 'link'), True),
+        )
         database = db
         
         
@@ -66,7 +69,10 @@ def init_db():
 def add_wiki_link(**kwargs):
     """Adds a wiki link"""
     with db.transaction(): # deferring transactions gives us a nice speed boost
-        return Link.create(**kwargs)
+        try:
+            return Link.create(**kwargs)
+        except IntegrityError as e:
+            log.info(e)
 
 
 def del_wiki_page(page):
@@ -110,9 +116,8 @@ def get_wiki_page(id):
 def get_links(page_name):
     with db.transaction():
         query = (Page.select()
-                 .join(Link)
-                 .where((Link.name == page_name) &&
-                        (Page.name == Link.link))
+                 .join(Link, on=(Link.page == Page.name))
+                 .where(Link.link == page_name)
                  .order_by(SQL('mtime').desc())
                  .dicts())
 
