@@ -2,7 +2,7 @@
     <ul>
 %for p in seealso:
         <li>
-            <a href="{{p['name']">{{p[['title']]}}</a>
+            <a href="{{base_url + '/' + p['name']}}">{{p['title']}}</a>
         </li>
 %end
     </ul>
