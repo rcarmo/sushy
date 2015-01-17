@@ -13,7 +13,6 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 * Page aliasing (i.e., multiple URLs for a page)
 * Closest-match URLs (i.e., fix typos)
 * HTTP caching (`Etag`, `Last-Modified`, `HEAD` support, etc.)
-* Internal link tracking (`SeeAlso` functionality, as seen on [Yaki][y])
 * Blog homepage/excerpts/archive navigation
 * RSS feeds
 * CSS inlining for RSS feeds
@@ -24,6 +23,7 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Done
 
+* Internal link tracking (`SeeAlso` functionality, as seen on [Yaki][y])
 * Multiple theme support (only the one theme for now)
 * Automatic insertion of image sizes in `img` tags
 * Deployable under [Dokku-alt][da]
