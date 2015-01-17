@@ -43,10 +43,11 @@ body {
     margin: 0px;
     padding: 0.3em;
     height: 4em;
-    background-color: yellow;
+    background: white;
 }
-#seealso a:hover {
-    background: #4c9220;
+
+a.seelink:hover {
+    background: #4c9220 !important;
     color: white;
     text-decoration: none;
 }
@@ -73,4 +74,4 @@ footer a, footer a:hover {
 h1, h2, h3, h4 {
     font-family:Roboto_slab,Arial,Helvetica,sans-serif;
     font-weight: normal;
-]
+}

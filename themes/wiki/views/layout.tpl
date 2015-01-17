@@ -38,7 +38,7 @@
 
 %if defined('scripts'):
     %for script in scripts:    
-        <script src="js/{{script}}"></script>
+        <script src="/static/js/{{script}}"></script>
     %end
 %end
 
