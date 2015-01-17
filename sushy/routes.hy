@@ -67,5 +67,6 @@
         (let [[page (get-page pagename)]]
             {"headers"  (:headers page)
              "pagename" pagename
+             "base_url" *page-route-base*
              "seealso"  (get-links pagename)
              "body"     (inner-html (apply-transforms (render-page page) pagename))})))
