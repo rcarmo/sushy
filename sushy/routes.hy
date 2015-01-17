@@ -68,5 +68,5 @@
             {"headers"  (:headers page)
              "pagename" pagename
              "base_url" *page-route-base*
-             "seealso"  (get-links pagename)
+             "seealso"  (list (get-links pagename))
              "body"     (inner-html (apply-transforms (render-page page) pagename))})))

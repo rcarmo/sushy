@@ -72,7 +72,7 @@ def add_wiki_link(**kwargs):
         try:
             return Link.create(**kwargs)
         except IntegrityError as e:
-            log.info(e)
+            log.debug(e) # skip duplicate links
 
 
 def del_wiki_page(page):

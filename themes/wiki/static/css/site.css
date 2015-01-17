@@ -29,6 +29,28 @@ body {
     padding-bottom: 4em;
 }
 
+#seealso {
+    padding-top: 1em;
+    text-align: top;
+    margin: 0px;
+    display: table;
+}
+#seealso .holder {
+    display: table-row;
+}
+#seealso a {
+    display: inline-table;
+    margin: 0px;
+    padding: 0.3em;
+    height: 4em;
+    background-color: yellow;
+}
+#seealso a:hover {
+    background: #4c9220;
+    color: white;
+    text-decoration: none;
+}
+
 footer {
     position: absolute;
     bottom: 0;

@@ -93,8 +93,8 @@
               <h1 class="slab">{{!headers["title"]}}</h1>
             </div>
             {{!base}}
-        </div>
 %include('seealso')
+        </div>
         <footer>
             Source on <a href="https://github.com/rcarmo/sushy">Github</a> | Made with <a href="http://ink.sapo.pt">Ink</a>
         </footer>
