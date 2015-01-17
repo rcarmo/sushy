@@ -43,7 +43,7 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 * All your Textile, Markdown or ReStructured Text content lives in a filesystem tree, with a folder per page
 * Sushy grabs and renders those on demand with fine-tuned HTTP headers (this is independently of whether or not you put Varnish or CloudFlare in front for caching)
-* It also maintains a SQLite database with a full-text index of all your content, updated live.
+* It also maintains a SQLite database with a full-text index of all your content - updated live as you add/edit content.
 
 ### Markup Support
 
