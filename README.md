@@ -1,3 +1,5 @@
++[![Stories in Ready](https://badge.waffle.io/rcarmo/sushy.png?label=ready&title=Ready)](https://waffle.io/rcarmo/sushy)
+
 # Sushy
 
 A wiki/blogging engine with a static file back-end. 
