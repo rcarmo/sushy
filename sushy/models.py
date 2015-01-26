@@ -15,7 +15,7 @@ class Page(Model):
     """Metadata table"""
     name        = CharField(primary_key=True)
     title       = CharField(null=True, index=True)
-    tags        = CharField(null=True, index=True) 
+    tags        = CharField(null=True, index=True)
     hash        = CharField(null=True, index=True) # plaintext hash, used for etags
     mtime       = DateTimeField(index=True)
     pubtime     = DateTimeField(index=True)
@@ -117,7 +117,17 @@ def get_links(page_name):
     with db.transaction():
         query = (Page.select()
                  .join(Link, on=(Link.page == Page.name))
-                 .where(Link.link == page_name)
+                 .where((Link.link == page_name))
+                 .order_by(SQL('mtime').desc())
+                 .dicts())
+
+        for page in query:
+             yield page
+
+    with db.transaction():
+        query = (Page.select()
+                 .join(Link, on=(Link.link == Page.name))
+                 .where((Link.page == page_name))
                  .order_by(SQL('mtime').desc())
                  .dicts())
 
