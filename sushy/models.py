@@ -114,6 +114,7 @@ def get_wiki_page(id):
 
 
 def get_links(page_name):
+    # Backlinks (links to current page)
     with db.transaction():
         query = (Page.select()
                  .join(Link, on=(Link.page == Page.name))
@@ -124,6 +125,7 @@ def get_links(page_name):
         for page in query:
              yield page
 
+    # Links from current page to valid pages
     with db.transaction():
         query = (Page.select()
                  .join(Link, on=(Link.link == Page.name))
