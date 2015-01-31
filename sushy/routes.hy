@@ -25,10 +25,10 @@
 (with-decorator
     (handle-get "/env")
     (render-view "debug")
-    (fn []
+    (defn debug-dump []
         (if *debug-mode*
             {"headers" {"title" "Environment dump"}
-             "environ"  environ}
+             "environ"  (dict environ)}
             (abort (int 404) "Page Not Found"))))
 
 
@@ -36,7 +36,7 @@
 (with-decorator
     (handle-get "/search")
     (render-view "search")
-    (fn []
+    (defn search []
         (if (in "q" (.keys (. request query)))
             {"results" (search (. request query q))
              "query"   (. request query q)
@@ -47,14 +47,14 @@
 ; static files
 (with-decorator 
     (handle-get "/static/<filename:path>")
-    (fn [filename]
+    (defn static-files [filename]
         (apply static-file [filename] {"root" *static-path*})))
 
         
 ; page media
 (with-decorator 
     (handle-get (+ *page-media-base* "/<filename:path>"))
-    (fn [filename]
+    (defn page-media [filename]
         (apply static-file [filename] {"root" *store-path*})))
 
 
@@ -62,7 +62,7 @@
 (with-decorator 
     (handle-get (+ *page-route-base* "/<pagename:path>"))
     (render-view "wiki")
-    (fn [pagename] 
+    (defn wiki-page [pagename] 
         ; TODO: fuzzy URL matching, error handling
         (let [[page (get-page pagename)]]
             {"headers"  (:headers page)

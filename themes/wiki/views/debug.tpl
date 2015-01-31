@@ -6,6 +6,9 @@
         </tr>
     </thead>
     <tbody>
+%if "NEW_RELIC_LICENSE_KEY" in environ:
+%environ["NEW_RELIC_LICENSE_KEY"] = ":redacted:"
+%end
 %for e in sorted(environ):
     <tr>
         <td><code>{{!e}}</code></td>
