@@ -6,6 +6,8 @@ export PROFILER?=False
 export CONTENT_PATH?=pages
 export THEME_PATH?=themes/wiki
 export DATABASE_PATH?=/tmp/sushy.db
+export NEW_RELIC_APP_NAME?=Sushy
+export NEW_RELIC_LICENSE_KEY?=''
 
 # Experimental zip bundle
 BUNDLE=sushy.zip
@@ -52,6 +54,9 @@ serve: build
 
 # Run with uwsgi
 uwsgi: build
+ifneq ($(NEW_RELIC_LICENSE_KEY),'')
+	newrelic-admin run-program uwsgi --http :$(PORT) --python-path . --wsgi sushy.app --callable app --gevent 2000 -p 1 
+endif
 	uwsgi --http :$(PORT) --python-path . --wsgi sushy.app --callable app --gevent 2000 -p 1 
 
 # Run with uwsgi
