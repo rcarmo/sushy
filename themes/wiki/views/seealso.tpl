@@ -2,8 +2,8 @@
 <hr/>
 <div id="seealso" class="all-100">
 	<h4>See Also:</h4>
-    <div class="holder all-100 small align-center">
-{{!''.join(['<a class="seelink tiny-100 small-50 medium-30 large-25 xlarge-15 align-left" href="' + base_url + '/' + p['name'] + '">' + p['title'] + '</a>' for p in seealso])}}
+    <div class="all-100 small horizontal-space">
+        {{!''.join(['<a class="seelink tiny-100 small-50 medium-30 large-25 xlarge-15 align-left" href="' + base_url + '/' + p['name'] + '">' + p['title'] + '</a>' for p in seealso])}}
     </div>
 </div>
 <script>
