@@ -17,7 +17,7 @@
 (with-decorator 
     (handle-get "/")
     (handle-get *page-route-base*)
-    (fn []
+    (defn home-page []
         (redirect *home-page*)))
 
 
