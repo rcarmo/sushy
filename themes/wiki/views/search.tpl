@@ -1,8 +1,8 @@
 <%
 from itertools import islice
 if defined("query"):
-headers['title'] = "Search results for '%s'" % query
-items = list(islice(results,0,20))
+    headers['title'] = "Search results for '%s'" % query
+    items = list(islice(results,0,20))
     if len(items):
 %>
     <table class="ink-table bordered hover alternating">
