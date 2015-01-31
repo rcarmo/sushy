@@ -29,7 +29,7 @@
         (if *debug-mode*
             {"headers" {"title" "Environment dump"}
              "environ"  environ}
-            (abort 404 "Page Not Found"))))
+            (abort (int 404) "Page Not Found"))))
 
 
 ; search
