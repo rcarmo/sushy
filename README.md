@@ -25,6 +25,7 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Done
 
+* [New Relic][nr] Support
 * Internal link tracking (`SeeAlso` functionality, as seen on [Yaki][y])
 * Multiple theme support (only the one theme for now)
 * Automatic insertion of image sizes in `img` tags
@@ -97,7 +98,8 @@ In accordance with the [12 Factor][12] approach, runtime configuration is taken 
 * `THEME_PATH`   - path under which static assets (JS/CSS/etc.)
 and templates/views are stored
 * `BIND_ADDRESS` - IP address to bind the development server to
-* `PORT`         - TCP port to bind the server to
+* `PORT` - TCP port to bind the server to
+* `NEW_RELIC_LICENSE_KEY` - If set, the New Relic agent is enabled
 
 These are set in the `Makefile` (which I use for a variety of purposes).
 
@@ -125,3 +127,4 @@ make serve
 [ink]: http://ink.sapo.pt
 [uwsgi]: https://github.com/unbit/uwsgi
 [db]: http://www.dropbox.com
+[nr]: http://www.newrelic.com
