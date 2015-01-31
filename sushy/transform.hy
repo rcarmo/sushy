@@ -136,8 +136,8 @@
     ; remember that Hy's threading macro manipulates the first argument slot
     (-> html 
         (HTML)
-        (base-href pagename)
         (interwiki-links)
+        (base-href pagename)
         (include-sources pagename)
-        (syntax-highlight)
-        (image-sources pagename)))
+        (image-sources pagename)
+        (syntax-highlight)))
