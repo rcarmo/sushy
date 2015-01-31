@@ -69,6 +69,9 @@ index: build
 
 # Run indexer and watch for changes
 index-watch: build
+ifneq ($(NEW_RELIC_LICENSE_KEY),'')
+	newrelic-admin run-python -m sushy.indexer watch
+endif
 	python -m sushy.indexer watch
 
 # Render pstats profiler files into nice PNGs (requires dot)
