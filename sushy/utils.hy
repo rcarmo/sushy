@@ -44,7 +44,6 @@
     ; memoization decorator with time-to-live
     (defn inner [func]
         (setv cache {})
-            
         (defn cached-fn [&rest args]
             (let [[now      (time)]
                   [to-check (sample (.keys cache) (int (/ (len cache) 4)))]]
