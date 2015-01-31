@@ -1,4 +1,4 @@
-%if len(seealso):
+%if defined("seealso") and len(seealso):
 <hr/>
 <div id="seealso" class="all-100">
 	<h4>See Also:</h4>

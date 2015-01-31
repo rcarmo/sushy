@@ -38,10 +38,10 @@
     (render-view "search")
     (fn []
         (if (in "q" (.keys (. request query)))
-            ; TODO: proper reporting of search result length, move messages to template
             {"results" (search (. request query q))
-             "headers" {"title" (% "Search Results for '%s'" (. request query q))}}
-            {"results" nil "headers" "No Results"})))
+             "query"   (. request query q)
+             "headers" {}}
+            {"headers" {}})))
 
             
 ; static files
