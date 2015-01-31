@@ -58,7 +58,7 @@ All markup formats MUST be preceded by "front matter" handled like RFC2822 heade
 
 ## Why?
 
-I've been running a classical, OO-based Python Wiki (called [Yaki][y]) for the better part of a decade. It works, but it is comparatively big and has become unwieldy and cumbersome to tweak. So I decided to [rewrite it][tng]. [Again][gae]. And [again][clj].
+I've been running a classical, object-oriented Python Wiki (called [Yaki][y]) for the better part of a decade. It works, but is comparatively big and has become unwieldy and cumbersome to tweak. So I decided to [rewrite it][tng]. [Again][gae]. And [again][clj].
 
 And I eventually decided to make it _smaller_ -- my intention is for the core to stop at around 1000 lines of code (as of this writing, it has a mere 705 LOC, excluding templates), so this is also an exercise in building tight, readable (and functional) code.
 
