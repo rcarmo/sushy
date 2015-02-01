@@ -36,7 +36,7 @@
 (with-decorator
     (handle-get "/search")
     (render-view "search")
-    (defn search []
+    (defn handle-search []
         (if (in "q" (.keys (. request query)))
             {"results" (search (. request query q))
              "query"   (. request query q)
