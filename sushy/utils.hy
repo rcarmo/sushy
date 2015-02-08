@@ -76,7 +76,18 @@
             (.warn log (% "Could not extract size from %s" filename))
             nil))))
 
-
+           
+(defn sse-pack [data]
+    ; pack data in SSE format
+    (+ (.join "" 
+              (map (fn [k] 
+                  (if (in k data)
+                      (% "%s: %s\n" (, k (get data k)))
+                      ""))
+                  ["retry" "id" "event" "data"]))
+        "\n"))
+ 
+       
 (defmacro timeit [block iterations]
     `(let [[t (time)]]
         (for [i (range ~iterations)]

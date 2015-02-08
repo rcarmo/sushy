@@ -13,3 +13,4 @@ textile>=2.2.1
 uWSGI>=2.0.9
 watchdog>=0.8.2
 newrelic>=2.42.0.35
+pyzmq>=14.5.0

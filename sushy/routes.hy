@@ -1,5 +1,5 @@
 (import 
-    [bottle    [abort get :as handle-get request redirect static-file view :as render-view]]
+    [bottle    [abort get :as handle-get request  redirect static-file view :as render-view]]
     [config    [*debug-mode* *home-page* *page-media-base* *page-route-base* *static-path* *store-path*]]
     [logging   [getLogger]]
     [models    [search get-links]]
@@ -30,7 +30,7 @@
             {"headers" {"title" "Environment dump"}
              "environ"  (dict environ)}
             (abort (int 404) "Page Not Found"))))
-
+            
 
 ; search
 (with-decorator
