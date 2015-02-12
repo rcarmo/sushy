@@ -1,9 +1,10 @@
 (import
-    [config             [*base-filenames* *store-path* *profiler*]]
+    [config             [*base-filenames* *bind-address* *store-path* *profiler* *zmq-port*]]
     [cProfile           [Profile]]
     [datetime           [datetime]]
     [dateutil.parser    [parse :as parse-date]]
     [hashlib            [sha1]]
+    [json               [dumps]]
     [logging            [getLogger Formatter]]
     [models             [add-wiki-link index-wiki-page init-db]]
     [os.path            [basename dirname]]
@@ -13,7 +14,8 @@
     [time               [sleep time]]
     [transform          [apply-transforms extract-internal-links extract-plaintext]]
     [watchdog.observers [Observer]]
-    [watchdog.events    [FileSystemEventHandler]])
+    [watchdog.events    [FileSystemEventHandler]]
+    [zmq                [Context *pub*]])
 
 
 (setv log (getLogger))
@@ -37,7 +39,7 @@
         false))
 
 
-(defn index-one [item]
+(defn index-one [item &optional [sock None]]
     ; index a single page
     (.info log (:path item))
     (let [[pagename   (:path item)]
@@ -47,6 +49,13 @@
           [doc        (apply-transforms (render-page page) pagename)]
           [plaintext  (extract-plaintext doc)]
           [links      (extract-internal-links doc)]]
+        
+        (if sock
+            (.send-multipart sock
+                [(str "indexing")
+                 (dumps {"pagename" pagename
+                              "title"    (.get headers "title" "Untitled")})]))
+                    
         (for [link links]
             (apply add-wiki-link []
                 {"page" pagename
@@ -83,14 +92,20 @@
 
 (defclass IndexingHandler [FileSystemEventHandler]
     ; handle file notifications
-    [[on-any-event ; TODO: handle deletions and moves separately
+    [[--init--
+        (fn [self]
+            (let [[ctx (Context)]
+                  [(. self sock) (.socket ctx *pub*)]]
+                (.bind (. self sock) (% "tcp://%s:%d" (, *bind-address* *zmq-port*)))))]
+     [on-any-event ; TODO: handle deletions and moves separately
         (fn [self event]
             (let [[filename (basename (. event src-path))]
                   [path     (dirname  (. event src-path))]]
                 (if (in filename *base-filenames*)
                     (index-one
                         {:path (slice path (+ 1 (len *store-path*)))
-                         :mtime (time)}))))]])
+                         :mtime (time)}
+                        (. self sock)))))]])
 
 
 (defn observer [path]

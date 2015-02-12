@@ -1,5 +1,6 @@
 (import [bottle    [request response route get :as handle-get]]
-        [config    [*zmq-port*]]    
+        [config    [*bind-address* *zmq-port*]]
+        [json      [dumps]]
         [logging   [getLogger]]
         [utils     [sse-pack]]
         [zmq       [Context *sub* *subscribe*]])
@@ -15,7 +16,7 @@
         
         
 ; CORS handling
-(with-decorator 
+(with-decorator
     (apply route ["/events"] {"method" "OPTIONS"})
     (defn options []
         (set-response-headers {"Access-Control-Allow-Origin"  "*"
@@ -33,11 +34,11 @@
         (let [[event-id (.get (. request headers) "Last-Event-Id" 0)]
               [ctx      (Context)]
               [sock     (.socket ctx *sub*)]
-              [msg      {"event" "init" 
+              [msg      {"event" "init"
                          "data"  "{}"
                          "id"    event-id
                          "retry" 2000}]]
-            (.connect sock (% "tcp://localhost:%s" *zmq-port*))
+            (.connect sock (% "tcp://%s:%d" (, *bind-address* *zmq-port*)))
             (.setsockopt sock *subscribe* (str "indexing"))
             (set-response-headers {"Content-Type"                "text/event-stream"
                                    "Access-Control-Allow-Origin" "*"})
@@ -48,9 +49,9 @@
             ; TODO: handle disconnects, which usually generate exceptions
             (while true
                 (setv event-id (inc event-id))
-                (assoc msg 
+                (assoc msg
                     "event" "update"
-                    "data"  (.recv sock)
+                    "data"  (dumps (.recv-multipart sock)); topic comes first
                     "id"    event-id))
                 (.debug log (% "Sent %s" msg))
                 (yield (sse-pack msg)))))

@@ -18,7 +18,7 @@
 
 (def *http-port* (.get environ "PORT" "8080"))
 
-(def *zmq-port* (.get environ "ZMQ_PORT" "10000"))
+(def *zmq-port* (int (.get environ "ZMQ_PORT" "10000")))
 
 (def *page-route-base* "/space")
 
