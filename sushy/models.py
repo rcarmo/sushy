@@ -115,26 +115,30 @@ def get_wiki_page(id):
 
 def get_links(page_name):
     # Backlinks (links to current page)
-    with db.transaction():
-        query = (Page.select()
-                 .join(Link, on=(Link.page == Page.name))
-                 .where((Link.link == page_name))
-                 .order_by(SQL('mtime').desc())
-                 .dicts())
+    try:
+        with db.transaction():
+            query = (Page.select()
+                     .join(Link, on=(Link.page == Page.name))
+                     .where((Link.link == page_name))
+                     .order_by(SQL('mtime').desc())
+                     .dicts())
 
-        for page in query:
-             yield page
+            for page in query:
+                 yield page
 
-    # Links from current page to valid pages
-    with db.transaction():
-        query = (Page.select()
-                 .join(Link, on=(Link.link == Page.name))
-                 .where((Link.page == page_name))
-                 .order_by(SQL('mtime').desc())
-                 .dicts())
+        # Links from current page to valid pages
+        with db.transaction():
+            query = (Page.select()
+                     .join(Link, on=(Link.link == Page.name))
+                     .where((Link.page == page_name))
+                     .order_by(SQL('mtime').desc())
+                     .dicts())
 
-        for page in query:
-             yield page
+            for page in query:
+                 yield page
+    except OperationalError as e:
+        log.warn(e)
+        return
 
 
 def get_latest(limit=20, months_ago=3):

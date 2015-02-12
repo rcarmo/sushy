@@ -1,4 +1,4 @@
-(import 
+(import
     [config             [*base-filenames* *store-path* *profiler*]]
     [cProfile           [Profile]]
     [datetime           [datetime]]
@@ -29,7 +29,7 @@
 (defn hide-from-search? [headers]
     (reduce (fn [x y] (or x y))
         (map (fn [header]
-                (if (and (in header headers) 
+                (if (and (in header headers)
                          (in (.lower (get headers header)) ["off" "no"]))
                     true
                     false))
@@ -49,7 +49,7 @@
           [links      (extract-internal-links doc)]]
         (for [link links]
             (apply add-wiki-link []
-                {"page" pagename 
+                {"page" pagename
                  "link" link}))
 
         (apply index-wiki-page []
@@ -59,13 +59,13 @@
              "title"   (.get headers "title" "Untitled")
              "tags"    (transform-tags (.get headers "tags" ""))
              ; this allows us to override the filesystem modification time through front matter
-             "mtime"   (try 
+             "mtime"   (try
                             (parse-date (.get headers "last-modified"))
                             (catch [e Exception]
                                 (.debug log (% "Could not parse last-modified date from %s" pagename))
                                 mtime))
              ; if there isn't any front matter info, fall back to mtime
-             "pubtime" (try 
+             "pubtime" (try
                             (parse-date (.get headers "date"))
                             (catch [e Exception]
                                 (.warn log (% "Could not parse date from %s" pagename))
@@ -115,7 +115,7 @@
         (init-db)
         (perform-indexing *store-path*)
         (.info log "Indexing done.")
-        (if *profiler* 
+        (if *profiler*
             (do
                 (.disable p)
                 (.info log "dumping stats")
