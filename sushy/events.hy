@@ -39,7 +39,7 @@
                          "id"    event-id
                          "retry" 2000}]]
             (.connect sock (% "tcp://%s:%d" (, *bind-address* *zmq-port*)))
-            (.setsockopt sock *subscribe* (str "indexing"))
+            (.setsockopt sock *subscribe* (str ""))
             (set-response-headers {"Content-Type"                "text/event-stream"
                                    "Access-Control-Allow-Origin" "*"})
             (.debug log (dict (. response headers)))
@@ -49,9 +49,9 @@
             ; TODO: handle disconnects, which usually generate exceptions
             (while true
                 (setv event-id (inc event-id))
-                (assoc msg
-                    "event" "update"
-                    "data"  (dumps (.recv-multipart sock)); topic comes first
-                    "id"    event-id))
+                (setv data (.recv-multipart sock))
+                (assoc msg "event" (get data 0)
+                           "data"  (get data 1)
+                           "id"    event-id)
                 (.debug log (% "Sent %s" msg))
-                (yield (sse-pack msg)))))
+                (yield (sse-pack msg))))))

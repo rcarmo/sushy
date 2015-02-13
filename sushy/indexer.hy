@@ -54,7 +54,7 @@
             (.send-multipart sock
                 [(str "indexing")
                  (dumps {"pagename" pagename
-                              "title"    (.get headers "title" "Untitled")})]))
+                         "title"    (.get headers "title" "Untitled")})]))
                     
         (for [link links]
             (apply add-wiki-link []
