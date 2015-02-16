@@ -3,7 +3,8 @@
         [json      [dumps]]
         [logging   [getLogger]]
         [utils     [sse-pack]]
-        [zmq       [Context *sub* *subscribe*]])
+        [time      [sleep]]
+        [zmq       [Context ZMQError *sub* *subscribe* *noblock* *eagain*]])
 
 (setv log (getLogger))
 
@@ -31,7 +32,7 @@
 (with-decorator
     (handle-get "/events")
     (defn server-events []
-        (let [[event-id (.get (. request headers) "Last-Event-Id" 0)]
+        (let [[event-id (int (.get (. request headers) "Last-Event-Id" 0))]
               [ctx      (Context)]
               [sock     (.socket ctx *sub*)]
               [msg      {"event" "init"
@@ -48,10 +49,17 @@
             (.debug log "Sent initial message")
             ; TODO: handle disconnects, which usually generate exceptions
             (while true
-                (setv event-id (inc event-id))
-                (setv data (.recv-multipart sock))
-                (assoc msg "event" (get data 0)
-                           "data"  (get data 1)
-                           "id"    event-id)
-                (.debug log (% "Sent %s" msg))
-                (yield (sse-pack msg))))))
+                (try
+                    (do
+                        (setv event-id (inc event-id))
+                        (setv data (.recv-multipart sock *noblock*))
+                        (assoc msg "event" (get data 0)
+                                   "data"  (get data 1)
+                                   "id"    event-id)
+                        (.debug log (% "Sent %s" msg))
+                        (yield (sse-pack msg)))
+                    (catch [e ZMQError]
+                        (yield "\n")
+                        (sleep 1))
+                    (catch [e GeneratorExit]
+                        ""))))))
