@@ -9,6 +9,9 @@ source.addEventListener('error', function(e) {
     }
 }, false);
 
+source.addEventListener('tick', function(e) {
+  console.log(e.data);
+}, false);
 source.addEventListener('indexing', function(e) {
   console.log(e.data);
 }, false);

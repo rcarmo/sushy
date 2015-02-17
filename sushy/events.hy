@@ -1,9 +1,9 @@
 (import [bottle    [request response route get :as handle-get]]
         [config    [*bind-address* *zmq-port*]]
+        [gevent    [sleep]]
         [json      [dumps]]
         [logging   [getLogger]]
         [utils     [sse-pack]]
-        [time      [sleep]]
         [zmq       [Context ZMQError *sub* *subscribe* *noblock* *eagain*]])
 
 (setv log (getLogger))
@@ -43,11 +43,8 @@
             (.setsockopt sock *subscribe* (str ""))
             (set-response-headers {"Content-Type"                "text/event-stream"
                                    "Access-Control-Allow-Origin" "*"})
-            (.debug log (dict (. response headers)))
-            (.debug log (sse-pack msg))
             (yield (sse-pack msg))
             (.debug log "Sent initial message")
-            ; TODO: handle disconnects, which usually generate exceptions
             (while true
                 (try
                     (do
@@ -59,7 +56,4 @@
                         (.debug log (% "Sent %s" msg))
                         (yield (sse-pack msg)))
                     (catch [e ZMQError]
-                        (yield "\n")
-                        (sleep 1))
-                    (catch [e GeneratorExit]
-                        ""))))))
+                        (sleep 1)))))))
