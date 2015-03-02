@@ -39,49 +39,54 @@
         false))
 
 
-(defn index-one [item &optional [sock None]]
-    ; index a single page
+(defn gather-item-data [item]
+    ; Takes a map with basic item info and builds all the required indexing data
     (.info log (:path item))
-    (let [[pagename   (:path item)]
-          [mtime      (.fromtimestamp datetime (:mtime item))]
-          [page       (get-page pagename)]
-          [headers    (:headers page)]
-          [doc        (apply-transforms (render-page page) pagename)]
-          [plaintext  (extract-plaintext doc)]
-          [links      (extract-internal-links doc)]]
-        
-        (if sock
-            (.send-multipart sock
-                [(str "indexing")
-                 (dumps {"pagename" pagename
-                         "title"    (.get headers "title" "Untitled")})]))
-                    
-        (for [link links]
-            (apply add-wiki-link []
-                {"page" pagename
-                 "link" link}))
-
-        (apply index-wiki-page []
-            {"name"    pagename
-             "body"    (if (hide-from-search? headers) "" plaintext)
-             "hash"    (.hexdigest (sha1 (.encode plaintext "utf-8")))
-             "title"   (.get headers "title" "Untitled")
-             "tags"    (transform-tags (.get headers "tags" ""))
-             ; this allows us to override the filesystem modification time through front matter
-             "mtime"   (try
-                            (parse-date (.get headers "last-modified"))
-                            (catch [e Exception]
-                                (.debug log (% "Could not parse last-modified date from %s" pagename))
-                                mtime))
-             ; if there isn't any front matter info, fall back to mtime
-             "pubtime" (try
-                            (parse-date (.get headers "date"))
-                            (catch [e Exception]
-                                (.warn log (% "Could not parse date from %s" pagename))
-                                mtime))})))
+    (let [[pagename     (:path item)]
+          [mtime        (.fromtimestamp datetime (:mtime item))]
+          [page         (get-page pagename)]
+          [headers      (:headers page)]
+          [doc          (apply-transforms (render-page page) pagename)]
+          [plaintext    (extract-plaintext doc)]
+          [links        (extract-internal-links doc)]]
+        {"name"     pagename
+         "body"     (if (hide-from-search? headers) "" plaintext)
+         "hash"     (.hexdigest (sha1 (.encode plaintext "utf-8")))
+         "title"    (.get headers "title" "Untitled")
+         "tags"     (transform-tags (.get headers "tags" ""))
+         ; this allows us to override the filesystem modification time through front matter
+         "mtime"    (try
+                        (parse-date (.get headers "last-modified"))
+                        (catch [e Exception]
+                            (.debug log (% "Could not parse last-modified date from %s" pagename))
+                            mtime))
+         ; if there isn't any front matter info, fall back to mtime
+         "pubtime"  (try
+                        (parse-date (.get headers "date"))
+                        (catch [e Exception]
+                            (.warn log (% "Could not parse date from %s" pagename))
+                            mtime))
+         "links"    links}))
 
 
-(defn perform-indexing [path]
+(defn index-one [item links &optional [sock None]]
+    (let [[pagename (.get item "pagename")]
+          [headers ]])
+    (if sock
+        (.send-multipart sock
+            [(str "indexing")
+             (dumps {"pagename" pagename
+                     "title"    (.get headers "title" "Untitled")})]))
+                
+    (for [link (.get item "links" )]
+        (apply add-wiki-link []
+            {"page" (:path item)
+             "link" link}))
+
+    (apply index-wiki-page [] data))
+
+
+(defn filesystem-walker [path]
     ; walk the filesystem and perform full-text and front matter indexing
     (let [[ctx (Context)]
           [sock (.socket ctx *push*)]]
@@ -91,6 +96,60 @@
                 (.send sock item)
                 (catch [e Exception]
                     (.error log (% "%s:%s handling %s" (, (type e) e item))))))))
+
+
+(defn indexing-worker []
+    (let [[ctx (Context)]
+          [in-sock (.socket ctx *pull*)]
+          [out-sock (.socket ctx *push*]])
+        (.bind in-sock *indexer-fanout*)
+        (.bind out-sock *database-sink*)
+
+    (try 
+        (while true
+            (let [[pagename     (:path (.recv in-sock))]
+                  [mtime        (.fromtimestamp datetime (:mtime item))]
+                  [page         (get-page pagename)]
+                  [headers      (:headers page)]
+                  [doc          (apply-transforms (render-page page) pagename)]
+                  [plaintext    (extract-plaintext doc)]
+                  [links        (extract-internal-links doc)]]
+                (.send-pyobj out-sock 
+                    {"name"     pagename
+                     "body"     (if (hide-from-search? headers) "" plaintext)
+                     "hash"     (.hexdigest (sha1 (.encode plaintext "utf-8")))
+                     "title"    (.get headers "title" "Untitled")
+                     "tags"     (transform-tags (.get headers "tags" ""))
+                     ; this allows us to override the filesystem modification time through front matter
+                     "mtime"    (try
+                                    (parse-date (.get headers "last-modified"))
+                                    (catch [e Exception]
+                                        (.debug log (% "Could not parse last-modified date from %s" pagename))
+                                        mtime))
+                     ; if there isn't any front matter info, fall back to mtime
+                     "pubtime"  (try
+                                    (parse-date (.get headers "date"))
+                                    (catch [e Exception]
+                                        (.warn log (% "Could not parse date from %s" pagename))
+                                        mtime))})))
+            (catch [e Exception]
+                (.error log (% "%s:%s handling %s" (, (type e) e item)))))))
+
+
+(defn database-worker []
+    (let [[ctx (Context)]
+          [sock (.socket ctx *pull*)]]
+        (try 
+            (.bind sock *database-sink*)
+            (while true
+                (let [[(, links item) (.recv-multipart sock)]]
+                    (apply index-wiki-page [] item)))
+                (for [link links]
+                (apply add-wiki-link []
+                    {"page" pagename
+                     "link" link}))
+            (catch [e Exception]
+                (.error log (% "%s:%s handling %s" (, (type e) e item)))))))
 
 
 (defclass IndexingHandler [FileSystemEventHandler]
