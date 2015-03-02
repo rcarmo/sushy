@@ -20,6 +20,10 @@
 
 (def *update-socket* (int (.get environ "UPDATE_SOCKET" "ipc:///tmp/sushy/updates")))
 
+(def *indexer-fanout* (int (.get environ "INDEXER_FANOUT_SOCKET" "ipc:///tmp/sushy/indexer")))
+
+(def *database-sink* (int (.get environ "DATABASE_SINK" "ipc:///tmp/sushy/writer")))
+
 (def *page-route-base* "/space")
 
 (def *page-media-base* "/media")

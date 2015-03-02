@@ -1,5 +1,5 @@
 (import
-    [config             [*base-filenames* *bind-address* *store-path* *profiler* *update-socket*]]
+    [config             [*base-filenames* *bind-address* *store-path* *profiler* *update-socket* *indexer-fanout* *database-sink*]]
     [cProfile           [Profile]]
     [datetime           [datetime]]
     [dateutil.parser    [parse :as parse-date]]
@@ -15,7 +15,7 @@
     [transform          [apply-transforms extract-internal-links extract-plaintext]]
     [watchdog.observers [Observer]]
     [watchdog.events    [FileSystemEventHandler]]
-    [zmq                [Context *pub*]])
+    [zmq                [Context *pub* *push* *pull*]])
 
 
 (setv log (getLogger))
@@ -83,11 +83,14 @@
 
 (defn perform-indexing [path]
     ; walk the filesystem and perform full-text and front matter indexing
-    (for [item (gen-pages path)]
-        (try
-            (index-one item)
-            (catch [e Exception]
-                (.error log (% "%s:%s handling %s" (, (type e) e item)))))))
+    (let [[ctx (Context)]
+          [sock (.socket ctx *push*)]]
+        (.bind sock *indexer-fanout*)
+        (for [item (gen-pages path)]
+            (try
+                (.send sock item)
+                (catch [e Exception]
+                    (.error log (% "%s:%s handling %s" (, (type e) e item))))))))
 
 
 (defclass IndexingHandler [FileSystemEventHandler]
