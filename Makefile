@@ -8,7 +8,7 @@ export THEME_PATH?=themes/wiki
 export DATABASE_PATH?=/tmp/sushy.db
 export NEW_RELIC_APP_NAME?=Sushy
 export NEW_RELIC_LICENSE_KEY?=''
-export ZMQ_PORT?=10000
+export UPDATE_SOCKET?=ipc:///tmp/sushy/updates
 
 # Experimental zip bundle
 BUNDLE=sushy.zip

@@ -1,5 +1,5 @@
 (import [bottle    [request response route get :as handle-get]]
-        [config    [*bind-address* *zmq-port*]]
+        [config    [*bind-address* *index-socket*]]
         [gevent    [sleep]]
         [json      [dumps]]
         [logging   [getLogger]]
@@ -39,7 +39,7 @@
                          "data"  "{}"
                          "id"    event-id
                          "retry" 2000}]]
-            (.connect sock (% "tcp://%s:%d" (, *bind-address* *zmq-port*)))
+            (.connect sock *index-socket*)
             (.setsockopt sock *subscribe* (str ""))
             (set-response-headers {"Content-Type"                "text/event-stream"
                                    "Access-Control-Allow-Origin" "*"})
