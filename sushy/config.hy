@@ -18,11 +18,11 @@
 
 (def *http-port* (.get environ "PORT" "8080"))
 
-(def *update-socket* (int (.get environ "UPDATE_SOCKET" "ipc:///tmp/sushy/updates")))
+(def *update-socket* (.get environ "UPDATE_SOCKET" "ipc:///tmp/sushy/updates"))
 
-(def *indexer-fanout* (int (.get environ "INDEXER_FANOUT_SOCKET" "ipc:///tmp/sushy/indexer")))
+(def *indexer-fanout* (.get environ "INDEXER_FANOUT_SOCKET" "ipc:///tmp/sushy/indexer"))
 
-(def *database-sink* (int (.get environ "DATABASE_SINK" "ipc:///tmp/sushy/writer")))
+(def *database-sink* (.get environ "DATABASE_SINK" "ipc:///tmp/sushy/writer"))
 
 (def *page-route-base* "/space")
 

@@ -93,8 +93,8 @@
     ; walk the filesystem and perform full-text and front matter indexing
     (let [[ctx (Context)]
           [sock (.socket ctx *push*)]]
+        (.bind sock *indexer-fanout*)
         (try
-            (.bind sock *indexer-fanout*)
             (for [item (gen-pages path)]
                 (.send-pyobj sock item))
             (catch [e Exception]
@@ -105,9 +105,9 @@
     (let [[ctx      (Context)]
           [in-sock  (.socket ctx *pull*)]
           [out-sock (.socket ctx *push*)]]
+        (.bind in-sock *indexer-fanout*)
+        (.bind out-sock *database-sink*)
         (try 
-            (.bind in-sock *indexer-fanout*)
-            (.bind out-sock *database-sink*)
             (while true
                 (.send-pyobj out-sock (gather-item-data (.recv-pyobj in-sock))))
             (catch [e Exception]
@@ -117,8 +117,8 @@
 (defn database-worker []
     (let [[ctx  (Context)]
           [sock (.socket ctx *pull*)]]
-        (try 
-            (.bind sock *database-sink*)
+        (.bind sock *database-sink*)
+        (try
             (while true
                 (index-one (.recv-pyobj sock)))
             (catch [e Exception]
@@ -131,7 +131,8 @@
         (fn [self]
             (let [[ctx (Context)]
                   [(. self sock) (.socket ctx *pub*)]]
-                (.bind (. self sock) *update-socket*))))]
+                (.bind (. self sock) *update-socket*)))]
+
      [on-any-event ; TODO: handle deletions and moves separately
         (fn [self event]
             (let [[filename (basename (. event src-path))]
