@@ -7,6 +7,7 @@
     [json               [dumps]]
     [logging            [getLogger Formatter]]
     [models             [add-wiki-link index-wiki-page init-db]]
+    [multiprocessing    [Process]]
     [os.path            [basename dirname]]
     [pstats             [Stats]]
     [render             [render-page]]
@@ -66,88 +67,60 @@
                         (catch [e Exception]
                             (.warn log (% "Could not parse date from %s" pagename))
                             mtime))
+         "headers"  headers
          "links"    links}))
 
 
-(defn index-one [item links &optional [sock None]]
+(defn index-one [item &optional [sock None]]
     (let [[pagename (.get item "pagename")]
-          [headers ]])
-    (if sock
-        (.send-multipart sock
-            [(str "indexing")
-             (dumps {"pagename" pagename
-                     "title"    (.get headers "title" "Untitled")})]))
+          [headers  (.get item "headers")]
+          [links    (.get item "links")]]
+        (if sock
+            (.send-multipart sock
+                [(str "indexing")
+                 (dumps {"pagename" pagename
+                         "title"    (.get headers "title" "Untitled")})]))
                 
-    (for [link (.get item "links" )]
-        (apply add-wiki-link []
-            {"page" (:path item)
-             "link" link}))
+        (for [link links]
+            (apply add-wiki-link []
+                {"page" pagename
+                 "link" link}))
 
-    (apply index-wiki-page [] data))
+        (apply index-wiki-page [] item)))
 
 
 (defn filesystem-walker [path]
     ; walk the filesystem and perform full-text and front matter indexing
     (let [[ctx (Context)]
           [sock (.socket ctx *push*)]]
-        (.bind sock *indexer-fanout*)
-        (for [item (gen-pages path)]
-            (try
-                (.send sock item)
-                (catch [e Exception]
-                    (.error log (% "%s:%s handling %s" (, (type e) e item))))))))
+        (try
+            (.bind sock *indexer-fanout*)
+            (for [item (gen-pages path)]
+                (.send-pyobj sock item))
+            (catch [e Exception]
+                (.error log (% "%s:%s handling %s" (, (type e) e item)))))))
 
 
 (defn indexing-worker []
-    (let [[ctx (Context)]
-          [in-sock (.socket ctx *pull*)]
-          [out-sock (.socket ctx *push*]])
-        (.bind in-sock *indexer-fanout*)
-        (.bind out-sock *database-sink*)
-
-    (try 
-        (while true
-            (let [[pagename     (:path (.recv in-sock))]
-                  [mtime        (.fromtimestamp datetime (:mtime item))]
-                  [page         (get-page pagename)]
-                  [headers      (:headers page)]
-                  [doc          (apply-transforms (render-page page) pagename)]
-                  [plaintext    (extract-plaintext doc)]
-                  [links        (extract-internal-links doc)]]
-                (.send-pyobj out-sock 
-                    {"name"     pagename
-                     "body"     (if (hide-from-search? headers) "" plaintext)
-                     "hash"     (.hexdigest (sha1 (.encode plaintext "utf-8")))
-                     "title"    (.get headers "title" "Untitled")
-                     "tags"     (transform-tags (.get headers "tags" ""))
-                     ; this allows us to override the filesystem modification time through front matter
-                     "mtime"    (try
-                                    (parse-date (.get headers "last-modified"))
-                                    (catch [e Exception]
-                                        (.debug log (% "Could not parse last-modified date from %s" pagename))
-                                        mtime))
-                     ; if there isn't any front matter info, fall back to mtime
-                     "pubtime"  (try
-                                    (parse-date (.get headers "date"))
-                                    (catch [e Exception]
-                                        (.warn log (% "Could not parse date from %s" pagename))
-                                        mtime))})))
+    (let [[ctx      (Context)]
+          [in-sock  (.socket ctx *pull*)]
+          [out-sock (.socket ctx *push*)]]
+        (try 
+            (.bind in-sock *indexer-fanout*)
+            (.bind out-sock *database-sink*)
+            (while true
+                (.send-pyobj out-sock (gather-item-data (.recv-pyobj in-sock))))
             (catch [e Exception]
                 (.error log (% "%s:%s handling %s" (, (type e) e item)))))))
 
 
 (defn database-worker []
-    (let [[ctx (Context)]
+    (let [[ctx  (Context)]
           [sock (.socket ctx *pull*)]]
         (try 
             (.bind sock *database-sink*)
             (while true
-                (let [[(, links item) (.recv-multipart sock)]]
-                    (apply index-wiki-page [] item)))
-                (for [link links]
-                (apply add-wiki-link []
-                    {"page" pagename
-                     "link" link}))
+                (index-one (.recv-pyobj sock)))
             (catch [e Exception]
                 (.error log (% "%s:%s handling %s" (, (type e) e item)))))))
 
@@ -183,6 +156,15 @@
             (catch [e KeyboardInterrupt]
                 (.stop observer)))
         (.join observer)))
+
+
+(defn perform-indexing [path]
+    (let [[db-worker (apply Process [] {"target" database-worker})]]
+        (.start db-worker)
+        (.start (apply Process [] {"target" indexing-worker}))
+        (.start (apply Process [] {"target" indexing-worker}))
+        (.start (apply Process [] {"target" filesystem-walker "args" (, path)}))
+        (.join db-worker)))
 
 
 (defmain [&rest args]
