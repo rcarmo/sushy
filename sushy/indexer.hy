@@ -89,44 +89,54 @@
         (apply index-wiki-page [] item)))
 
 
-(defn filesystem-walker [path]
+(defn filesystem-walker [path count]
     ; walk the filesystem and perform full-text and front matter indexing
     (let [[ctx (Context)]
           [sock (.socket ctx *push*)]]
         (.bind sock *indexer-fanout*)
-;        (.setsockopt sock *sndhwm* (int 2))
+        ; (.setsockopt sock *sndhwm* (int 2))
         (try
             (for [item (gen-pages path)]
                 (.debug log item)
                 (.send-pyobj sock item))
             (catch [e Exception]
                 (.error log (% "%s:%s handling %s" (, (type e) e item)))))
-        (.close sock)))
+        ; send poison pills
+        (for [i (range count)]
+            (.send-pyobj sock nil))
+        (.close sock))
+        (.debug log "exiting"))
 
 
 (defn indexing-worker []
     (let [[ctx      (Context)]
           [in-sock  (.socket ctx *pull*)]
-          [out-sock (.socket ctx *push*)]]
+          [out-sock (.socket ctx *push*)]
+          [item     true]]
         (.connect in-sock *indexer-fanout*)
         (.connect out-sock *database-sink*)
         (try 
-            (while true
-                (.debug log "indexing-worker")
-                (.send-pyobj out-sock (gather-item-data (.recv-pyobj in-sock))))
+            (while item
+                (setv item (.recv-pyobj in-sock))
+                (if item
+                    (.send-pyobj out-sock (gather-item-data item))
+                    (.send-pyobj out-sock nil)))
             (catch [e Exception]
                 (.error log (% "%s:%s" (, (type e) e)))))
-        (.close out-sock)))
+        (.debug log "exiting")))
 
 
-(defn database-worker []
+(defn database-worker [count]
     (let [[ctx  (Context)]
-          [sock (.socket ctx *pull*)]]
+          [sock (.socket ctx *pull*)]
+          [seen 0]]
         (.bind sock *database-sink*)
         (try
-            (while true
-                (.debug log "database-worker")
-                (index-one (.recv-pyobj sock)))
+            (while (!= seen count)
+                (let [[item (.recv-pyobj sock)]]
+                    (if item
+                        (index-one item)
+                        (setv seen (inc seen)))))
             (catch [e Exception]
                 (.error log (% "%s:%s" (, (type e) e)))))))
 
@@ -165,12 +175,12 @@
         (.join observer)))
 
 
-(defn perform-indexing [path]
-    (let [[db-worker (apply Process [] {"target" database-worker})]]
+(defn perform-indexing [path count]
+    (let [[db-worker (apply Process [] {"target" database-worker "args" (, count)})]]
         (.start db-worker)
-        (.start (apply Process [] {"target" indexing-worker}))
-        (.start (apply Process [] {"target" indexing-worker}))
-        (.start (apply Process [] {"target" filesystem-walker "args" (, path)}))
+        (for [i (range count)]
+            (.start (apply Process [] {"target" indexing-worker})))
+        (.start (apply Process [] {"target" filesystem-walker "args" (, path count)}))
         (.join db-worker)))
 
 
@@ -179,7 +189,7 @@
         (if *profiler*
             (.enable p))
         (init-db)
-        (perform-indexing *store-path*)
+        (perform-indexing *store-path* 2)
         (.info log "Indexing done.")
         (if *profiler*
             (do
