@@ -18,7 +18,7 @@
 
 (def *http-port* (.get environ "PORT" "8080"))
 
-(def *update-socket* (int (.get environ "UPDATE_SOCKET" "ipc:///tmp/sushy/updates")))
+(def *update-socket* (.get environ "UPDATE_SOCKET" "ipc:///tmp/sushy/updates"))
 
 (def *page-route-base* "/space")
 

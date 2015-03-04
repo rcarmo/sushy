@@ -96,7 +96,7 @@
         (fn [self]
             (let [[ctx (Context)]
                   [(. self sock) (.socket ctx *pub*)]]
-                (.bind (. self sock) *update-socket*))))]
+                (.bind (. self sock) *update-socket*)))]
      [on-any-event ; TODO: handle deletions and moves separately
         (fn [self event]
             (let [[filename (basename (. event src-path))]
