@@ -119,10 +119,10 @@
             (while item
                 (setv item (.recv-pyobj in-sock))
                 (if item
-                    (.send-pyobj out-sock (gather-item-data item))
-                    (.send-pyobj out-sock nil)))
+                    (.send-pyobj out-sock (gather-item-data item))))
             (catch [e Exception]
                 (.error log (% "%s:%s" (, (type e) e)))))
+        (.send-pyobj out-sock nil)
         (.debug log "exiting")))
 
 
@@ -138,7 +138,8 @@
                         (index-one item)
                         (setv seen (inc seen)))))
             (catch [e Exception]
-                (.error log (% "%s:%s" (, (type e) e)))))))
+                (.error log (% "%s:%s" (, (type e) e)))))
+         (.debug log "exiting")))
 
 
 (defclass IndexingHandler [FileSystemEventHandler]
