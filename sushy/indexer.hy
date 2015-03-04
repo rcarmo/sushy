@@ -16,7 +16,7 @@
     [transform          [apply-transforms extract-internal-links extract-plaintext]]
     [watchdog.observers [Observer]]
     [watchdog.events    [FileSystemEventHandler]]
-    [zmq                [Context *pub* *push* *pull*]])
+    [zmq                [Context *pub* *push* *pull* *sndhwm* *rcvhwm*]])
 
 
 (setv log (getLogger))
@@ -94,24 +94,29 @@
     (let [[ctx (Context)]
           [sock (.socket ctx *push*)]]
         (.bind sock *indexer-fanout*)
+;        (.setsockopt sock *sndhwm* (int 2))
         (try
             (for [item (gen-pages path)]
+                (.debug log item)
                 (.send-pyobj sock item))
             (catch [e Exception]
-                (.error log (% "%s:%s handling %s" (, (type e) e item)))))))
+                (.error log (% "%s:%s handling %s" (, (type e) e item)))))
+        (.close sock)))
 
 
 (defn indexing-worker []
     (let [[ctx      (Context)]
           [in-sock  (.socket ctx *pull*)]
           [out-sock (.socket ctx *push*)]]
-        (.bind in-sock *indexer-fanout*)
-        (.bind out-sock *database-sink*)
+        (.connect in-sock *indexer-fanout*)
+        (.connect out-sock *database-sink*)
         (try 
             (while true
+                (.debug log "indexing-worker")
                 (.send-pyobj out-sock (gather-item-data (.recv-pyobj in-sock))))
             (catch [e Exception]
-                (.error log (% "%s:%s handling %s" (, (type e) e item)))))))
+                (.error log (% "%s:%s" (, (type e) e)))))
+        (.close out-sock)))
 
 
 (defn database-worker []
@@ -120,9 +125,10 @@
         (.bind sock *database-sink*)
         (try
             (while true
+                (.debug log "database-worker")
                 (index-one (.recv-pyobj sock)))
             (catch [e Exception]
-                (.error log (% "%s:%s handling %s" (, (type e) e item)))))))
+                (.error log (% "%s:%s" (, (type e) e)))))))
 
 
 (defclass IndexingHandler [FileSystemEventHandler]
