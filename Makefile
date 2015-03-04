@@ -8,9 +8,9 @@ export THEME_PATH?=themes/wiki
 export DATABASE_PATH?=/tmp/sushy.db
 export NEW_RELIC_APP_NAME?=Sushy
 export NEW_RELIC_LICENSE_KEY?=''
-export UPDATE_SOCKET?=ipc:///tmp/sushy/updates
-export INDEXER_FANOUT?=ipc:///tmp/sushy/indexer
-export DATABASE_SINK?=ipc:///tmp/sushy/writer
+export UPDATE_SOCKET?=ipc:///tmp/sushy-updates
+export INDEXER_FANOUT?=ipc:///tmp/sushy-indexer
+export DATABASE_SINK?=ipc:///tmp/sushy-writer
 
 # Experimental zip bundle
 BUNDLE=sushy.zip

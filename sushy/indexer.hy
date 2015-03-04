@@ -39,7 +39,6 @@
             ["x-index" "index" "search"])
         false))
 
-
 (defn gather-item-data [item]
     ; Takes a map with basic item info and builds all the required indexing data
     (.info log (:path item))
@@ -80,7 +79,7 @@
                 [(str "indexing")
                  (dumps {"pagename" pagename
                          "title"    (.get headers "title" "Untitled")})]))
-                
+
         (for [link links]
             (apply add-wiki-link []
                 {"page" pagename
@@ -89,23 +88,25 @@
         (apply index-wiki-page [] item)))
 
 
-(defn filesystem-walker [path count]
+(defn filesystem-walker [path worker-count]
     ; walk the filesystem and perform full-text and front matter indexing
-    (let [[ctx (Context)]
-          [sock (.socket ctx *push*)]]
+    (let [[ctx        (Context)]
+          [sock       (.socket ctx *push*)]
+          [item-count 0]]
         (.bind sock *indexer-fanout*)
         ; (.setsockopt sock *sndhwm* (int 2))
         (try
             (for [item (gen-pages path)]
                 (.debug log item)
-                (.send-pyobj sock item))
+                (.send-pyobj sock item)
+                (setv item-count (inc item-count)))
             (catch [e Exception]
                 (.error log (% "%s:%s handling %s" (, (type e) e item)))))
         ; send poison pills
-        (for [i (range count)]
+        (for [i (range worker-count)]
             (.send-pyobj sock nil))
-        (.close sock))
-        (.debug log "exiting"))
+        (.close sock)
+        (.debug log (% "exiting: %d items handled" item-count))))
 
 
 (defn indexing-worker []
@@ -126,17 +127,20 @@
         (.debug log "exiting")))
 
 
-(defn database-worker [count]
-    (let [[ctx  (Context)]
-          [sock (.socket ctx *pull*)]
-          [seen 0]]
+(defn database-worker [worker-count]
+    (let [[ctx              (Context)]
+          [sock             (.socket ctx *pull*)]
+          [finished-workers 0]
+          [item-count       0]]
         (.bind sock *database-sink*)
         (try
-            (while (!= seen count)
+            (while (!= finished-workers worker-count)
                 (let [[item (.recv-pyobj sock)]]
                     (if item
-                        (index-one item)
-                        (setv seen (inc seen)))))
+                        (do 
+                            (index-one item)
+                            (setv item-count (inc item-count)))
+                        (setv finished-workers (inc finished-workers)))))
             (catch [e Exception]
                 (.error log (% "%s:%s" (, (type e) e)))))))
 
