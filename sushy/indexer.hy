@@ -120,10 +120,10 @@
             (while item
                 (setv item (.recv-pyobj in-sock))
                 (if item
-                    (.send-pyobj out-sock (gather-item-data item))
-                    (.send-pyobj out-sock nil)))
+                    (.send-pyobj out-sock (gather-item-data item))))
             (catch [e Exception]
                 (.error log (% "%s:%s" (, (type e) e)))))
+        (.send-pyobj out-sock nil)
         (.debug log "exiting")))
 
 
@@ -142,7 +142,8 @@
                             (setv item-count (inc item-count)))
                         (setv finished-workers (inc finished-workers)))))
             (catch [e Exception]
-                (.error log (% "%s:%s" (, (type e) e)))))))
+                (.error log (% "%s:%s" (, (type e) e)))))
+         (.debug log "exiting")))
 
 
 (defclass IndexingHandler [FileSystemEventHandler]
