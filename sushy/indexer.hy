@@ -94,7 +94,7 @@
           [sock       (.socket ctx *push*)]
           [item-count 0]]
         (.bind sock *indexer-fanout*)
-        (.setsockopt sock *sndhwm* worker-count)
+        ;(.setsockopt sock *sndhwm* worker-count)
         (try
             (for [item (gen-pages path)]
                 (.send-pyobj sock item)
@@ -115,7 +115,7 @@
           [item     true]]
         (.connect in-sock *indexer-fanout*)
         (.connect out-sock *database-sink*)
-        (.setsockopt out-sock *sndhwm* worker-count)
+        ;(.setsockopt out-sock *sndhwm* worker-count)
         (try 
             (while item
                 (setv item (.recv-pyobj in-sock))
@@ -134,7 +134,7 @@
           [item-count       0]
           [item             nil]]
         (.bind sock *database-sink*)
-        (.setsockopt sock *rcvhwm* worker-count)
+        ;(.setsockopt sock *rcvhwm* worker-count)
         (try
             (while (!= finished-workers worker-count)
                 (setv item (.recv-pyobj sock))

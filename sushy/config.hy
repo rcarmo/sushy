@@ -1,10 +1,15 @@
 (import
-    [bottle  [*template-path*]]
-    [logging [getLogger basicConfig *debug* *info*]]
-    [os      [environ]]
-    [os.path [join abspath]])
+    [bottle         [*template-path*]]
+    [logging        [getLogger basicConfig *debug* *info*]]
+    [logging.config [dictConfig]]
+    [os             [environ]]
+    [sys            [stdout]]
+    [codecs         [getwriter]]
+    [os.path        [join abspath]])
 
 (setv log (getLogger))
+
+(setv stdout ((getwriter "utf-8") stdout))
 
 (def *store-path* (.get environ "CONTENT_PATH" "pages"))
 
@@ -59,7 +64,22 @@
 (def *ignored-folders* ["CVS" ".hg" ".svn" ".git" ".AppleDouble" ".TemporaryItems"])
 
 (if *debug-mode*
-    (apply basicConfig [] {"level" *debug* "format" "%(asctime)s %(levelname)s %(process)d %(filename)s:%(funcName)s:%(lineno)d %(message)s"})
+    (dictConfig 
+        {"version" 1
+         "formatters" {"http"    {"format" "localhost - - [%(asctime)s] %(process)d %(levelname)s %(filename)s:%(funcName)s:%(lineno)d %(message)s"
+                                 "datefmt" "%Y/%m/%d %H:%M:%S"}}
+         "handlers"   {"console" {"class"     "logging.StreamHandler"
+                                  "formatter" "http"
+                                  "level"     "DEBUG"
+                                  "stream"    "ext://sys.stdout"}
+                       "ram"     {"class"     "logging.handlers.MemoryHandler"
+                                  "formatter" "http"
+                                  "level"     "WARNING"
+                                  "capacity"  200}}
+         "loggers"    {"peewee"  {"level"     "WARNING"
+                                  "handlers"  ["ram" "console"]}}
+         "root"       {"level"    "DEBUG" 
+                       "handlers" ["console"]}})
     (apply basicConfig [] {"level" *info* "format" "%(levelname)s:%(process)d:%(funcName)s %(message)s"}))
 
 ; prepend the theme template path to bottle's search list
