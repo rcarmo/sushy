@@ -6,8 +6,8 @@
     [hashlib            [sha1]]
     [json               [dumps]]
     [logging            [getLogger Formatter]]
-    [models             [add-wiki-link index-wiki-page init-db]]
-    [multiprocessing    [Process]]
+    [models             [db add-wiki-link index-wiki-page init-db]]
+    [multiprocessing    [Process cpu-count]]
     [os.path            [basename dirname]]
     [pstats             [Stats]]
     [render             [render-page]]
@@ -20,6 +20,7 @@
 
 
 (setv log (getLogger))
+
 
 (defn transform-tags [line]
     ; expand tags to be "tag:value", which enables us to search for tags using FTS
@@ -67,7 +68,7 @@
                             (.warn log (% "Could not parse date from %s" pagename))
                             mtime))
          "headers"  headers
-         "links"    links}))
+         "links"    (list links)}))
 
 
 (defn index-one [item &optional [sock None]]
@@ -84,7 +85,6 @@
             (apply add-wiki-link []
                 {"page" pagename
                  "link" link}))
-
         (apply index-wiki-page [] item)))
 
 
@@ -94,10 +94,9 @@
           [sock       (.socket ctx *push*)]
           [item-count 0]]
         (.bind sock *indexer-fanout*)
-        ; (.setsockopt sock *sndhwm* (int 2))
+        (.setsockopt sock *sndhwm* worker-count)
         (try
             (for [item (gen-pages path)]
-                (.debug log item)
                 (.send-pyobj sock item)
                 (setv item-count (inc item-count)))
             (catch [e Exception]
@@ -109,41 +108,44 @@
         (.debug log (% "exiting: %d items handled" item-count))))
 
 
-(defn indexing-worker []
+(defn indexing-worker [worker-count]
     (let [[ctx      (Context)]
           [in-sock  (.socket ctx *pull*)]
           [out-sock (.socket ctx *push*)]
           [item     true]]
         (.connect in-sock *indexer-fanout*)
         (.connect out-sock *database-sink*)
+        (.setsockopt out-sock *sndhwm* worker-count)
         (try 
             (while item
                 (setv item (.recv-pyobj in-sock))
                 (if item
                     (.send-pyobj out-sock (gather-item-data item))))
             (catch [e Exception]
-                (.error log (% "%s:%s" (, (type e) e)))))
+                (.error log (% "%s:%s while gathering" (, (type e) e)))))
         (.send-pyobj out-sock nil)
-        (.debug log "exiting")))
+        (.debug log "exiting indexing worker")))
 
 
 (defn database-worker [worker-count]
     (let [[ctx              (Context)]
           [sock             (.socket ctx *pull*)]
           [finished-workers 0]
-          [item-count       0]]
+          [item-count       0]
+          [item             nil]]
         (.bind sock *database-sink*)
+        (.setsockopt sock *rcvhwm* worker-count)
         (try
             (while (!= finished-workers worker-count)
-                (let [[item (.recv-pyobj sock)]]
-                    (if item
-                        (do 
-                            (index-one item)
-                            (setv item-count (inc item-count)))
-                        (setv finished-workers (inc finished-workers)))))
+                (setv item (.recv-pyobj sock))
+                (if item
+                    (do 
+                        (index-one item)
+                        (setv item-count (inc item-count)))
+                    (setv finished-workers (inc finished-workers))))
             (catch [e Exception]
-                (.error log (% "%s:%s" (, (type e) e)))))
-         (.debug log "exiting")))
+                (.error log (% "%s:%s while inserting" (, (type e) e)))))
+         (.debug log (% "exiting database worker: %d items" item-count))))
 
 
 (defclass IndexingHandler [FileSystemEventHandler]
@@ -184,7 +186,7 @@
     (let [[db-worker (apply Process [] {"target" database-worker "args" (, count)})]]
         (.start db-worker)
         (for [i (range count)]
-            (.start (apply Process [] {"target" indexing-worker})))
+            (.start (apply Process [] {"target" indexing-worker "args" (, count)})))
         (.start (apply Process [] {"target" filesystem-walker "args" (, path count)}))
         (.join db-worker)))
 
@@ -194,7 +196,9 @@
         (if *profiler*
             (.enable p))
         (init-db)
-        (perform-indexing *store-path* 2)
+        ; close database connection to remove contention
+        (.close db)
+        (perform-indexing *store-path* (int (* 2 (cpu-count))))
         (.info log "Indexing done.")
         (if *profiler*
             (do

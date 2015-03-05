@@ -124,7 +124,7 @@ def get_links(page_name):
                      .dicts())
 
             for page in query:
-                 yield page
+                yield page
 
         # Links from current page to valid pages
         with db.transaction():
@@ -135,7 +135,7 @@ def get_links(page_name):
                      .dicts())
 
             for page in query:
-                 yield page
+                yield page
     except OperationalError as e:
         log.warn(e)
         return
