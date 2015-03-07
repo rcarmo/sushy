@@ -9,6 +9,7 @@ peewee>=2.4.7
 pillow>=2.7.0
 pygments>=2.0.2
 python-dateutil>=2.4
+pytz>=2014.10
 pyzmq>=14.5.0
 smartypants>=1.8.6
 textile>=2.2.2

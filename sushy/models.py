@@ -86,16 +86,15 @@ def del_wiki_page(page):
 def index_wiki_page(**kwargs):
     """Adds wiki page metatada and FTS data."""
     with db.transaction():
-        log.debug(kwargs)
-        try:
-            page = Page.create(**kwargs)
-        except IntegrityError:
-            page = Page.get(Page.name == kwargs["name"])
         values = {}
-        for k in [u"title", u"tags", u"hash", u"mtime", u"pubtime"]:
+        for k in [u"name", u"title", u"tags", u"hash", u"mtime", u"pubtime"]:
             values[k] = kwargs[k]
         log.debug(values)
-        q = page.update(**values)
+        try:
+            page = Page.create(**values)
+        except IntegrityError:
+            page = Page.get(Page.name == values["name"])
+            page.update(**values)
         if len(kwargs['body']):
             parts = []
             for k in ['title', 'body', 'tags']:

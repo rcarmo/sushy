@@ -87,7 +87,7 @@
                        "sushy.store" {"level" "WARNING"}}
          "root"       {"level"    "DEBUG" 
                        "handlers" ["console"]}})
-    (apply basicConfig [] {"level" *info* "format" "%(levelname)s:%(process)d:%(funcName)s %(message)s"}))
+    (apply basicConfig [] {"level" *info* "format" "%(asctime)s %(levelname)s:%(process)d:%(funcName)s %(message)s"}))
 
 ; prepend the theme template path to bottle's search list
 (.insert *template-path* 0 (abspath *view-path*))

@@ -10,16 +10,19 @@
     [multiprocessing    [Process cpu-count]]
     [os.path            [basename dirname]]
     [pstats             [Stats]]
+    [pytz               [timezone]]
     [render             [render-page]]
     [store              [is-page? gen-pages get-page]]
     [time               [sleep time]]
     [transform          [apply-transforms extract-internal-links extract-plaintext]]
     [watchdog.observers [Observer]]
     [watchdog.events    [FileSystemEventHandler]]
-    [zmq                [Context Poller *pub* *sub* *push* *pull* *sndhwm* *rcvhwm* *pollin*]])
+    [zmq                [Context Poller *pub* *sub* *push* *pull* *sndhwm* *rcvhwm* *pollin* *subscribe*]])
 
 
 (setv log (getLogger --name--))
+
+(setv *utc* (timezone "UTC"))
 
 
 (defn transform-tags [line]
@@ -40,9 +43,20 @@
             ["x-index" "index" "search"])
         false))
 
+
+(defn utc-date [string fallback]
+    (let [[date (try
+                    (parse-date string)
+                    (catch [e Exception]
+                        fallback))]]
+        (if (. date tzinfo)
+            (.astimezone date *utc*)
+            date)))
+
+
 (defn gather-item-data [item]
     ; Takes a map with basic item info and builds all the required indexing data
-    (.debug log (:path item))
+    ;(.debug log (:path item))
     (let [[pagename     (:path item)]
           [mtime        (.fromtimestamp datetime (:mtime item))]
           [page         (get-page pagename)]
@@ -56,17 +70,9 @@
          "title"    (.get headers "title" "Untitled")
          "tags"     (transform-tags (.get headers "tags" ""))
          ; this allows us to override the filesystem modification time through front matter
-         "mtime"    (try
-                        (parse-date (.get headers "last-modified"))
-                        (catch [e Exception]
-                            (.warn log (% "Could not parse modification time from %s" pagename))
-                            mtime))
+         "mtime"    (utc-date (.get headers "last-modified") mtime)
          ; if there isn't any front matter info, fall back to mtime
-         "pubtime"  (try
-                        (parse-date (.get headers "date"))
-                        (catch [e Exception]
-                            (.warn log (% "Could not parse publishing time from %s" pagename))
-                            mtime))
+         "pubtime"  (utc-date (.get headers "date") mtime)
          "headers"  headers
          "links"    (list links)}))
 
@@ -103,6 +109,7 @@
                 (setv item-count (inc item-count)))
             (catch [e Exception]
                 (.error log (% "%s:%s handling %s" (, (type e) e item)))))
+        ; let the database worker know how many items to expect
         (.send-pyobj cnt-sock item-count)
         (.debug log (% "exiting filesystem walker: %d items handled" item-count))))
 
@@ -117,21 +124,25 @@
         (.connect in-sock *indexer-fanout*)
         (.connect out-sock *database-sink*)
         (.connect ctl-sock *indexer-control*)
+        (.setsockopt-string ctl-sock *subscribe* "")
         (.setsockopt out-sock *sndhwm* worker-count)
         (.register poller in-sock *pollin*)
         (.register poller ctl-sock *pollin*)
         (.debug log "indexing worker")
-        (try 
-            (while item
-                (setv socks (dict (.poll poller)))
-                (cond [(= (.get socks ctl-sock) *pollin*)
-                       (setv item (.recv-pyobj in-sock))]
-                      [(= (.get socks in-sock) *pollin*)
-                       (do
-                           (setv item (.recv-pyobj in-sock))
-                           (.send-pyobj out-sock (gather-item-data item)))]))
-            (catch [e Exception]
-                (.error log (% "%s:%s while gathering" (, (type e) e)))))
+        (while item
+            (setv socks (dict (.poll poller)))
+            (cond   [(= (.get socks ctl-sock) *pollin*)
+                        (setv item (.recv-pyobj ctl-sock))]
+                    [(= (.get socks in-sock) *pollin*)
+                        (do
+                            (setv item (.recv-pyobj in-sock))
+                            (try
+                                (.send-pyobj out-sock (gather-item-data item))
+                                (catch [e Exception]
+                                    (.send-pyobj out-sock nil)
+                                    (.error log 
+                                        (%  "%s:%s while handling %s" 
+                                            (, (type e) e (try (:path item) (catch [e KeyError] nil))))))))]))
         (.debug log "exiting indexing worker")))
 
 
@@ -143,22 +154,25 @@
           [item-limit       -1]
           [item-count       0]
           [item             nil]]
+        (.bind ctl-sock *indexer-control*)
         (.bind in-sock *database-sink*)
         (.connect cnt-sock *indexer-count*)
-        (.bind ctl-sock *indexer-control*)
         (.setsockopt in-sock *rcvhwm* worker-count)
         (.debug log "database worker")
         (setv item-limit (.recv-pyobj cnt-sock))
+        (.info log (% "waiting for %d items" item-limit))
         (try
             (while (!= item-count item-limit)
-                (.info log (% "indexed %d of %d" item-count item-limit))
+                (if (= 0 (% item-count 100))
+                    (.debug log (% "indexed %d of %d" (, item-count item-limit))))
                 (setv item (.recv-pyobj in-sock))
-                (index-one item)
+                (if item
+                    (index-one item))
                 (setv item-count (inc item-count)))
             (catch [e Exception]
                 (.error log (% "%s:%s while inserting" (, (type e) e)))))
         (.send-pyobj ctl-sock nil)
-        (.debug log (% "exiting database worker: %d items" item-count))))
+        (.info log (% "exiting database worker: %d items" item-count))))
 
 
 (defclass IndexingHandler [FileSystemEventHandler]
@@ -196,13 +210,14 @@
 
 
 (defn perform-indexing [path count]
-    (let [[db-worker (apply Process [] {"target" database-worker "args" (, count)})]]
-        (.start db-worker)
-        (sleep 1)
+    (let [[procs [(apply Process [] {"target" database-worker "args" (, count)})]]]
         (for [i (range count)]
-            (.start (apply Process [] {"target" indexing-worker "args" (, count)})))
-        (.start (apply Process [] {"target" filesystem-walker "args" (, path count)}))
-        (.join db-worker)))
+            (.append procs (apply Process [] {"target" indexing-worker "args" (, count)})))
+        (.append procs (apply Process [] {"target" filesystem-walker "args" (, path count)}))
+        (for [p procs]
+            (.start p))
+        (for [p procs]
+            (.join p))))
 
 
 (defmain [&rest args]
@@ -212,8 +227,9 @@
         (init-db)
         ; close database connection to remove contention
         (.close db)
-        (perform-indexing *store-path* (int (* 2 (cpu-count))))
-        (.info log "Indexing done.")
+        (setv start-time (time))
+        (perform-indexing *store-path* (int (* 1 (cpu-count))))
+        (.info log "Indexing done in %fs" (- (time) start-time))
         (if *profiler*
             (do
                 (.disable p)
