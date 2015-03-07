@@ -228,7 +228,7 @@
         ; close database connection to remove contention
         (.close db)
         (setv start-time (time))
-        (perform-indexing *store-path* (int (* 1 (cpu-count))))
+        (perform-indexing *store-path* (int (cpu-count)))
         (.info log "Indexing done in %fs" (- (time) start-time))
         (if *profiler*
             (do
