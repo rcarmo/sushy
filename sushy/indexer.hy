@@ -173,7 +173,7 @@
             (catch [e Exception]
                 (.error log (% "%s:%s while inserting" (, (type e) e)))))
         (.send-pyobj ctl-sock nil)
-        (.info log (% "exiting database worker: %d items" item-count))))
+        (.info log (% "exiting database worker: %d items indexed" item-count))))
 
 
 (defclass IndexingHandler [FileSystemEventHandler]
