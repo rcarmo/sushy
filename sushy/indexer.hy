@@ -128,8 +128,9 @@
         (if *profiler*
             (.enable p))
         (init-db)
+        (setv start-time (time))
         (perform-indexing *store-path*)
-        (.info log "Indexing done.")
+        (.info log (% "Indexing done in %fs" (- (time) start-time)))
         (if *profiler*
             (do
                 (.disable p)
