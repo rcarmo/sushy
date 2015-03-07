@@ -3,7 +3,7 @@ from peewee import *
 from playhouse.sqlite_ext import *
 import datetime
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 # Database models for metadata caching and full text indexing using SQLite3 (handily beats Whoosh and makes for a single index file)
 

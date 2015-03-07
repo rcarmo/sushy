@@ -7,7 +7,7 @@
     [codecs         [getwriter]]
     [os.path        [join abspath]])
 
-(setv log (getLogger))
+(setv log (getLogger --name--))
 
 (setv stdout ((getwriter "utf-8") stdout))
 
@@ -26,6 +26,10 @@
 (def *update-socket* (.get environ "UPDATE_SOCKET" "ipc:///tmp/sushy-updates"))
 
 (def *indexer-fanout* (.get environ "INDEXER_FANOUT_SOCKET" "ipc:///tmp/sushy-indexer"))
+
+(def *indexer-control* (.get environ "INDEXER_CONTROL_SOCKET" "ipc:///tmp/sushy-control"))
+
+(def *indexer-count* (.get environ "INDEXER_COUNT_SOCKET" "ipc:///tmp/sushy-count"))
 
 (def *database-sink* (.get environ "DATABASE_SINK" "ipc:///tmp/sushy-writer"))
 
@@ -65,7 +69,7 @@
 
 (if *debug-mode*
     (dictConfig 
-        {"version" 1
+        {"version"    1
          "formatters" {"http"    {"format" "localhost - - [%(asctime)s] %(process)d %(levelname)s %(filename)s:%(funcName)s:%(lineno)d %(message)s"
                                  "datefmt" "%Y/%m/%d %H:%M:%S"}}
          "handlers"   {"console" {"class"     "logging.StreamHandler"
@@ -77,7 +81,10 @@
                                   "level"     "WARNING"
                                   "capacity"  200}}
          "loggers"    {"peewee"  {"level"     "WARNING"
-                                  "handlers"  ["ram" "console"]}}
+                                  "handlers"  ["ram" "console"]}
+                       "__init__" {"level" "WARNING"}; for Markdown
+                       "sushy.models" {"level" "WARNING"}
+                       "sushy.store" {"level" "WARNING"}}
          "root"       {"level"    "DEBUG" 
                        "handlers" ["console"]}})
     (apply basicConfig [] {"level" *info* "format" "%(levelname)s:%(process)d:%(funcName)s %(message)s"}))

@@ -6,7 +6,7 @@
         [utils     [sse-pack]]
         [zmq       [Context ZMQError *sub* *subscribe* *noblock* *eagain*]])
 
-(setv log (getLogger))
+(setv log (getLogger --name--))
 
 (defn set-response-headers [headers]
     ; convert dict k/v to plain strings, since gevent's WSGI is picky that way

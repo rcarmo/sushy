@@ -1,5 +1,5 @@
 (import
-    [config             [*base-filenames* *bind-address* *store-path* *profiler* *update-socket* *indexer-fanout* *database-sink*]]
+    [config             [*base-filenames* *bind-address* *store-path* *profiler* *update-socket* *indexer-count* *indexer-fanout* *indexer-control* *database-sink*]]
     [cProfile           [Profile]]
     [datetime           [datetime]]
     [dateutil.parser    [parse :as parse-date]]
@@ -16,10 +16,10 @@
     [transform          [apply-transforms extract-internal-links extract-plaintext]]
     [watchdog.observers [Observer]]
     [watchdog.events    [FileSystemEventHandler]]
-    [zmq                [Context *pub* *push* *pull* *sndhwm* *rcvhwm*]])
+    [zmq                [Context Poller *pub* *sub* *push* *pull* *sndhwm* *rcvhwm* *pollin*]])
 
 
-(setv log (getLogger))
+(setv log (getLogger --name--))
 
 
 (defn transform-tags [line]
@@ -42,7 +42,7 @@
 
 (defn gather-item-data [item]
     ; Takes a map with basic item info and builds all the required indexing data
-    (.info log (:path item))
+    (.debug log (:path item))
     (let [[pagename     (:path item)]
           [mtime        (.fromtimestamp datetime (:mtime item))]
           [page         (get-page pagename)]
@@ -59,13 +59,13 @@
          "mtime"    (try
                         (parse-date (.get headers "last-modified"))
                         (catch [e Exception]
-                            (.debug log (% "Could not parse last-modified date from %s" pagename))
+                            (.warn log (% "Could not parse modification time from %s" pagename))
                             mtime))
          ; if there isn't any front matter info, fall back to mtime
          "pubtime"  (try
                         (parse-date (.get headers "date"))
                         (catch [e Exception]
-                            (.warn log (% "Could not parse date from %s" pagename))
+                            (.warn log (% "Could not parse publishing time from %s" pagename))
                             mtime))
          "headers"  headers
          "links"    (list links)}))
@@ -92,60 +92,73 @@
     ; walk the filesystem and perform full-text and front matter indexing
     (let [[ctx        (Context)]
           [sock       (.socket ctx *push*)]
+          [cnt-sock   (.socket ctx *push*)]
           [item-count 0]]
         (.bind sock *indexer-fanout*)
-        ;(.setsockopt sock *sndhwm* worker-count)
+        (.bind cnt-sock *indexer-count*)
+        (.setsockopt sock *sndhwm* worker-count)
         (try
             (for [item (gen-pages path)]
                 (.send-pyobj sock item)
                 (setv item-count (inc item-count)))
             (catch [e Exception]
                 (.error log (% "%s:%s handling %s" (, (type e) e item)))))
-        ; send poison pills
-        (for [i (range worker-count)]
-            (.send-pyobj sock nil))
-        (.close sock)
-        (.debug log (% "exiting: %d items handled" item-count))))
+        (.send-pyobj cnt-sock item-count)
+        (.debug log (% "exiting filesystem walker: %d items handled" item-count))))
 
 
 (defn indexing-worker [worker-count]
     (let [[ctx      (Context)]
+          [poller   (Poller)]
           [in-sock  (.socket ctx *pull*)]
           [out-sock (.socket ctx *push*)]
+          [ctl-sock (.socket ctx *sub*)]
           [item     true]]
         (.connect in-sock *indexer-fanout*)
         (.connect out-sock *database-sink*)
-        ;(.setsockopt out-sock *sndhwm* worker-count)
+        (.connect ctl-sock *indexer-control*)
+        (.setsockopt out-sock *sndhwm* worker-count)
+        (.register poller in-sock *pollin*)
+        (.register poller ctl-sock *pollin*)
+        (.debug log "indexing worker")
         (try 
             (while item
-                (setv item (.recv-pyobj in-sock))
-                (if item
-                    (.send-pyobj out-sock (gather-item-data item))))
+                (setv socks (dict (.poll poller)))
+                (cond [(= (.get socks ctl-sock) *pollin*)
+                       (setv item (.recv-pyobj in-sock))]
+                      [(= (.get socks in-sock) *pollin*)
+                       (do
+                           (setv item (.recv-pyobj in-sock))
+                           (.send-pyobj out-sock (gather-item-data item)))]))
             (catch [e Exception]
                 (.error log (% "%s:%s while gathering" (, (type e) e)))))
-        (.send-pyobj out-sock nil)
         (.debug log "exiting indexing worker")))
 
 
 (defn database-worker [worker-count]
     (let [[ctx              (Context)]
-          [sock             (.socket ctx *pull*)]
-          [finished-workers 0]
+          [in-sock          (.socket ctx *pull*)]
+          [cnt-sock         (.socket ctx *pull*)]
+          [ctl-sock         (.socket ctx *pub*)]
+          [item-limit       -1]
           [item-count       0]
           [item             nil]]
-        (.bind sock *database-sink*)
-        ;(.setsockopt sock *rcvhwm* worker-count)
+        (.bind in-sock *database-sink*)
+        (.connect cnt-sock *indexer-count*)
+        (.bind ctl-sock *indexer-control*)
+        (.setsockopt in-sock *rcvhwm* worker-count)
+        (.debug log "database worker")
+        (setv item-limit (.recv-pyobj cnt-sock))
         (try
-            (while (!= finished-workers worker-count)
-                (setv item (.recv-pyobj sock))
-                (if item
-                    (do 
-                        (index-one item)
-                        (setv item-count (inc item-count)))
-                    (setv finished-workers (inc finished-workers))))
+            (while (!= item-count item-limit)
+                (.info log (% "indexed %d of %d" item-count item-limit))
+                (setv item (.recv-pyobj in-sock))
+                (index-one item)
+                (setv item-count (inc item-count)))
             (catch [e Exception]
                 (.error log (% "%s:%s while inserting" (, (type e) e)))))
-         (.debug log (% "exiting database worker: %d items" item-count))))
+        (.send-pyobj ctl-sock nil)
+        (.debug log (% "exiting database worker: %d items" item-count))))
 
 
 (defclass IndexingHandler [FileSystemEventHandler]
@@ -185,6 +198,7 @@
 (defn perform-indexing [path count]
     (let [[db-worker (apply Process [] {"target" database-worker "args" (, count)})]]
         (.start db-worker)
+        (sleep 1)
         (for [i (range count)]
             (.start (apply Process [] {"target" indexing-worker "args" (, count)})))
         (.start (apply Process [] {"target" filesystem-walker "args" (, path count)}))
