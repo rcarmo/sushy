@@ -25,6 +25,8 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Done
 
+* `multiprocessing`-based indexer
+* SSE (Server-Sent Events) support for notifying visitors a page has changed
 * [New Relic][nr] Support
 * Internal link tracking (`SeeAlso` functionality, as seen on [Yaki][y])
 * Multiple theme support (only the one theme for now)
@@ -60,7 +62,7 @@ All markup formats MUST be preceded by "front matter" handled like RFC2822 heade
 
 I've been running a classical, object-oriented Python Wiki (called [Yaki][y]) for the better part of a decade. It works, but is comparatively big and has become unwieldy and cumbersome to tweak. So I decided to [rewrite it][tng]. [Again][gae]. And [again][clj].
 
-And I eventually decided to make it _smaller_ -- my intention is for the core to stop at around 1000 lines of code (as of this writing, it has a mere 705 LOC, excluding templates), so this is also an exercise in building tight, readable (and functional) code.
+And I eventually decided to make it _smaller_ -- my intention is for the core to stop at around 1000 lines of code (as of this writing, it is a tad larger, mostly due to indexing optimizations) excluding templates, so this is also an exercise in building tight, readable (and functional) code.
 
 ### Why [Hy][hy]?
 
