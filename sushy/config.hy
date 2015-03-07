@@ -1,10 +1,15 @@
 (import
-    [bottle  [*template-path*]]
-    [logging [getLogger basicConfig *debug* *info*]]
-    [os      [environ]]
-    [os.path [join abspath]])
+    [bottle         [*template-path*]]
+    [logging        [getLogger basicConfig *debug* *info*]]
+    [logging.config [dictConfig]]
+    [os             [environ]]
+    [sys            [stdout]]
+    [codecs         [getwriter]]
+    [os.path        [join abspath]])
 
-(setv log (getLogger))
+(setv log (getLogger --name--))
+
+(setv stdout ((getwriter "utf-8") stdout))
 
 (def *store-path* (.get environ "CONTENT_PATH" "pages"))
 
@@ -18,7 +23,15 @@
 
 (def *http-port* (.get environ "PORT" "8080"))
 
-(def *zmq-port* (int (.get environ "ZMQ_PORT" "10000")))
+(def *update-socket* (.get environ "UPDATE_SOCKET" "ipc:///tmp/sushy-updates"))
+
+(def *indexer-fanout* (.get environ "INDEXER_FANOUT_SOCKET" "ipc:///tmp/sushy-indexer"))
+
+(def *indexer-control* (.get environ "INDEXER_CONTROL_SOCKET" "ipc:///tmp/sushy-control"))
+
+(def *indexer-count* (.get environ "INDEXER_COUNT_SOCKET" "ipc:///tmp/sushy-count"))
+
+(def *database-sink* (.get environ "DATABASE_SINK" "ipc:///tmp/sushy-writer"))
 
 (def *page-route-base* "/space")
 
@@ -55,8 +68,26 @@
 (def *ignored-folders* ["CVS" ".hg" ".svn" ".git" ".AppleDouble" ".TemporaryItems"])
 
 (if *debug-mode*
-    (apply basicConfig [] {"level" *debug* "format" "%(asctime)s %(levelname)s %(process)d %(filename)s:%(funcName)s:%(lineno)d %(message)s"})
-    (apply basicConfig [] {"level" *info* "format" "%(levelname)s:%(process)d:%(funcName)s %(message)s"}))
+    (dictConfig 
+        {"version"    1
+         "formatters" {"http"    {"format" "localhost - - [%(asctime)s] %(process)d %(levelname)s %(filename)s:%(funcName)s:%(lineno)d %(message)s"
+                                 "datefmt" "%Y/%m/%d %H:%M:%S"}}
+         "handlers"   {"console" {"class"     "logging.StreamHandler"
+                                  "formatter" "http"
+                                  "level"     "DEBUG"
+                                  "stream"    "ext://sys.stdout"}
+                       "ram"     {"class"     "logging.handlers.MemoryHandler"
+                                  "formatter" "http"
+                                  "level"     "WARNING"
+                                  "capacity"  200}}
+         "loggers"    {"peewee"  {"level"     "WARNING"
+                                  "handlers"  ["ram" "console"]}
+                       "__init__" {"level" "WARNING"}; for Markdown
+                       "sushy.models" {"level" "WARNING"}
+                       "sushy.store" {"level" "WARNING"}}
+         "root"       {"level"    "DEBUG" 
+                       "handlers" ["console"]}})
+    (apply basicConfig [] {"level" *info* "format" "%(asctime)s %(levelname)s:%(process)d:%(funcName)s %(message)s"}))
 
 ; prepend the theme template path to bottle's search list
 (.insert *template-path* 0 (abspath *view-path*))

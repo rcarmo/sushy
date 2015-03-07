@@ -7,7 +7,7 @@
     [os.path [join exists splitext]]
     [stat    [ST_MTIME]])
 
-(setv log (getLogger))
+(setv log (getLogger --name--))
 
 
 (defn strip-seq [string-sequence]

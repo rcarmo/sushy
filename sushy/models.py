@@ -3,7 +3,7 @@ from peewee import *
 from playhouse.sqlite_ext import *
 import datetime
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 # Database models for metadata caching and full text indexing using SQLite3 (handily beats Whoosh and makes for a single index file)
 
@@ -86,16 +86,15 @@ def del_wiki_page(page):
 def index_wiki_page(**kwargs):
     """Adds wiki page metatada and FTS data."""
     with db.transaction():
-        log.debug(kwargs)
-        try:
-            page = Page.create(**kwargs)
-        except IntegrityError:
-            page = Page.get(Page.name == kwargs["name"])
         values = {}
-        for k in [u"title", u"tags", u"hash", u"mtime", u"pubtime"]:
+        for k in [u"name", u"title", u"tags", u"hash", u"mtime", u"pubtime"]:
             values[k] = kwargs[k]
         log.debug(values)
-        q = page.update(**values)
+        try:
+            page = Page.create(**values)
+        except IntegrityError:
+            page = Page.get(Page.name == values["name"])
+            page.update(**values)
         if len(kwargs['body']):
             parts = []
             for k in ['title', 'body', 'tags']:
@@ -124,7 +123,7 @@ def get_links(page_name):
                      .dicts())
 
             for page in query:
-                 yield page
+                yield page
 
         # Links from current page to valid pages
         with db.transaction():
@@ -135,7 +134,7 @@ def get_links(page_name):
                      .dicts())
 
             for page in query:
-                 yield page
+                yield page
     except OperationalError as e:
         log.warn(e)
         return

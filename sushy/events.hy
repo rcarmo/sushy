@@ -1,12 +1,12 @@
 (import [bottle    [request response route get :as handle-get]]
-        [config    [*bind-address* *zmq-port*]]
+        [config    [*bind-address* *index-socket*]]
         [gevent    [sleep]]
         [json      [dumps]]
         [logging   [getLogger]]
         [utils     [sse-pack]]
         [zmq       [Context ZMQError *sub* *subscribe* *noblock* *eagain*]])
 
-(setv log (getLogger))
+(setv log (getLogger --name--))
 
 (defn set-response-headers [headers]
     ; convert dict k/v to plain strings, since gevent's WSGI is picky that way
@@ -39,7 +39,7 @@
                          "data"  "{}"
                          "id"    event-id
                          "retry" 2000}]]
-            (.connect sock (% "tcp://%s:%d" (, *bind-address* *zmq-port*)))
+            (.connect sock *index-socket*)
             (.setsockopt sock *subscribe* (str ""))
             (set-response-headers {"Content-Type"                "text/event-stream"
                                    "Access-Control-Allow-Origin" "*"})
