@@ -139,6 +139,7 @@
                             (try
                                 (.send-pyobj out-sock (gather-item-data item))
                                 (catch [e Exception]
+                                    ; keep database worker count in sync                                    
                                     (.send-pyobj out-sock nil)
                                     (.error log 
                                         (%  "%s:%s while handling %s" 
