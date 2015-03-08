@@ -23,6 +23,8 @@
 
 (def *http-port* (.get environ "PORT" "8080"))
 
+; TODO: rename sockets for consistency
+
 (def *update-socket* (.get environ "UPDATE_SOCKET" "ipc:///tmp/sushy-updates"))
 
 (def *indexer-fanout* (.get environ "INDEXER_FANOUT_SOCKET" "ipc:///tmp/sushy-indexer"))
@@ -67,6 +69,8 @@
 
 (def *ignored-folders* ["CVS" ".hg" ".svn" ".git" ".AppleDouble" ".TemporaryItems"])
 
+; TODO: cleanup the logging dict
+
 (if *debug-mode*
     (dictConfig 
         {"version"    1
@@ -80,11 +84,11 @@
                                   "formatter" "http"
                                   "level"     "WARNING"
                                   "capacity"  200}}
-         "loggers"    {"peewee"  {"level"     "WARNING"
-                                  "handlers"  ["ram" "console"]}
-                       "__init__" {"level" "WARNING"}; for Markdown
+         "loggers"    {"peewee"       {"level"     "WARNING"
+                                       "handlers"  ["ram" "console"]}
+                       "__init__"     {"level" "WARNING"}; for Markdown
                        "sushy.models" {"level" "WARNING"}
-                       "sushy.store" {"level" "WARNING"}}
+                       "sushy.store"  {"level" "WARNING"}}
          "root"       {"level"    "DEBUG" 
                        "handlers" ["console"]}})
     (apply basicConfig [] {"level" *info* "format" "%(asctime)s %(levelname)s:%(process)d:%(funcName)s %(message)s"}))
