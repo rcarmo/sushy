@@ -15,6 +15,8 @@
 
 (def *theme-path* (.get environ "THEME_PATH" "themes/wiki"))
 
+(def *feed-css* (.get environ "FEED_CSS" "themes/wiki/static/css/rss.css"))
+
 (def *static-path* (join *theme-path* "static"))
 
 (def *view-path* (join *theme-path* "views"))
