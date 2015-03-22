@@ -2,6 +2,7 @@ bottle>=0.12.8
 docutils>=0.12
 gevent>=1.0.1
 hy>=0.10.1
+inlinestyler>=0.1.7
 lxml>=3.4.2
 Markdown>=2.5.2
 newrelic>=2.46.0.37
