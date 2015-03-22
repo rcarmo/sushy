@@ -1,6 +1,7 @@
 import os, sys, logging
 from peewee import *
 from playhouse.sqlite_ext import *
+from playhouse.kv import PickledKeyStore
 import datetime
 
 log = logging.getLogger(__name__)
@@ -10,6 +11,8 @@ log = logging.getLogger(__name__)
 # TODO: port these to Hy (if at all possible given that Peewee relies on inner classes)
 
 db = SqliteExtDatabase(os.environ['DATABASE_PATH'], threadlocals=True)
+
+KVS = PickledKeyStore(ordered=True, database=db)
 
 class Page(Model):
     """Metadata table"""
@@ -33,15 +36,6 @@ class Link(Model):
         indexes = (
             (('page', 'link'), True),
         )
-        database = db
-        
-        
-class Cache(Model):
-    """Key-value store for arbitrary data"""
-    key   = CharField(primary_key=True)
-    value = BlobField(null=True)
-    
-    class Meta:
         database = db
 
 
