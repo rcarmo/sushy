@@ -2,6 +2,7 @@
     [collections [OrderedDict]]
     [functools   [wraps]]
     [logging     [getLogger]]
+    [msgpack     [packb unpackb]]
     [PIL         [Image]]
     [random      [sample]]
     [time        [time]])
@@ -86,6 +87,14 @@
                       ""))
                   ["retry" "id" "event" "data"]))
         "\n"))
+
+
+(defn zmq-pack [socket obj &optional [flags 0]]
+    (apply .send [socket (packb obj)] {"flags" flags}))
+
+
+(defn zmq-unpack [socket &optional [flags 0]]
+    (unpackb (.recv socket flags)))
  
        
 (defmacro timeit [block iterations]

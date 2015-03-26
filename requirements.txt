@@ -4,6 +4,7 @@ gevent>=1.0.1
 hy>=0.10.1
 inlinestyler>=0.1.7
 lxml>=3.4.2
+msgpack-python>=0.4.6
 Markdown>=2.5.2
 newrelic>=2.46.0.37
 peewee>=2.4.7

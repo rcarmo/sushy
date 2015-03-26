@@ -15,6 +15,7 @@
     [store              [is-page? gen-pages get-page]]
     [time               [sleep time]]
     [transform          [apply-transforms extract-internal-links extract-plaintext]]
+    [utils              [zmq-pack zmq-unpack]]
     [watchdog.observers [Observer]]
     [watchdog.events    [FileSystemEventHandler]]
     [zmq                [Context Poller *pub* *sub* *push* *pull* *sndhwm* *rcvhwm* *pollin* *subscribe*]])
@@ -82,7 +83,7 @@
           [headers  (.get item "headers")]
           [links    (.get item "links")]]
         (if sock
-            (.send-multipart sock
+            (zmq-pack sock
                 [(str "indexing")
                  (dumps {"pagename" pagename
                          "title"    (.get headers "title" "Untitled")})]))
@@ -105,12 +106,12 @@
         (.setsockopt sock *sndhwm* worker-count)
         (try
             (for [item (gen-pages path)]
-                (.send-pyobj sock item)
+                (zmq-pack sock item)
                 (setv item-count (inc item-count)))
             (catch [e Exception]
                 (.error log (% "%s:%s handling %s" (, (type e) e item)))))
         ; let the database worker know how many items to expect
-        (.send-pyobj cnt-sock item-count)
+        (zmq-pack cnt-sock item-count)
         (.debug log (% "exiting filesystem walker: %d items handled" item-count))))
 
 
@@ -132,15 +133,15 @@
         (while item
             (setv socks (dict (.poll poller)))
             (cond   [(= (.get socks ctl-sock) *pollin*)
-                        (setv item (.recv-pyobj ctl-sock))]
+                        (setv item (zmq-unpack ctl-sock))]
                     [(= (.get socks in-sock) *pollin*)
                         (do
-                            (setv item (.recv-pyobj in-sock))
+                            (setv item (zmq-unpack in-sock))
                             (try
-                                (.send-pyobj out-sock (gather-item-data item))
+                                (zmq-pack out-sock (gather-item-data item))
                                 (catch [e Exception]
                                     ; keep database worker count in sync                                    
-                                    (.send-pyobj out-sock nil)
+                                    (zmq-pack out-sock nil)
                                     (.error log 
                                         (%  "%s:%s while handling %s" 
                                             (, (type e) e (try (:path item) (catch [e KeyError] nil))))))))]))
@@ -160,19 +161,19 @@
         (.connect cnt-sock *indexer-count*)
         (.setsockopt in-sock *rcvhwm* worker-count)
         (.debug log "database worker")
-        (setv item-limit (.recv-pyobj cnt-sock))
+        (setv item-limit (zmq-unpack cnt-sock))
         (.info log (% "waiting for %d items" item-limit))
         (try
             (while (!= item-count item-limit)
                 (if (= 0 (% item-count 100))
                     (.debug log (% "indexed %d of %d" (, item-count item-limit))))
-                (setv item (.recv-pyobj in-sock))
+                (setv item (zmq-unpack in-sock))
                 (if item
                     (index-one item))
                 (setv item-count (inc item-count)))
             (catch [e Exception]
                 (.error log (% "%s:%s while inserting" (, (type e) e)))))
-        (.send-pyobj ctl-sock nil)
+        (zmq-pack ctl-sock nil)
         (.info log (% "exiting database worker: %d items indexed" item-count))))
 
 
