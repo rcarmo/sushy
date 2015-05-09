@@ -143,8 +143,8 @@
                                     ; keep database worker count in sync                                    
                                     (zmq-pack out-sock nil)
                                     (.error log 
-                                        (%  "%s:%s while handling %s" 
-                                            (, (type e) e (try (:path item) (catch [e KeyError] nil))))))))]))
+                                        (% "%s:%s while handling %s" 
+                                           (, (type e) e (try (:path item) (catch [e KeyError] nil))))))))]))
         (.debug log "exiting indexing worker")))
 
 

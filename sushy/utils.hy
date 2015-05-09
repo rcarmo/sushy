@@ -1,5 +1,6 @@
 (import 
     [collections [OrderedDict]]
+    [datetime    [datetime]]
     [functools   [wraps]]
     [logging     [getLogger]]
     [msgpack     [packb unpackb]]
@@ -8,6 +9,8 @@
     [time        [time]])
 
 (setv log (getLogger))
+
+(def *datetime-format* "%Y%m%dT%H:%M:%S.%f")
 
 (defn memoize []
     ; memoization decorator
@@ -89,12 +92,25 @@
         "\n"))
 
 
+(defn pack-datetime [obj]
+    (if (isinstance obj datetime)
+        {:datetime (.strftime obj *datetime-format*)}
+        obj))
+
+
+(defn unpack-datetime [obj]
+    (try
+        (.strptime datetime (:datetime obj) *datetime-format*)
+        (catch [e Exception]
+            obj)))
+
+
 (defn zmq-pack [socket obj &optional [flags 0]]
-    (apply .send [socket (packb obj)] {"flags" flags}))
+    (apply .send [socket (apply packb [obj] {"default" pack-datetime})] {"flags" flags}))
 
 
 (defn zmq-unpack [socket &optional [flags 0]]
-    (unpackb (.recv socket flags)))
+    (apply unpackb [(.recv socket flags)] {"encoding" "utf-8" "object_hook" unpack-datetime}))
  
        
 (defmacro timeit [block iterations]

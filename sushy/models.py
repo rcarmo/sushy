@@ -55,7 +55,6 @@ def init_db():
         Page.create_table()
         Link.create_table()
         FTSPage.create_table()
-        Cache.create_table()
     except OperationalError as e:
         log.info(e)
 
