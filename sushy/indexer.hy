@@ -25,6 +25,7 @@
 
 (setv *utc* (timezone "UTC"))
 
+(def *logging-modulo* 10)
 
 (defn transform-tags [line]
     ; expand tags to be "tag:value", which enables us to search for tags using FTS
@@ -116,12 +117,13 @@
 
 
 (defn indexing-worker [worker-count]
-    (let [[ctx      (Context)]
-          [poller   (Poller)]
-          [in-sock  (.socket ctx *pull*)]
-          [out-sock (.socket ctx *push*)]
-          [ctl-sock (.socket ctx *sub*)]
-          [item     true]]
+    (let [[ctx        (Context)]
+          [poller     (Poller)]
+          [in-sock    (.socket ctx *pull*)]
+          [out-sock   (.socket ctx *push*)]
+          [ctl-sock   (.socket ctx *sub*)]
+          [item-count 0]
+          [item       true]]
         (.connect in-sock *indexer-fanout*)
         (.connect out-sock *database-sink*)
         (.connect ctl-sock *indexer-control*)
@@ -137,6 +139,9 @@
                     [(= (.get socks in-sock) *pollin*)
                         (do
                             (setv item (zmq-unpack in-sock))
+                            (if (= 0 (% item-count *logging-modulo*))
+                                (.debug log (% "indexed %d" item-count)))
+                            (setv item-count (inc item-count)) 
                             (try
                                 (zmq-pack out-sock (gather-item-data item))
                                 (catch [e Exception]
@@ -145,7 +150,7 @@
                                     (.error log 
                                         (% "%s:%s while handling %s" 
                                            (, (type e) e (try (:path item) (catch [e KeyError] nil))))))))]))
-        (.debug log "exiting indexing worker")))
+        (.debug log (% "exiting indexing worker: %d items indexed" item-count))))
 
 
 (defn database-worker [worker-count]
@@ -165,9 +170,10 @@
         (.info log (% "waiting for %d items" item-limit))
         (try
             (while (!= item-count item-limit)
-                (if (= 0 (% item-count 100))
-                    (.debug log (% "indexed %d of %d" (, item-count item-limit))))
+                (if (= 0 (% item-count *logging-modulo*))
+                    (.debug log (% "stored %d of %d" (, item-count item-limit))))
                 (setv item (zmq-unpack in-sock))
+                (.debug log (get item "name"))
                 (if item
                     (index-one item))
                 (setv item-count (inc item-count)))
@@ -241,5 +247,3 @@
         (do
             (.info log "Starting watcher...")
             (observer *store-path*)))))
-
-
