@@ -25,7 +25,7 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Done
 
-* `multiprocessing`-based indexer
+* `multiprocessing`-based indexer (in `feature/multiprocessing`, disabled for ease of profiling)
 * SSE (Server-Sent Events) support for notifying visitors a page has changed
 * [New Relic][nr] Support
 * Internal link tracking (`SeeAlso` functionality, as seen on [Yaki][y])
