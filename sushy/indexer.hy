@@ -171,7 +171,7 @@
         (try
             (while (!= item-count item-limit)
                 (if (= 0 (% item-count *logging-modulo*))
-                    (.debug log (% "stored %d of %d" (, item-count item-limit))))
+                    (.debug log (% "storing %d of %d" (, item-count item-limit))))
                 (setv item (zmq-unpack in-sock))
                 (.debug log (get item "name"))
                 (if item
