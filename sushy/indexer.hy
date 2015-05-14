@@ -7,7 +7,6 @@
     [json               [dumps]]
     [logging            [getLogger Formatter]]
     [models             [db add-wiki-link index-wiki-page init-db]]
-    [multiprocessing    [Process cpu-count]]
     [os.path            [basename dirname]]
     [pstats             [Stats]]
     [pytz               [timezone]]
@@ -15,7 +14,6 @@
     [store              [is-page? gen-pages get-page]]
     [time               [sleep time]]
     [transform          [apply-transforms extract-internal-links extract-plaintext]]
-    [utils              [zmq-pack zmq-unpack]]
     [watchdog.observers [Observer]]
     [watchdog.events    [FileSystemEventHandler]]
     [zmq                [Context Poller *pub* *sub* *push* *pull* *sndhwm* *rcvhwm* *pollin* *subscribe*]])
@@ -84,7 +82,7 @@
           [headers  (.get item "headers")]
           [links    (.get item "links")]]
         (if sock
-            (zmq-pack sock
+            (.send-pyobj sock
                 [(str "indexing")
                  (dumps {"pagename" pagename
                          "title"    (.get headers "title" "Untitled")})]))
@@ -96,91 +94,18 @@
         (apply index-wiki-page [] item)))
 
 
-(defn filesystem-walker [path worker-count]
+(defn filesystem-walk [path]
     ; walk the filesystem and perform full-text and front matter indexing
-    (let [[ctx        (Context)]
-          [sock       (.socket ctx *push*)]
-          [cnt-sock   (.socket ctx *push*)]
-          [item-count 0]]
-        (.bind sock *indexer-fanout*)
-        (.bind cnt-sock *indexer-count*)
-        (.setsockopt sock *sndhwm* worker-count)
+    (let [[item-count 0]]
         (try
             (for [item (gen-pages path)]
-                (zmq-pack sock item)
+                (if (= 0 (% item-count *logging-modulo*))
+                    (.debug log (% "indexing %d" item-count)))
+                (index-one (gather-item-data item))
                 (setv item-count (inc item-count)))
             (catch [e Exception]
                 (.error log (% "%s:%s handling %s" (, (type e) e item)))))
-        ; let the database worker know how many items to expect
-        (zmq-pack cnt-sock item-count)
         (.debug log (% "exiting filesystem walker: %d items handled" item-count))))
-
-
-(defn indexing-worker [worker-count]
-    (let [[ctx        (Context)]
-          [poller     (Poller)]
-          [in-sock    (.socket ctx *pull*)]
-          [out-sock   (.socket ctx *push*)]
-          [ctl-sock   (.socket ctx *sub*)]
-          [item-count 0]
-          [item       true]]
-        (.connect in-sock *indexer-fanout*)
-        (.connect out-sock *database-sink*)
-        (.connect ctl-sock *indexer-control*)
-        (.setsockopt-string ctl-sock *subscribe* "")
-        (.setsockopt out-sock *sndhwm* worker-count)
-        (.register poller in-sock *pollin*)
-        (.register poller ctl-sock *pollin*)
-        (.debug log "indexing worker")
-        (while item
-            (setv socks (dict (.poll poller)))
-            (cond   [(= (.get socks ctl-sock) *pollin*)
-                        (setv item (zmq-unpack ctl-sock))]
-                    [(= (.get socks in-sock) *pollin*)
-                        (do
-                            (setv item (zmq-unpack in-sock))
-                            (if (= 0 (% item-count *logging-modulo*))
-                                (.debug log (% "indexed %d" item-count)))
-                            (setv item-count (inc item-count)) 
-                            (try
-                                (zmq-pack out-sock (gather-item-data item))
-                                (catch [e Exception]
-                                    ; keep database worker count in sync                                    
-                                    (zmq-pack out-sock nil)
-                                    (.error log 
-                                        (% "%s:%s while handling %s" 
-                                           (, (type e) e (try (:path item) (catch [e KeyError] nil))))))))]))
-        (.debug log (% "exiting indexing worker: %d items indexed" item-count))))
-
-
-(defn database-worker [worker-count]
-    (let [[ctx              (Context)]
-          [in-sock          (.socket ctx *pull*)]
-          [cnt-sock         (.socket ctx *pull*)]
-          [ctl-sock         (.socket ctx *pub*)]
-          [item-limit       -1]
-          [item-count       0]
-          [item             nil]]
-        (.bind ctl-sock *indexer-control*)
-        (.bind in-sock *database-sink*)
-        (.connect cnt-sock *indexer-count*)
-        (.setsockopt in-sock *rcvhwm* worker-count)
-        (.debug log "database worker")
-        (setv item-limit (zmq-unpack cnt-sock))
-        (.info log (% "waiting for %d items" item-limit))
-        (try
-            (while (!= item-count item-limit)
-                (if (= 0 (% item-count *logging-modulo*))
-                    (.debug log (% "storing %d of %d" (, item-count item-limit))))
-                (setv item (zmq-unpack in-sock))
-                (.debug log (get item "name"))
-                (if item
-                    (index-one item))
-                (setv item-count (inc item-count)))
-            (catch [e Exception]
-                (.error log (% "%s:%s while inserting" (, (type e) e)))))
-        (zmq-pack ctl-sock nil)
-        (.info log (% "exiting database worker: %d items indexed" item-count))))
 
 
 (defclass IndexingHandler [FileSystemEventHandler]
@@ -217,17 +142,6 @@
         (.join observer)))
 
 
-(defn perform-indexing [path count]
-    (let [[procs [(apply Process [] {"target" database-worker "args" (, count)})]]]
-        (for [i (range count)]
-            (.append procs (apply Process [] {"target" indexing-worker "args" (, count)})))
-        (.append procs (apply Process [] {"target" filesystem-walker "args" (, path count)}))
-        (for [p procs]
-            (.start p))
-        (for [p procs]
-            (.join p))))
-
-
 (defmain [&rest args]
     (let [[p (Profile)]]
         (if *profiler*
@@ -236,7 +150,7 @@
         ; close database connection to remove contention
         (.close db)
         (setv start-time (time))
-        (perform-indexing *store-path* (int (cpu-count)))
+        (filesystem-walk *store-path*)
         (.info log "Indexing done in %fs" (- (time) start-time))
         (if *profiler*
             (do

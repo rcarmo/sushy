@@ -3,7 +3,6 @@
     [datetime    [datetime]]
     [functools   [wraps]]
     [logging     [getLogger]]
-    [msgpack     [packb unpackb]]
     [PIL         [Image]]
     [random      [sample]]
     [time        [time]])
@@ -92,27 +91,6 @@
         "\n"))
 
 
-(defn pack-datetime [obj]
-    (if (isinstance obj datetime)
-        {:datetime (.strftime obj *datetime-format*)}
-        obj))
-
-
-(defn unpack-datetime [obj]
-    (try
-        (.strptime datetime (:datetime obj) *datetime-format*)
-        (catch [e Exception]
-            obj)))
-
-
-(defn zmq-pack [socket obj &optional [flags 0]]
-    (apply .send [socket (apply packb [obj] {"default" pack-datetime})] {"flags" flags}))
-
-
-(defn zmq-unpack [socket &optional [flags 0]]
-    (apply unpackb [(.recv socket flags)] {"encoding" "utf-8" "object_hook" unpack-datetime}))
- 
-       
 (defmacro timeit [block iterations]
     `(let [[t (time)]]
         (for [i (range ~iterations)]

@@ -3,7 +3,7 @@
         [gevent    [sleep]]
         [json      [dumps]]
         [logging   [getLogger]]
-        [utils     [sse-pack zmq-unpack]]
+        [utils     [sse-pack]]
         [zmq       [Context ZMQError *sub* *subscribe* *noblock* *eagain*]])
 
 (setv log (getLogger --name--))
@@ -49,7 +49,7 @@
                 (try
                     (do
                         (setv event-id (inc event-id))
-                        (setv data (zmq-unpack sock *noblock*))
+                        (setv data (.recv-pyobj sock *noblock*))
                         (assoc msg "event" (get data 0)
                                    "data"  (get data 1)
                                    "id"    event-id)
