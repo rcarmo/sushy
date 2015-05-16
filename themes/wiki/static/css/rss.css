@@ -7,6 +7,10 @@ body, div {
     font-family: Georgia, Times New Roman, Times, serif;
 } 
 
+pre {
+    font-family: Menlo, Consolas, Courier New, Courier, monospace;
+}
+
 a:link {
   color: #0000cc
 } 
