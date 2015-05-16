@@ -7,6 +7,7 @@
     [lxml.etree         [Element tostring fromstring]]
     [models             [*kvs* get-latest]]
     [os.path            [abspath]]
+    [pytz               [*utc*]]
     [render             [render-page]]
     [store              [get-page]]
     [transform          [apply-transforms inner-html]])
@@ -29,7 +30,7 @@
                 (assoc item
                     "pagename"     pagename
                     "author"       (get (:headers page) "from")
-                    "pubdate"     (.strftime (get item "pubtime") *rss-date-format*)
+                    "pubdate"     (.strftime (.localize *utc* (get item "pubtime")) *rss-date-format*)
                     "description"  (inner-html (fromstring (inline-css (tostring doc))))
                     "category"    (get (.split pagename "/") 0))
                 (.debug log item)
@@ -39,7 +40,7 @@
 
 (with-decorator (render-template "rss")
     (defn render-feed [base_url]
-        {"pubdate"          (.strftime (.now datetime) *rss-date-format*)
+        {"pubdate"          (.strftime (.localize *utc* (.now datetime)) *rss-date-format*)
          "items"            (gather-items)
          "feed_ttl"         *feed-ttl*
          "site_name"        *site-name*
