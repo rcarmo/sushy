@@ -80,6 +80,10 @@ ifneq ($(NEW_RELIC_LICENSE_KEY),'')
 endif
 	python -m sushy.indexer watch
 
+# RSS testing
+feed: build
+	python -m sushy.feeds
+
 # Render pstats profiler files into nice PNGs (requires dot)
 %.png: %.pstats
 	python tools/gprof2dot.py -f pstats $< | dot -Tpng -o $@
