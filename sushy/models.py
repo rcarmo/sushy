@@ -3,6 +3,7 @@ from peewee import *
 from playhouse.sqlite_ext import *
 from playhouse.kv import PickledKeyStore
 import datetime
+from dateutil.relativedelta import relativedelta
 
 log = logging.getLogger(__name__)
 
@@ -136,7 +137,7 @@ def get_links(page_name):
 def get_latest(limit=20, months_ago=3):
     with db.transaction():
         query = (Page.select()
-                .where(Page.mtime >= (datetime.datetime.now() + datetime.timedelta(months=-months_ago)))
+                .where(Page.mtime >= (datetime.datetime.now() + relativedelta(months=-months_ago)))
                 .order_by(SQL('mtime').desc())
                 .limit(limit)
                 .dicts())
