@@ -3,6 +3,7 @@
     [logging        [getLogger basicConfig *debug* *info*]]
     [logging.config [dictConfig]]
     [os             [environ]]
+    [re]
     [sys            [stdout]]
     [codecs         [getwriter]]
     [os.path        [join abspath]])
@@ -52,6 +53,8 @@
 (def *alias-page* "meta/Aliases")
 
 (def *interwiki-page* "meta/InterWikiMap")
+
+(def *exclude-from-feeds* (.compile re "^meta.*"))
 
 (def *base-types*
     {".txt"      "text/x-textile"; TODO: this should be reverted to text/plain later in the testing cycle
