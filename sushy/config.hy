@@ -18,6 +18,14 @@
 
 (def *feed-css* (.get environ "FEED_CSS" "themes/wiki/static/css/rss.css"))
 
+(def *feed-ttl* 30)
+
+(def *site-name* (.get environ "SITE_NAME" "Sushy"))
+
+(def *site-description* (.get environ "SITE_DESCRIPTION" "A Sushy-powered site"))
+
+(def *site-copyright* (.get environ "SITE_COPYRIGHT" "CC Attribution-NonCommercial-NoDerivs 3.0"))
+
 (def *static-path* (join *theme-path* "static"))
 
 (def *view-path* (join *theme-path* "views"))
