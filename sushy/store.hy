@@ -30,6 +30,8 @@
               [header-lines (.splitlines (get parts 0))]
               [headers      (dict (map split-header-line header-lines))]
               [body         (.strip (get parts 1))]]
+              (if (not (in "from" headers))
+                (assoc headers "from" "Unknown Author"))
               (if (not (in "content-type" headers))
                 (assoc headers "content-type" content-type))
               {:headers headers
