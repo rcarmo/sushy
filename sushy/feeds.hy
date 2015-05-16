@@ -33,7 +33,6 @@
                     "pubdate"     (.strftime (.localize *utc* (get item "pubtime")) *rss-date-format*)
                     "description"  (inner-html (fromstring (inline-css (tostring doc))))
                     "category"    (get (.split pagename "/") 0))
-                (.debug log item)
                 (.append items item)))
         items)) 
 
