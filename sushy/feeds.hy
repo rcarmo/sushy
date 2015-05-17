@@ -1,9 +1,10 @@
 (import 
     [bottle             [view :as render-template]]
+    [cssutils           [log :as *cssutils-log*]]
     [config             [*exclude-from-feeds* *feed-css* *feed-ttl* *page-route-base* *site-name* *site-copyright* *site-description*]]
     [datetime           [datetime]]
     [inlinestyler.utils [inline-css]]
-    [logging            [getLogger Formatter]]
+    [logging            [getLogger Formatter *error*]]
     [lxml.etree         [Element tostring fromstring]]
     [models             [*kvs* get-latest]]
     [os.path            [abspath]]
@@ -14,14 +15,16 @@
 
 (setv log (getLogger --name--))
 
+(.setLevel *cssutils-log* *error*); disable logging, since it is incredibly whiny
+
 (def *rss-date-format* "%a, %d %b %Y %H:%M:%S %z")
 
-(def filtered-latest
-    (genexpr x [x (get-latest)] (not (.match *exclude-from-feeds* (.get x "name")))))
+(defn filtered-latest []
+    (filter (fn [x] (not (.match *exclude-from-feeds* (.get x "name")))) (get-latest)))
 
 (defn gather-items []
     (let [[items []]]
-        (for [item filtered-latest]
+        (for [item (filtered-latest)]
             (let [[pagename (.get item "name")]
                 [page     (get-page pagename)]
                 [doc      (apply-transforms (render-page page) pagename)]]

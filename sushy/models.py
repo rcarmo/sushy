@@ -134,7 +134,7 @@ def get_links(page_name):
         return
 
 
-def get_latest(limit=20, months_ago=3):
+def get_latest(limit=20, months_ago=6):
     with db.transaction():
         query = (Page.select()
                 .where(Page.mtime >= (datetime.datetime.now() + relativedelta(months=-months_ago)))

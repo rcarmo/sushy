@@ -1,6 +1,7 @@
 (import 
-    [bottle    [abort get :as handle-get request redirect static-file view :as render-view]]
+    [bottle    [abort get :as handle-get request redirect response static-file view :as render-view]]
     [config    [*debug-mode* *home-page* *page-media-base* *page-route-base* *static-path* *store-path*]]
+    [feeds     [render-feed]]
     [logging   [getLogger]]
     [models    [search get-links]]
     [os        [environ]]
@@ -30,6 +31,20 @@
             {"headers" {"title" "Environment dump"}
              "environ"  (dict environ)}
             (abort (int 404) "Page Not Found"))))
+
+
+; RSS feed
+(with-decorator
+    (handle-get "/rss")
+    (defn serve-feed []
+        (try
+            (let [[base-url (slice (. request url) 0 (- (len (. request path))))]
+                  [buffer   (render-feed base-url)]]
+                (setv (. response content-type) "application/rss+xml")
+                buffer)
+            (catch [e Exception]
+                (.error log (% "%s:%s serving feed" (, (type e) e)))  
+                (abort (int 503) "Error generating feed.")))))
 
 
 ; search
