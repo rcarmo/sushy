@@ -16,7 +16,6 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 * Closest-match URLs (i.e., fix typos)
 * HTTP caching (`Etag`, `Last-Modified`, `HEAD` support, etc.)
 * Blog homepage/excerpts/archive navigation
-* CSS inlining for RSS feeds
 * Sitemap
 * Image thumbnailing
 * Site thumbnailing (for taking screenshots of external links)
@@ -24,6 +23,7 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Done
 
+* CSS inlining for RSS feeds
 * RSS feeds
 * `multiprocessing`-based indexer (in `feature/multiprocessing`, disabled for ease of profiling)
 * SSE (Server-Sent Events) support for notifying visitors a page has changed
