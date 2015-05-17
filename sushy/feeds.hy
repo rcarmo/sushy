@@ -1,6 +1,6 @@
 (import 
     [bottle             [view :as render-template]]
-    [config             [*exclude-from-feeds* *feed-css* *feed-ttl* *site-name* *site-copyright* *site-description*]]
+    [config             [*exclude-from-feeds* *feed-css* *feed-ttl* *page-route-base* *site-name* *site-copyright* *site-description*]]
     [datetime           [datetime]]
     [inlinestyler.utils [inline-css]]
     [logging            [getLogger Formatter]]
@@ -45,6 +45,7 @@
          "site_name"        *site-name*
          "site_description" *site-description*
          "site_copyright"   *site-copyright*
+         "page_route_base"  *page-route-base*
          "base_url"         base_url}))
 
 
