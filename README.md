@@ -16,13 +16,13 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 * Closest-match URLs (i.e., fix typos)
 * HTTP caching (`Etag`, `Last-Modified`, `HEAD` support, etc.)
 * Blog homepage/excerpts/archive navigation
-* Sitemap
 * Image thumbnailing
 * Site thumbnailing (for taking screenshots of external links)
 * Docker deployment (currently deploying on [Dokku-alt][da] using a `Procfile`, waiting for the dust to settle to build a proper reference container)
 
 ### Done
 
+* Sitemap
 * CSS inlining for RSS feeds
 * RSS feeds
 * `multiprocessing`-based indexer (in `feature/multiprocessing`, disabled for ease of profiling)
