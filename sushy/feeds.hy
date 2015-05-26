@@ -6,7 +6,7 @@
     [inlinestyler.utils [inline-css]]
     [logging            [getLogger Formatter *error*]]
     [lxml.etree         [Element tostring fromstring]]
-    [models             [*kvs* get-latest]]
+    [models             [*kvs* get-all get-latest]]
     [os.path            [abspath]]
     [pytz               [*utc*]]
     [render             [render-page]]
@@ -29,7 +29,7 @@
                 [page     (get-page pagename)]
                 [doc      (apply-transforms (render-page page) pagename)]]
                 (.append doc (apply Element ["link"] {"rel"  "stylesheet"
-                                                    "href" (+ "file://" (abspath *feed-css*)) }))
+                                                      "href" (+ "file://" (abspath *feed-css*)) }))
                 (assoc item
                     "pagename"     pagename
                     "author"       (get (:headers page) "from")
@@ -49,6 +49,19 @@
          "site_description" *site-description*
          "site_copyright"   *site-copyright*
          "page_route_base"  *page-route-base*
+         "base_url"         base_url}))
+
+
+(with-decorator (render-template "sitemap")
+    (defn render-sitemap [base_url]
+        {"items"            (get-all)
+         "page_route_base"  *page-route-base*
+         "base_url"         base_url}))
+
+
+(with-decorator (render-template "robots")
+    (defn render-robots [base_url]
+        {"page_route_base"  *page-route-base*
          "base_url"         base_url}))
 
 
