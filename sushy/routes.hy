@@ -1,13 +1,14 @@
 (import 
     [bottle    [abort get :as handle-get request redirect response static-file view :as render-view]]
     [config    [*debug-mode* *home-page* *page-media-base* *page-route-base* *static-path* *store-path*]]
-    [feeds     [render-feed]]
+    [feeds     [render-feed render-sitemap render-robots]]
     [logging   [getLogger]]
     [models    [search get-links]]
     [os        [environ]]
     [render    [render-page]]
     [store     [get-page]]
-    [transform [apply-transforms inner-html]])
+    [transform [apply-transforms inner-html]]
+    [utils     [ttl-cache]])
 
 
 (setv log (getLogger))
@@ -35,6 +36,7 @@
 
 ; RSS feed
 (with-decorator
+    (ttl-cache 300)
     (handle-get "/rss")
     (defn serve-feed []
         (try
@@ -45,6 +47,36 @@
             (catch [e Exception]
                 (.error log (% "%s:%s serving feed" (, (type e) e)))  
                 (abort (int 503) "Error generating feed.")))))
+
+
+; Sitemap
+(with-decorator
+    (ttl-cache 3600)
+    (handle-get "/sitemap.xml")
+    (defn serve-sitemap []
+        (try
+            (let [[base-url (slice (. request url) 0 (- (len (. request path))))]
+                  [buffer   (render-sitemap base-url)]]
+                (setv (. response content-type) "text/xml")
+                buffer)
+            (catch [e Exception]
+                (.error log (% "%s:%s serving sitemap" (, (type e) e)))  
+                (abort (int 503) "Error generating sitemap.")))))
+
+
+; robots.txt
+(with-decorator
+    (ttl-cache 3600)
+    (handle-get "/robots.txt")
+    (defn serve-robots []
+        (try
+            (let [[base-url (slice (. request url) 0 (- (len (. request path))))]
+                  [buffer   (render-robots base-url)]]
+                (setv (. response content-type) "text/plain")
+                buffer)
+            (catch [e Exception]
+                (.error log (% "%s:%s serving robots.txt" (, (type e) e)))  
+                (abort (int 503) "Error generating robots.txt.")))))
 
 
 ; search

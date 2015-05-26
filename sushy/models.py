@@ -21,8 +21,8 @@ class Page(Model):
     title       = CharField(null=True, index=True)
     tags        = CharField(null=True, index=True)
     hash        = CharField(null=True, index=True) # plaintext hash, used for etags
-    mtime       = DateTimeField(index=True)
-    pubtime     = DateTimeField(index=True)
+    mtime       = DateTimeField(index=True) # UTC
+    pubtime     = DateTimeField(index=True) # UTC
 
     class Meta:
         database = db
@@ -140,6 +140,16 @@ def get_latest(limit=20, months_ago=6):
                 .where(Page.mtime >= (datetime.datetime.now() + relativedelta(months=-months_ago)))
                 .order_by(SQL('mtime').desc())
                 .limit(limit)
+                .dicts())
+
+        for page in query:
+            yield page
+
+
+def get_all():
+    with db.transaction():
+        query = (Page.select()
+                .order_by(SQL('mtime').desc())
                 .dicts())
 
         for page in query:
