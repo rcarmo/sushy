@@ -6,6 +6,7 @@
         <meta name="HandheldFriendly" content="True">
         <meta name="MobileOptimized" content="320">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+        <meta name="theme-color" content="#4c9220">
         <title>{{!headers["title"]}}</title>
         <link rel="shortcut icon" href="/static/favicon.ico">
         <link rel="apple-touch-icon-precomposed" href="http://cdn.ink.sapo.pt/3.1.1/img/touch-icon.57.png">
