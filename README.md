@@ -23,6 +23,7 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Done
 
+* OpenSearch support (search directly from the omnibar on some browsers)
 * CSS inlining for RSS feeds
 * RSS feeds
 * `multiprocessing`-based indexer (in `feature/multiprocessing`, disabled for ease of profiling)
