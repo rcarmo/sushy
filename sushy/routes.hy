@@ -1,6 +1,6 @@
 (import 
     [bottle    [abort get :as handle-get request redirect response static-file view :as render-view]]
-    [config    [*debug-mode* *home-page* *page-media-base* *page-route-base* *static-path* *store-path*]]
+    [config    [*debug-mode* *home-page* *page-media-base* *page-route-base* *site-description* *site-name* *static-path* *store-path*]]
     [feeds     [render-feed render-sitemap render-robots]]
     [logging   [getLogger]]
     [models    [search get-links]]
@@ -79,6 +79,16 @@
                 (abort (int 503) "Error generating robots.txt.")))))
 
 
+; OpenSearch metadata
+(with-decorator
+    (handle-get "/opensearch.xml")
+    (render-view "opensearch")
+    (defn handle-opensearch []
+        {"base_url"         *base-url*
+         "site_description" *site-description*
+         "site_name"        *site-name*})
+
+         
 ; search
 (with-decorator
     (handle-get "/search")
@@ -112,8 +122,9 @@
     (defn wiki-page [pagename] 
         ; TODO: fuzzy URL matching, error handling
         (let [[page (get-page pagename)]]
-            {"headers"  (:headers page)
-             "pagename" pagename
-             "base_url" *page-route-base*
-             "seealso"  (list (get-links pagename))
-             "body"     (inner-html (apply-transforms (render-page page) pagename))})))
+            {"headers"   (:headers page)
+             "pagename"  pagename
+             "base_url"  *page-route-base*
+             "site_name" *site-name*
+             "seealso"   (list (get-links pagename))
+             "body"      (inner-html (apply-transforms (render-page page) pagename))})))
