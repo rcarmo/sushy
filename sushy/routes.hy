@@ -1,7 +1,7 @@
 (import 
     [bottle    [abort get :as handle-get request redirect response static-file view :as render-view]]
     [config    [*debug-mode* *home-page* *page-media-base* *page-route-base* *site-description* *site-name* *static-path* *store-path*]]
-    [feeds     [render-feed render-sitemap render-robots]]
+    [feeds     [render-feed render-sitemap]]
     [logging   [getLogger]]
     [models    [search get-links]]
     [os        [environ]]
@@ -70,14 +70,11 @@
 (with-decorator
     (ttl-cache 3600)
     (handle-get "/robots.txt")
+    (render-view "robots")
     (defn serve-robots []
-        (try
-            (let [[buffer (render-robots (base-url))]]
-                (setv (. response content-type) "text/plain")
-                buffer)
-            (catch [e Exception]
-                (.error log (% "%s:%s serving robots.txt" (, (type e) e)))  
-                (abort (int 503) "Error generating robots.txt.")))))
+        (setv (. response content-type) "text/plain")
+        {"base_url"         (base-url)
+         "page_route_base"  *page-route-base*}))
 
 
 ; OpenSearch metadata

@@ -59,12 +59,6 @@
          "base_url"         base_url}))
 
 
-(with-decorator (render-template "robots")
-    (defn render-robots [base_url]
-        {"page_route_base"  *page-route-base*
-         "base_url"         base_url}))
-
-
 (defmain [&rest args]
     (.info log "Updating feed")
     (print (render-feed "http://localhost")))
