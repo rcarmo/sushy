@@ -81,12 +81,15 @@
 
 ; OpenSearch metadata
 (with-decorator
+    (ttl-cache 3600)
     (handle-get "/opensearch.xml")
     (render-view "opensearch")
     (defn handle-opensearch []
-        {"base_url"         *base-url*
-         "site_description" *site-description*
-         "site_name"        *site-name*})
+        (let [[base-url (slice (. request url) 0 (- (len (. request path))))]]
+            (setv (. response content-type) "text/xml")
+            {"base_url"         base-url
+             "site_description" *site-description*
+             "site_name"        *site-name*}))
 
          
 ; search
