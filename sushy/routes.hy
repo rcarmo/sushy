@@ -14,6 +14,10 @@
 (setv log (getLogger))
 
 
+(defn base-url []
+    (slice (. request url) 0 (- (len (. request path)))))
+
+
 ; TODO: etags and HTTP header handling for caching
 
 (with-decorator 
@@ -40,8 +44,7 @@
     (handle-get "/rss")
     (defn serve-feed []
         (try
-            (let [[base-url (slice (. request url) 0 (- (len (. request path))))]
-                  [buffer   (render-feed base-url)]]
+            (let [[buffer (render-feed (base-url))]]
                 (setv (. response content-type) "application/rss+xml")
                 buffer)
             (catch [e Exception]
@@ -55,8 +58,7 @@
     (handle-get "/sitemap.xml")
     (defn serve-sitemap []
         (try
-            (let [[base-url (slice (. request url) 0 (- (len (. request path))))]
-                  [buffer   (render-sitemap base-url)]]
+            (let [[buffer (render-sitemap (base-url))]]
                 (setv (. response content-type) "text/xml")
                 buffer)
             (catch [e Exception]
@@ -70,8 +72,7 @@
     (handle-get "/robots.txt")
     (defn serve-robots []
         (try
-            (let [[base-url (slice (. request url) 0 (- (len (. request path))))]
-                  [buffer   (render-robots base-url)]]
+            (let [[buffer (render-robots (base-url))]]
                 (setv (. response content-type) "text/plain")
                 buffer)
             (catch [e Exception]
@@ -85,11 +86,10 @@
     (handle-get "/opensearch.xml")
     (render-view "opensearch")
     (defn handle-opensearch []
-        (let [[base-url (slice (. request url) 0 (- (len (. request path))))]]
-            (setv (. response content-type) "text/xml")
-            {"base_url"         base-url
-             "site_description" *site-description*
-             "site_name"        *site-name*}))
+        (setv (. response content-type) "text/xml")
+        {"base_url"         (base-url)
+         "site_description" *site-description*
+         "site_name"        *site-name*})
 
          
 ; search
