@@ -16,13 +16,13 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 * Closest-match URLs (i.e., fix typos)
 * HTTP caching (`Etag`, `Last-Modified`, `HEAD` support, etc.)
 * Blog homepage/excerpts/archive navigation
-* Sitemap
 * Image thumbnailing
 * Site thumbnailing (for taking screenshots of external links)
 * Docker deployment (currently deploying on [Dokku-alt][da] using a `Procfile`, waiting for the dust to settle to build a proper reference container)
 
 ### Done
 
+* Sitemap
 * OpenSearch support (search directly from the omnibar on some browsers)
 * CSS inlining for RSS feeds
 * RSS feeds
@@ -63,7 +63,7 @@ All markup formats MUST be preceded by "front matter" handled like RFC2822 heade
 
 I've been running a classical, object-oriented Python Wiki (called [Yaki][y]) for the better part of a decade. It works, but is comparatively big and has become unwieldy and cumbersome to tweak. So I decided to [rewrite it][tng]. [Again][gae]. And [again][clj].
 
-And I eventually decided to make it _smaller_ -- my intention is for the core to stop at around 1000 lines of code (as of this writing, it is a tad larger, mostly due to indexing optimizations) excluding templates, so this is also an exercise in building tight, readable (and functional) code.
+And I eventually decided to make it _smaller_ -- my intention is for the core to stop at around 1000 lines of code excluding templates, so this is also an exercise in building tight, readable (and functional) code.
 
 ### Why [Hy][hy]?
 
