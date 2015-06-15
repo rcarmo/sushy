@@ -1,10 +1,12 @@
 (import 
     [bottle    [abort get :as handle-get request redirect response static-file view :as render-view]]
-    [config    [*debug-mode* *home-page* *page-media-base* *page-route-base* *static-path* *store-path*]]
-    [feeds     [render-feed render-sitemap render-robots]]
+    [config    [*debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *home-page* *page-media-base* *page-route-base* *rss-date-format* *site-copyright* *site-description* *site-name* *static-path* *store-path*]]
+    [datetime  [datetime]]
+    [feeds     [render-feed-items]]
     [logging   [getLogger]]
-    [models    [search get-links]]
+    [models    [search get-links get-all]]
     [os        [environ]]
+    [pytz      [*utc*]]
     [render    [render-page]]
     [store     [get-page]]
     [transform [apply-transforms inner-html]]
@@ -12,6 +14,10 @@
 
 
 (setv log (getLogger))
+
+
+(defn base-url []
+    (slice (. request url) 0 (- (len (. request path)))))
 
 
 ; TODO: etags and HTTP header handling for caching
@@ -38,47 +44,54 @@
 (with-decorator
     (ttl-cache 300)
     (handle-get "/rss")
+    (render-view "rss")
     (defn serve-feed []
-        (try
-            (let [[base-url (slice (. request url) 0 (- (len (. request path))))]
-                  [buffer   (render-feed base-url)]]
-                (setv (. response content-type) "application/rss+xml")
-                buffer)
-            (catch [e Exception]
-                (.error log (% "%s:%s serving feed" (, (type e) e)))  
-                (abort (int 503) "Error generating feed.")))))
+        (setv (. response content-type) "application/rss+xml")
+        {"pubdate"          (.strftime (.localize *utc* (.now datetime)) *rss-date-format*)
+         "items"            (render-feed-items)
+         "feed_ttl"         *feed-ttl*
+         "site_name"        *site-name*
+         "site_description" *site-description*
+         "site_copyright"   *site-copyright*
+         "page_route_base"  *page-route-base*
+         "base_url"         (base-url)}))
 
 
 ; Sitemap
 (with-decorator
     (ttl-cache 3600)
     (handle-get "/sitemap.xml")
+    (render-view "sitemap")
     (defn serve-sitemap []
-        (try
-            (let [[base-url (slice (. request url) 0 (- (len (. request path))))]
-                  [buffer   (render-sitemap base-url)]]
-                (setv (. response content-type) "text/xml")
-                buffer)
-            (catch [e Exception]
-                (.error log (% "%s:%s serving sitemap" (, (type e) e)))  
-                (abort (int 503) "Error generating sitemap.")))))
+        (setv (. response content-type) "text/xml")
+        {"items"            (get-all)
+         "page_route_base"  *page-route-base*
+         "base_url"         (base-url)}))
 
 
 ; robots.txt
 (with-decorator
     (ttl-cache 3600)
     (handle-get "/robots.txt")
+    (render-view "robots")
     (defn serve-robots []
-        (try
-            (let [[base-url (slice (. request url) 0 (- (len (. request path))))]
-                  [buffer   (render-robots base-url)]]
-                (setv (. response content-type) "text/plain")
-                buffer)
-            (catch [e Exception]
-                (.error log (% "%s:%s serving robots.txt" (, (type e) e)))  
-                (abort (int 503) "Error generating robots.txt.")))))
+        (setv (. response content-type) "text/plain")
+        {"base_url"         (base-url)
+         "page_route_base"  *page-route-base*}))
 
 
+; OpenSearch metadata
+(with-decorator
+    (ttl-cache 3600)
+    (handle-get "/opensearch.xml")
+    (render-view "opensearch")
+    (defn handle-opensearch []
+        (setv (. response content-type) "text/xml")
+        {"base_url"         (base-url)
+         "site_description" *site-description*
+         "site_name"        *site-name*}))
+
+         
 ; search
 (with-decorator
     (handle-get "/search")
@@ -112,8 +125,9 @@
     (defn wiki-page [pagename] 
         ; TODO: fuzzy URL matching, error handling
         (let [[page (get-page pagename)]]
-            {"headers"  (:headers page)
-             "pagename" pagename
-             "base_url" *page-route-base*
-             "seealso"  (list (get-links pagename))
-             "body"     (inner-html (apply-transforms (render-page page) pagename))})))
+            {"headers"   (:headers page)
+             "pagename"  pagename
+             "base_url"  *page-route-base*
+             "site_name" *site-name*
+             "seealso"   (list (get-links pagename))
+             "body"      (inner-html (apply-transforms (render-page page) pagename))})))
