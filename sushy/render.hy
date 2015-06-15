@@ -86,12 +86,12 @@
                   [page     (get-page pagename)]
                   [doc      (apply-transforms (render-page page) pagename)]]
                 (.append doc (apply Element ["link"] {"rel"  "stylesheet"
-                                                      "href" (+ "file://" (abspath *feed-css*)) }))
+                                                      "href" (+ "file://" (abspath *feed-css*))}))
                 (assoc item
-                    "pagename"     pagename
-                    "author"       (get (:headers page) "from")
+                    "pagename"    pagename
+                    "author"      (get (:headers page) "from")
                     "pubdate"     (.strftime (.localize *utc* (get item "pubtime")) *rss-date-format*)
-                    "description"  (inner-html (fromstring (inline-css (tostring doc))))
+                    "description" (inner-html (fromstring (inline-css (tostring doc))))
                     "category"    (get (.split pagename "/") 0))
                 (.append items item)))
         items))
