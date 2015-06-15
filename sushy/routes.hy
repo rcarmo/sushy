@@ -2,11 +2,12 @@
     [bottle    [abort get :as handle-get request redirect response static-file view :as render-view]]
     [config    [*debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *home-page* *page-media-base* *page-route-base* *rss-date-format* *site-copyright* *site-description* *site-name* *static-path* *store-path*]]
     [datetime  [datetime]]
+    [feeds     [render-feed-items]]
     [logging   [getLogger]]
     [models    [search get-links get-all]]
     [os        [environ]]
     [pytz      [*utc*]]
-    [render    [render-page render-feed-items]]
+    [render    [render-page]]
     [store     [get-page]]
     [transform [apply-transforms inner-html]]
     [utils     [ttl-cache]])
