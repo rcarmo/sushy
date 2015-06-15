@@ -1,11 +1,12 @@
 (import 
     [bottle    [abort get :as handle-get request redirect response static-file view :as render-view]]
-    [config    [*debug-mode* *home-page* *page-media-base* *page-route-base* *site-description* *site-name* *static-path* *store-path*]]
-    [feeds     [render-feed render-sitemap]]
+    [config    [*debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *home-page* *page-media-base* *page-route-base* *rss-date-format* *site-copyright* *site-description* *site-name* *static-path* *store-path*]]
+    [datetime  [datetime]]
     [logging   [getLogger]]
-    [models    [search get-links]]
+    [models    [search get-links get-all]]
     [os        [environ]]
-    [render    [render-page]]
+    [pytz      [*utc*]]
+    [render    [render-page render-feed-items]]
     [store     [get-page]]
     [transform [apply-transforms inner-html]]
     [utils     [ttl-cache]])
@@ -42,28 +43,29 @@
 (with-decorator
     (ttl-cache 300)
     (handle-get "/rss")
+    (render-view "rss")
     (defn serve-feed []
-        (try
-            (let [[buffer (render-feed (base-url))]]
-                (setv (. response content-type) "application/rss+xml")
-                buffer)
-            (catch [e Exception]
-                (.error log (% "%s:%s serving feed" (, (type e) e)))  
-                (abort (int 503) "Error generating feed.")))))
+        (setv (. response content-type) "application/rss+xml")
+        {"pubdate"          (.strftime (.localize *utc* (.now datetime)) *rss-date-format*)
+         "items"            (render-feed-items)
+         "feed_ttl"         *feed-ttl*
+         "site_name"        *site-name*
+         "site_description" *site-description*
+         "site_copyright"   *site-copyright*
+         "page_route_base"  *page-route-base*
+         "base_url"         (base-url)}))
 
 
 ; Sitemap
 (with-decorator
     (ttl-cache 3600)
     (handle-get "/sitemap.xml")
+    (render-view "sitemap")
     (defn serve-sitemap []
-        (try
-            (let [[buffer (render-sitemap (base-url))]]
-                (setv (. response content-type) "text/xml")
-                buffer)
-            (catch [e Exception]
-                (.error log (% "%s:%s serving sitemap" (, (type e) e)))  
-                (abort (int 503) "Error generating sitemap.")))))
+        (setv (. response content-type) "text/xml")
+        {"items"            (get-all)
+         "page_route_base"  *page-route-base*
+         "base_url"         (base-url)}))
 
 
 ; robots.txt
@@ -86,7 +88,7 @@
         (setv (. response content-type) "text/xml")
         {"base_url"         (base-url)
          "site_description" *site-description*
-         "site_name"        *site-name*})
+         "site_name"        *site-name*}))
 
          
 ; search

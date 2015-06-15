@@ -20,6 +20,8 @@
 
 (def *feed-ttl* 30)
 
+(def *rss-date-format* "%a, %d %b %Y %H:%M:%S %z")
+
 (def *site-name* (.get environ "SITE_NAME" "Sushy"))
 
 (def *site-description* (.get environ "SITE_DESCRIPTION" "A Sushy-powered site"))
