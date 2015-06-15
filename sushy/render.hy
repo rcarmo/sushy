@@ -53,15 +53,15 @@
 
 
 (def render-map 
-   {"text/plain"          render-plaintext
-    "text/rst"            render-restructured-text ; unofficial, but let's be lenient
-    "text/x-rst"          render-restructured-text ; official
-    "text/x-web-markdown" render-markdown
-    "text/x-markdown"     render-markdown
-    "text/markdown"       render-markdown
-    "text/textile"        render-textile
-    "text/x-textile"      render-textile
-    "text/html"           render-html})
+    {"text/plain"          render-plaintext
+     "text/rst"            render-restructured-text ; unofficial, but let's be lenient
+     "text/x-rst"          render-restructured-text ; official
+     "text/x-web-markdown" render-markdown
+     "text/x-markdown"     render-markdown
+     "text/markdown"       render-markdown
+     "text/textile"        render-textile
+     "text/x-textile"      render-textile
+     "text/html"           render-html})
     
     
 (defn render-page [page]
