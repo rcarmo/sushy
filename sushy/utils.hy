@@ -12,6 +12,19 @@
 
 (def *datetime-format* "%Y%m%dT%H:%M:%S.%f")
 
+(def *gmt-format* "%a, %d %b %Y %H:%M:%S GMT")
+
+
+(defn report-route-arguments []
+    ; debugging decorator
+    (defn inner [func]
+        (defn wrapper-fn [&rest args &kwargs kwargs]
+            (.set-header response (str "Route-Arguments") (str [args kwargs]))
+            (apply func args kwargs))
+        wrapper-fn)
+    inner)
+
+
 (defn report-processing-time []
     ; timing decorator
     (defn inner [func]
