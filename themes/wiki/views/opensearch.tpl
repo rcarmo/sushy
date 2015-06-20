@@ -4,5 +4,5 @@
 <Description>{{site_description}}</Description>
 <InputEncoding>UTF-8</InputEncoding>
 <Image width="16" height="16" type="image/x-icon">{{base_url}}/favicon.ico</Image>
-<Url type="text/html" method="get" template="{{base_url}}/search/?q={searchTerms}"/>
+<Url type="text/html" method="get" template="{{base_url}}/search?q={searchTerms}"/>
 </OpenSearchDescription>
