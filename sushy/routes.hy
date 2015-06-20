@@ -1,16 +1,18 @@
-(import 
-    [bottle    [abort get :as handle-get request redirect response static-file view :as render-view]]
-    [config    [*debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *home-page* *page-media-base* *page-route-base* *rss-date-format* *site-copyright* *site-description* *site-name* *static-path* *store-path*]]
-    [datetime  [datetime]]
-    [feeds     [render-feed-items]]
-    [logging   [getLogger]]
-    [models    [search get-links get-all]]
-    [os        [environ]]
-    [pytz      [*utc*]]
-    [render    [render-page]]
-    [store     [get-page]]
-    [transform [apply-transforms inner-html]]
-    [utils     [ttl-cache report-processing-time]])
+(import
+    [bottle      [abort get :as handle-get request redirect response static-file view :as render-view]]
+    [config      [*debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *home-page* *page-media-base* *page-route-base* *rss-date-format* *site-copyright* *site-description* *site-name* *static-path* *store-path*]]
+    [datetime    [datetime]]
+    [email.utils [parsedate]]
+    [feeds       [render-feed-items]]
+    [logging     [getLogger]]
+    [models      [search get-links get-all get-metadata]]
+    [os          [environ]]
+    [pytz        [*utc*]]
+    [render      [render-page]]
+    [store       [get-page]]
+    [time        [mktime]]
+    [transform   [apply-transforms inner-html]]
+    [utils       [*gmt-format* lru-cache ttl-cache report-processing-time]])
 
 
 (setv log (getLogger))
@@ -18,6 +20,32 @@
 
 (defn base-url []
     (slice (. request url) 0 (- (len (. request path)))))
+
+ 
+(defn http-caching [page-key seconds]
+    ; http enrichment decorator
+    (defn inner [func]
+        (defn wrap-fn [&rest args &kwargs kwargs]
+            (let [[pagename    (get kwargs page-key)]
+                  [metadata    (get-metadata pagename)]
+                  [req-headers (. request headers)]]
+                (if metadata
+                    (let [[pragma (if seconds "public" "no-cache, must-revalidate")]
+                          [etag   (.format "W/\"{}\"" (get metadata "hash"))]]
+                        (if (and (in "If-Modified-Since" req-headers)
+                                 (<= (get metadata "mtime")
+                                     (.fromtimestamp datetime (mktime (parsedate (get req-headers "If-Modified-Since"))))))
+                            (abort (int 304) "Not modified"))
+                        (if (and (in "If-None-Match" req-headers)
+                                 (= etag (get req-headers "If-None-Match")))
+                            (abort (int 304) "Not modified"))
+                        (.set-header response (str "Etag") etag)
+                        (.set-header response (str "Last-Modified") (.strftime (get metadata "mtime") *gmt-format*))
+                        (.set-header response (str "Cache-Control") (.format "{}, max-age={}" pragma seconds))
+                        (.set-header response (str "Pragma") pragma))))
+            (apply func args kwargs))
+        wrap-fn)
+    inner)
 
 
 ; TODO: etags and HTTP header handling for caching
@@ -132,6 +160,7 @@
 (with-decorator 
     (handle-get (+ *page-route-base* "/<pagename:path>"))
     (report-processing-time)
+    (http-caching "pagename" 3600)
     (ttl-cache 30)
     (render-view "wiki")
     (defn wiki-page [pagename] 
