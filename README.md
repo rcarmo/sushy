@@ -14,7 +14,6 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 * Page aliasing (i.e., multiple URLs for a page)
 * Closest-match URLs (i.e., fix typos)
-* HTTP caching (`Etag`, `Last-Modified`, `HEAD` support, etc.)
 * Blog homepage/excerpts/archive navigation
 * Image thumbnailing
 * Site thumbnailing (for taking screenshots of external links)
@@ -22,6 +21,7 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Done
 
+* HTTP caching (`Etag`, `Last-Modified`, `HEAD` support, etc.)
 * Sitemap
 * OpenSearch support (search directly from the omnibar on some browsers)
 * CSS inlining for RSS feeds
