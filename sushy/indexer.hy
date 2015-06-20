@@ -1,4 +1,5 @@
 (import
+    [binascii           [b2a-base64]]
     [config             [*base-filenames* *bind-address* *store-path* *profiler* *update-socket* *indexer-count* *indexer-fanout* *indexer-control* *database-sink*]]
     [cProfile           [Profile]]
     [datetime           [datetime]]
@@ -66,7 +67,7 @@
           [links        (extract-internal-links doc)]]
         {"name"     pagename
          "body"     (if (hide-from-search? headers) "" plaintext)
-         "hash"     (.hexdigest (sha1 (.encode plaintext "utf-8")))
+         "hash"     (.strip (b2a-base64 (.digest (sha1 (.encode plaintext "utf-8")))))
          "title"    (.get headers "title" "Untitled")
          "tags"     (transform-tags (.get headers "tags" ""))
          ; this allows us to override the filesystem modification time through front matter
