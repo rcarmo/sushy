@@ -10,7 +10,7 @@
     [render    [render-page]]
     [store     [get-page]]
     [transform [apply-transforms inner-html]]
-    [utils     [ttl-cache]])
+    [utils     [ttl-cache report-processing-time]])
 
 
 (setv log (getLogger))
@@ -42,8 +42,9 @@
 
 ; RSS feed
 (with-decorator
-    (ttl-cache 300)
     (handle-get "/rss")
+    (report-processing-time)
+    (ttl-cache 300)
     (render-view "rss")
     (defn serve-feed []
         (setv (. response content-type) "application/rss+xml")
@@ -59,8 +60,9 @@
 
 ; Sitemap
 (with-decorator
-    (ttl-cache 3600)
     (handle-get "/sitemap.xml")
+    (report-processing-time)
+    (ttl-cache 3600)
     (render-view "sitemap")
     (defn serve-sitemap []
         (setv (. response content-type) "text/xml")
@@ -71,8 +73,9 @@
 
 ; robots.txt
 (with-decorator
-    (ttl-cache 3600)
     (handle-get "/robots.txt")
+    (report-processing-time)
+    (ttl-cache 3600)
     (render-view "robots")
     (defn serve-robots []
         (setv (. response content-type) "text/plain")
@@ -82,8 +85,9 @@
 
 ; OpenSearch metadata
 (with-decorator
-    (ttl-cache 3600)
     (handle-get "/opensearch.xml")
+    (report-processing-time)
+    (ttl-cache 3600)
     (render-view "opensearch")
     (defn handle-opensearch []
         (setv (. response content-type) "text/xml")
@@ -95,13 +99,19 @@
 ; search
 (with-decorator
     (handle-get "/search")
+    (report-processing-time)
+    (ttl-cache 30 "q")
     (render-view "search")
     (defn handle-search []
         (if (in "q" (.keys (. request query)))
-            {"results" (search (. request query q))
-             "query"   (. request query q)
-             "headers" {}}
-            {"headers" {}})))
+            {"results"          (search (. request query q))
+             "query"            (. request query q)
+             "headers"          {}
+             "site_description" *site-description*
+             "site_name"        *site-name*}
+            {"headers"          {}
+             "site_description" *site-description*
+             "site_name"        *site-name*})))
 
             
 ; static files
@@ -121,6 +131,8 @@
 ; page content
 (with-decorator 
     (handle-get (+ *page-route-base* "/<pagename:path>"))
+    (report-processing-time)
+    (ttl-cache 30)
     (render-view "wiki")
     (defn wiki-page [pagename] 
         ; TODO: fuzzy URL matching, error handling

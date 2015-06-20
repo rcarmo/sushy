@@ -1,5 +1,6 @@
-(import 
+(import
     [collections [OrderedDict]]
+    [bottle      [request response]]
     [datetime    [datetime]]
     [functools   [wraps]]
     [logging     [getLogger]]
@@ -11,58 +12,75 @@
 
 (def *datetime-format* "%Y%m%dT%H:%M:%S.%f")
 
+(defn report-processing-time []
+    ; timing decorator
+    (defn inner [func]
+        (defn timed-fn [&rest args &kwargs kwargs]
+            (let [[start (time)]
+                  [result (apply func args kwargs)]]
+                (.set-header response (str "Processing-Time") (+ (str (int (* 1000 (- (time) start)))) "ms"))
+                result))
+        timed-fn)
+    inner)
+
+
 (defn memoize []
     ; memoization decorator
     (defn inner [func]
         (setv cache {})
-        (defn memoized-fn [&rest args]
-            (let [[result nil]]
-                (if (in args cache)
-                    (.get cache args)
-                    (setv result (apply func args)))
-            (.setdefault cache args result)))
+        (defn memoized-fn [&rest args &kwargs kwargs]
+            (let [[result nil]
+                  [key (, args (tuple kwargs))]]
+                (if (in key cache)
+                    (.get cache key)
+                    (setv result (apply func args kwargs)))
+                (.setdefault cache key result)))
        memoized-fn)
     inner)
 
 
-(defn lru-cache [&optional [limit 100]]
+(defn lru-cache [&optional [limit 100] [query-field nil]]
     ; LRU cache memoization decorator
     (defn inner [func]
         (setv cache (OrderedDict))
-        (defn cached-fn [&rest args]
-            (let [[result nil]]
+        (defn cached-fn [&rest args &kwargs kwargs]
+            (let [[result nil]
+                  [tag (if query-field (get (. request query) query-field))]
+                  [key (, tag args (tuple kwargs))]]
                 (try
-                    (setv result (.pop cache args))
+                    (setv result (.pop cache key))
                     (catch [e KeyError]
-                        (setv result (apply func args))
+                        (setv result (apply func args kwargs))
                 (if (> (len cache) limit)
                     (.popitem cache 0))))
-                (setv (get cache args) result)
+                (setv (get cache key) result)
                 result))
         cached-fn)
     inner)
 
 
-(defn ttl-cache [&optional [ttl 30]]
+(defn ttl-cache [&optional [ttl 30] [query-field nil]]
     ; memoization decorator with time-to-live
     (defn inner [func]
         (setv cache {})
-        (defn cached-fn [&rest args]
+        (defn cached-fn [&rest args &kwargs kwargs]
             (let [[now      (time)]
+                  [tag      (if query-field (get (. request query) query-field))]
+                  [key      (, tag args (tuple kwargs))]
                   [to-check (sample (.keys cache) (int (/ (len cache) 4)))]]
                 ; check current arguments and 25% of remaining keys 
-                (.append to-check args)
+                (.append to-check key)
 
                 (for [k to-check]
                     (let [[(, good-until value) (.get cache k (, now nil))]]
                         (if (< good-until now)
                             (del (get cache k)))))
 
-                (if (in args cache)
-                    (let [[(, good-until value) (get cache args)]]
+                (if (in key cache)
+                    (let [[(, good-until value) (get cache key)]]
                         value)
-                    (let [[value (apply func args)]]
-                        (assoc cache args (, (+ now ttl) value))
+                    (let [[value (apply func args kwargs)]]
+                        (assoc cache key (, (+ now ttl) value))
                         value))))
         cached-fn)
     inner)
