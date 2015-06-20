@@ -9,7 +9,7 @@
         <meta name="theme-color" content="#4c9220">
         <title>{{!headers["title"]}}</title>
         <link rel="shortcut icon" href="/static/favicon.ico">
-        <link rel="search" type="application/opensearchdescription+xml" title="{{site_name}}" href="/opensearch.xml" />
+        <link rel="search" type="application/opensearchdescription+xml" title="{{site_name}}" href="/opensearch.xml"/>
         <link rel="apple-touch-icon-precomposed" href="http://cdn.ink.sapo.pt/3.1.1/img/touch-icon.57.png">
         <link rel="apple-touch-icon-precomposed" sizes="72x72" href="http://cdn.ink.sapo.pt/3.1.1/img/touch-icon.72.png">
         <link rel="apple-touch-icon-precomposed" sizes="114x114" href="http://cdn.ink.sapo.pt/3.1.1/img/touch-icon.114.png">
