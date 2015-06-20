@@ -22,8 +22,8 @@
     (slice (. request url) 0 (- (len (. request path)))))
 
  
+; HTTP enrichment decorator - note that bottle automatically maps HEAD to GET, so no special handling is required for that.
 (defn http-caching [page-key seconds]
-    ; http enrichment decorator
     (defn inner [func]
         (defn wrap-fn [&rest args &kwargs kwargs]
             (let [[pagename    (get kwargs page-key)]
@@ -46,9 +46,7 @@
             (apply func args kwargs))
         wrap-fn)
     inner)
-
-
-; TODO: etags and HTTP header handling for caching
+    
 
 (with-decorator 
     (handle-get "/")
