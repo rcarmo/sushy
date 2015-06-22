@@ -94,8 +94,11 @@
     (render-view "debug")
     (defn debug-dump []
         (if *debug-mode*
-            {"headers" {"title" "Environment dump"}
-             "environ"  (dict environ)}
+            {"base_url"         (base-url)
+             "environ"          (dict environ)
+             "headers"          {"title" "Environment dump"}
+             "site_description" *site-description*
+             "site_name"        *site-name*}
             (abort (int 404) "Page Not Found"))))
 
 
