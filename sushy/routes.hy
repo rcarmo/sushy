@@ -68,7 +68,7 @@
                                  (<= (get metadata "mtime")
                                      (.fromtimestamp datetime (mktime (parsedate (get req-headers "If-Modified-Since"))))))
                             (abort (int 304) "Not modified"))
-                        (.set-header response (str "Etag") etag)
+                        (.set-header response (str "ETag") etag)
                         (.set-header response (str "Last-Modified") (.strftime (get metadata "mtime") *gmt-format*))
                         (.set-header response (str "Expires") (.strftime (+ (.now datetime) (apply relativedelta [] {"seconds" seconds})) *gmt-format*))
                         (.set-header response (str "Cache-Control") (.format "{}, max-age={}" pragma seconds))
