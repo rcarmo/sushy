@@ -1,8 +1,10 @@
 (import
     [collections [OrderedDict]]
+    [binascii    [b2a-base64]]
     [bottle      [request response]]
     [datetime    [datetime]]
     [functools   [wraps]]
+    [hashlib     [sha1]]
     [logging     [getLogger]]
     [PIL         [Image]]
     [random      [sample]]
@@ -13,6 +15,18 @@
 (def *datetime-format* "%Y%m%dT%H:%M:%S.%f")
 
 (def *gmt-format* "%a, %d %b %Y %H:%M:%S GMT")
+
+
+(defn base-url []
+    (slice (. request url) 0 (- (len (. request path)))))
+
+; a little hash helper
+(defn compact-hash [&rest args]
+    (let [[hash (sha1)]]
+        (for [a args]
+            (.update hash (str a)))
+        (.strip (b2a-base64 (.digest hash)))))
+
 
 (defn report-processing-time []
     ; timing decorator
@@ -32,7 +46,7 @@
         (setv cache {})
         (defn memoized-fn [&rest args &kwargs kwargs]
             (let [[result nil]
-                  [key (, args (tuple kwargs))]]
+                  [key (compact-hash args kwargs)]]
                 (if (in key cache)
                     (.get cache key)
                     (setv result (apply func args kwargs)))
@@ -48,7 +62,7 @@
         (defn cached-fn [&rest args &kwargs kwargs]
             (let [[result nil]
                   [tag (if query-field (get (. request query) query-field))]
-                  [key (, tag args (tuple kwargs))]]
+                  [key (compact-hash tag args kwargs)]]
                 (try
                     (setv result (.pop cache key))
                     (catch [e KeyError]
@@ -68,7 +82,7 @@
         (defn cached-fn [&rest args &kwargs kwargs]
             (let [[now      (time)]
                   [tag      (if query-field (get (. request query) query-field))]
-                  [key      (, tag args (tuple kwargs))]
+                  [key      (compact-hash tag args kwargs)]
                   [to-check (sample (.keys cache) (int (/ (len cache) 4)))]]
                 ; check current arguments and 25% of remaining keys 
                 (.append to-check key)

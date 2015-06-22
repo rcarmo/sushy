@@ -1,12 +1,10 @@
 (import
-    [binascii    [b2a-base64]]
-    [bottle      [abort get :as handle-get request redirect response static-file view :as render-view template]]
-    [config      [*debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *home-page* *page-media-base* *page-route-base* *rss-date-format* *site-copyright* *site-description* *site-name* *static-path* *store-path*]]
+    [bottle      [abort get :as handle-get request redirect response static-file view :as render-view]]
+    [config      [*debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *home-page* *layout-hash* *page-media-base* *page-route-base* *rss-date-format* *site-copyright* *site-description* *site-name* *static-path* *store-path*]]
     [datetime    [datetime]]
     [dateutil.relativedelta  [relativedelta]]
     [email.utils [parsedate]]
     [feeds       [render-feed-items]]
-    [hashlib     [sha1]]
     [logging     [getLogger]]
     [models      [search get-links get-all get-metadata get-latest]]
     [os          [environ]]
@@ -15,26 +13,10 @@
     [store       [get-page]]
     [time        [mktime]]
     [transform   [apply-transforms inner-html]]
-    [utils       [*gmt-format* lru-cache ttl-cache report-processing-time]])
+    [utils       [*gmt-format* base-url compact-hash lru-cache ttl-cache report-processing-time]])
 
 
 (setv log (getLogger))
-
-
-(defn base-url []
-    (slice (. request url) 0 (- (len (. request path)))))
-
-
-; compute a sha1 hash for the HTML layout, so that etag generation is related to HTTP payload
-(def *layout-hash* (.hexdigest (sha1 (template "layout" {"base" "" "headers" {"title" ""} "site_name" "" "site_description" ""}))))
-
-
-; a little etag helper
-(defn compute-etag [&rest args]
-    (let [[hash (sha1)]]
-        (for [a args]
-            (.update hash a))
-        (.format "W/\"{}\"" (.strip (b2a-base64 (.digest hash))))))
 
 
 ; grab page metadata or generate a minimal shim based on the last update
@@ -60,7 +42,7 @@
                   [req-headers (. request headers)]]
                 (if metadata
                     (let [[pragma (if seconds "public" "no-cache, must-revalidate")]
-                          [etag   (compute-etag etag-seed content-type (get metadata "hash"))]]
+                          [etag   (.format "W/\"{}\"" (compact-hash etag-seed content-type (get metadata "hash")))]]
                         (if (and (in "If-None-Match" req-headers)
                                  (= etag (get req-headers "If-None-Match")))
                             (abort (int 304) "Not modified"))
@@ -110,14 +92,14 @@
     (ttl-cache (/ *feed-ttl* 4))
     (render-view "rss")
     (defn serve-feed []
-        {"pubdate"          (.strftime (.localize *utc* (.now datetime)) *rss-date-format*)
-         "items"            (render-feed-items)
+        {"base_url"         (base-url)
          "feed_ttl"         *feed-ttl*
-         "site_name"        *site-name*
-         "site_description" *site-description*
-         "site_copyright"   *site-copyright*
+         "items"            (render-feed-items)
          "page_route_base"  *page-route-base*
-         "base_url"         (base-url)}))
+         "pubdate"          (.strftime (.localize *utc* (.now datetime)) *rss-date-format*)
+         "site_copyright"   *site-copyright*
+         "site_description" *site-description*
+         "site_name"        *site-name*}))
 
 
 ; Sitemap
@@ -129,9 +111,9 @@
     (render-view "sitemap")
     (defn serve-sitemap []
         (setv (. response content-type) "text/xml")
-        {"items"            (get-all)
-         "page_route_base"  *page-route-base*
-         "base_url"         (base-url)}))
+        {"base_url"         (base-url)
+         "items"            (get-all)
+         "page_route_base"  *page-route-base*}))
 
 
 ; robots.txt
@@ -168,9 +150,9 @@
     (render-view "search")
     (defn handle-search []
         (if (in "q" (.keys (. request query)))
-            {"results"          (search (. request query q))
+            {"headers"          {}
              "query"            (. request query q)
-             "headers"          {}
+             "results"          (search (. request query q))
              "site_description" *site-description*
              "site_name"        *site-name*}
             {"headers"          {}
@@ -202,9 +184,10 @@
     (defn wiki-page [pagename] 
         ; TODO: fuzzy URL matching, error handling
         (let [[page (get-page pagename)]]
-            {"headers"   (:headers page)
-             "pagename"  pagename
-             "base_url"  *page-route-base*
-             "site_name" *site-name*
-             "seealso"   (list (get-links pagename))
-             "body"      (inner-html (apply-transforms (render-page page) pagename))})))
+            {"base_url"         (base-url)
+             "body"             (inner-html (apply-transforms (render-page page) pagename))            
+             "headers"          (:headers page)
+             "pagename"         pagename
+             "seealso"          (list (get-links pagename))
+             "site_description" *site-description*
+             "site_name"        *site-name*})))

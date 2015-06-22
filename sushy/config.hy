@@ -1,5 +1,6 @@
 (import
-    [bottle         [*template-path*]]
+    [bottle         [*template-path* template]]
+    [hashlib        [sha1]]
     [logging        [getLogger basicConfig *debug* *info*]]
     [logging.config [dictConfig]]
     [os             [environ]]
@@ -110,3 +111,6 @@
 
 ; prepend the theme template path to bottle's search list
 (.insert *template-path* 0 (abspath *view-path*))
+
+; compute a sha1 hash for the HTML layout, so that etag generation is related to HTTP payload
+(def *layout-hash* (.hexdigest (sha1 (template "layout" {"base" "" "headers" {"title" ""} "site_name" "" "site_description" ""}))))
