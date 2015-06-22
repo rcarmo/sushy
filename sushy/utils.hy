@@ -22,9 +22,7 @@
 
 ; a little hash helper
 (defn compact-hash [&rest args]
-    (let [[hash (sha1)]]
-        (for [a args]
-            (.update hash (str a)))
+    (let [[hash (sha1 (str args))]]
         (.strip (b2a-base64 (.digest hash)))))
 
 
