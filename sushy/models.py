@@ -4,7 +4,6 @@ from playhouse.sqlite_ext import *
 from playhouse.kv import PickledKeyStore
 import datetime
 from dateutil.relativedelta import relativedelta
-from utils import ttl_cache
 
 log = logging.getLogger(__name__)
 
@@ -102,7 +101,6 @@ def index_wiki_page(**kwargs):
         return page
 
 
-@ttl_cache(30)
 def get_metadata(name):
     try:
         with db.transaction():
@@ -137,7 +135,7 @@ def get_links(page_name):
                 yield page
     except OperationalError as e:
         log.warn(e)
-        return
+        return        
 
 
 def get_latest(limit=20, months_ago=6):
