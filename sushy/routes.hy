@@ -55,7 +55,7 @@
     (defn inner [func]
         (defn wrap-fn [&rest args &kwargs kwargs]
             (let [[pagename    (if page-key (get kwargs page-key) nil)]
-                  [etag-seed   (if page-key *layout-hash* (. request path))] 
+                  [etag-seed   (if page-key *layout-hash* (. request url))] 
                   [metadata    (wrap-metadata pagename)]
                   [req-headers (. request headers)]]
                 (if metadata
