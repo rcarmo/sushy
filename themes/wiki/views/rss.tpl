@@ -5,7 +5,7 @@
 <link>{{base_url}}</link>
 <description>{{site_description}}</description>
 <copyright>{{site_copyright}}</copyright>
-<ttl>{{feed_ttl}}</ttl>
+<ttl>{{feed_ttl/60}}</ttl>
 <pubDate>{{pubdate}}</pubDate>
 <lastBuildDate>{{pubdate}}</lastBuildDate>
 <generator>sushy</generator>

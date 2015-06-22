@@ -103,8 +103,8 @@
 (with-decorator
     (handle-get "/rss")
     (report-processing-time)
-    (http-caching nil "application/rss+xml" 1800)
-    (ttl-cache 300)
+    (http-caching nil "application/rss+xml" *feed-ttl*)
+    (ttl-cache (/ *feed-ttl* 4))
     (render-view "rss")
     (defn serve-feed []
         {"pubdate"          (.strftime (.localize *utc* (.now datetime)) *rss-date-format*)
@@ -121,8 +121,8 @@
 (with-decorator
     (handle-get "/sitemap.xml")
     (report-processing-time)
-    (http-caching nil "text/xml" 3600)
-    (ttl-cache 3600)
+    (http-caching nil "text/xml" *feed-ttl*)
+    (ttl-cache (/ *feed-ttl* 4))
     (render-view "sitemap")
     (defn serve-sitemap []
         (setv (. response content-type) "text/xml")

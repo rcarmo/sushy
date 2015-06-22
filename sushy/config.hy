@@ -18,7 +18,7 @@
 
 (def *feed-css* (.get environ "FEED_CSS" "themes/wiki/static/css/rss.css"))
 
-(def *feed-ttl* 30)
+(def *feed-ttl* 1800); in seconds
 
 (def *rss-date-format* "%a, %d %b %Y %H:%M:%S %z")
 
