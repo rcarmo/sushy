@@ -6,7 +6,7 @@
     [email.utils [parsedate]]
     [feeds       [render-feed-items]]
     [logging     [getLogger]]
-    [models      [search get-links get-all get-metadata get-latest]]
+    [models      [search get-links get-all get-closest-matches get-metadata get-latest]]
     [os          [environ]]
     [pytz        [*utc*]]
     [render      [render-page]]
@@ -182,12 +182,18 @@
     (ttl-cache 30)
     (render-view "wiki")
     (defn wiki-page [pagename] 
-        ; TODO: fuzzy URL matching, error handling
-        (let [[page (get-page pagename)]]
-            {"base_url"         (base-url)
-             "body"             (inner-html (apply-transforms (render-page page) pagename))            
-             "headers"          (:headers page)
-             "pagename"         pagename
-             "seealso"          (list (get-links pagename))
-             "site_description" *site-description*
-             "site_name"        *site-name*})))
+        (try
+            (let [[page (get-page pagename)]]
+                {"base_url"         (base-url)
+                 "body"             (inner-html (apply-transforms (render-page page) pagename))            
+                 "headers"          (:headers page)
+                 "pagename"         pagename
+                 "seealso"          (list (get-links pagename))
+                 "site_description" *site-description*
+                 "site_name"        *site-name*})
+            (except [e IOError]
+                (try
+                    (let [[match (get (.next (get-closest-matches pagename)) "name")]]
+                        (redirect (+ *page-route-base* "/" match)))
+                    (except [e StopIteration]
+                        (abort (int 404) "Page not found")))))))
