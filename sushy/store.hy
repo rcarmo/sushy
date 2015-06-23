@@ -37,7 +37,7 @@
               {:headers headers
                :body    body})
         (catch [e Exception]
-            (.exception log "Could not parse page")
+            (.error log "Could not parse page")
             (throw (IOError "Invalid Page Format.")))))
 
 
@@ -65,13 +65,16 @@
 (defn get-page [pagename]
     ; return the raw data for a page 
     (.debug log (join *store-path* pagename))
-    (let [[path         (join *store-path* pagename)]
-          [page         (.next (filter (fn [item] (exists (join path item))) *base-filenames*))]
-          [filename     (join *store-path* pagename page)]
-          [content-type (get *base-types* (get (splitext page) 1))]]
-        (parse-page
-          (.read
-            (apply open [filename] {"mode" "r" "encoding" "utf-8"})) content-type)))
+    (try
+        (let [[path         (join *store-path* pagename)]
+              [page         (.next (filter (fn [item] (exists (join path item))) *base-filenames*))]
+              [filename     (join *store-path* pagename page)]
+            [content-type (get *base-types* (get (splitext page) 1))]]
+            (parse-page
+                (.read
+                    (apply open [filename] {"mode" "r" "encoding" "utf-8"})) content-type))
+        (catch [e StopIteration]
+            (throw (IOError "page not found")))))
 
 
 (defn filtered-names [folder-list]
