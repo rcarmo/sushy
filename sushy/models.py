@@ -138,13 +138,19 @@ def get_links(page_name):
         return        
 
 
-def get_latest(limit=20, months_ago=6):
+def get_latest(limit=20, regexp=None):
     with db.transaction():
-        query = (Page.select()
-                .where(Page.mtime >= (datetime.datetime.now() + relativedelta(months=-months_ago)))
-                .order_by(SQL('mtime').desc())
-                .limit(limit)
-                .dicts())
+        if regexp:
+            query = (Page.select()
+                    .where(Page.name.regexp(regexp))
+                    .order_by(SQL('mtime').desc())
+                    .limit(limit)
+                    .dicts())
+        else:
+            query = (Page.select()
+                    .order_by(SQL('mtime').desc())
+                    .limit(limit)
+                    .dicts())
 
         for page in query:
             yield page
