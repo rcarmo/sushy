@@ -29,7 +29,7 @@ PROFILES=$(wildcard *.pstats)
 CALL_DIAGRAMS=$(PROFILES:.pstats=.png)
 
 repl:
-	hy
+	hy -i "(import sushy.app)"
 
 deps:
 	pip install -U -r requirements.txt
