@@ -2,26 +2,23 @@
     [config             [*base-filenames* *bind-address* *store-path* *profiler* *update-socket* *indexer-count* *indexer-fanout* *indexer-control* *database-sink*]]
     [cProfile           [Profile]]
     [datetime           [datetime]]
-    [dateutil.parser    [parse :as parse-date]]
     [hashlib            [sha1]]
     [json               [dumps]]
     [logging            [getLogger Formatter]]
     [models             [db add-wiki-link index-wiki-page init-db]]
     [os.path            [basename dirname]]
     [pstats             [Stats]]
-    [pytz               [timezone]]
     [render             [render-page]]
     [store              [is-page? gen-pages get-page]]
     [time               [sleep time]]
     [transform          [apply-transforms extract-internal-links extract-plaintext]]
+    [utils              [utc-date]]
     [watchdog.observers [Observer]]
     [watchdog.events    [FileSystemEventHandler]]
     [zmq                [Context Poller *pub* *sub* *push* *pull* *sndhwm* *rcvhwm* *pollin* *subscribe*]])
 
 
 (setv log (getLogger --name--))
-
-(setv *utc* (timezone "UTC"))
 
 (def *logging-modulo* 10)
 
@@ -42,16 +39,6 @@
                     false))
             ["x-index" "index" "search"])
         false))
-
-
-(defn utc-date [string fallback]
-    (let [[date (try
-                    (parse-date string)
-                    (catch [e Exception]
-                        fallback))]]
-        (if (. date tzinfo)
-            (.astimezone date *utc*)
-            date)))
 
 
 (defn gather-item-data [item]

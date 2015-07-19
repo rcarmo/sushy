@@ -1,14 +1,16 @@
 (import
-    [collections [OrderedDict]]
-    [binascii    [b2a-base64]]
-    [bottle      [request response]]
-    [datetime    [datetime]]
-    [functools   [wraps]]
-    [hashlib     [sha1]]
-    [logging     [getLogger]]
-    [PIL         [Image]]
-    [random      [sample]]
-    [time        [time]])
+    [collections        [OrderedDict]]
+    [binascii           [b2a-base64]]
+    [bottle             [request response]]
+    [datetime           [datetime]]
+    [dateutil.parser    [parse :as parse-date]]
+    [functools          [wraps]]
+    [hashlib            [sha1]]
+    [logging            [getLogger]]
+    [PIL                [Image]]
+    [pytz               [timezone]]
+    [random             [sample]]
+    [time               [time]])
 
 (setv log (getLogger))
 
@@ -16,6 +18,7 @@
 
 (def *gmt-format* "%a, %d %b %Y %H:%M:%S GMT")
 
+(setv *utc* (timezone "UTC"))
 
 (defn base-url []
     (slice (. request url) 0 (- (len (. request path)))))
@@ -121,6 +124,16 @@
                       ""))
                   ["retry" "id" "event" "data"]))
         "\n"))
+
+
+(defn utc-date [string fallback]
+    (let [[date (try
+                    (parse-date string)
+                    (catch [e Exception]
+                        fallback))]]
+        (if (. date tzinfo)
+            (.astimezone date *utc*)
+            date)))
 
 
 (defmacro timeit [block iterations]
