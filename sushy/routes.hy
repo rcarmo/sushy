@@ -36,27 +36,29 @@
 (defn http-caching [page-key content-type seconds]
     (defn inner [func]
         (defn wrap-fn [&rest args &kwargs kwargs]
-            (let [[pagename    (if page-key (get kwargs page-key) nil)]
-                  [etag-seed   (if page-key *layout-hash* (. request url))] 
-                  [metadata    (wrap-metadata pagename)]
-                  [req-headers (. request headers)]]
-                (if metadata
-                    (let [[pragma (if seconds "public" "no-cache, must-revalidate")]
-                          [etag   (.format "W/\"{}\"" (compact-hash etag-seed content-type (get metadata "hash")))]]
-                        (if (and (in "If-None-Match" req-headers)
-                                 (= etag (get req-headers "If-None-Match")))
-                            (abort (int 304) "Not modified"))
-                        (if (and (in "If-Modified-Since" req-headers)
-                                 (<= (get metadata "mtime")
-                                     (.fromtimestamp datetime (mktime (parsedate (get req-headers "If-Modified-Since"))))))
-                            (abort (int 304) "Not modified"))
-                        (.set-header response (str "ETag") etag)
-                        (.set-header response (str "Last-Modified") (.strftime (get metadata "mtime") *gmt-format*))
-                        (.set-header response (str "Expires") (.strftime (+ (.now datetime) (apply relativedelta [] {"seconds" seconds})) *gmt-format*))
-                        (.set-header response (str "Cache-Control") (.format "{}, max-age={}" pragma seconds))
-                        (.set-header response (str "Pragma") pragma))))
-                (.set-header response (str "Content-Type") content-type)
-            (apply func args kwargs))
+            (if *debug-mode*
+                (apply func args kwargs)
+                (let [[pagename    (if page-key (get kwargs page-key) nil)]
+                      [etag-seed   (if page-key *layout-hash* (. request url))] 
+                      [metadata    (wrap-metadata pagename)]
+                      [req-headers (. request headers)]]
+                    (if metadata
+                        (let [[pragma (if seconds "public" "no-cache, must-revalidate")]
+                              [etag   (.format "W/\"{}\"" (compact-hash etag-seed content-type (get metadata "hash")))]]
+                            (if (and (in "If-None-Match" req-headers)
+                                     (= etag (get req-headers "If-None-Match")))
+                                (abort (int 304) "Not modified"))
+                            (if (and (in "If-Modified-Since" req-headers)
+                                     (<= (get metadata "mtime")
+                                         (.fromtimestamp datetime (mktime (parsedate (get req-headers "If-Modified-Since"))))))
+                                (abort (int 304) "Not modified"))
+                            (.set-header response (str "ETag") etag)
+                            (.set-header response (str "Last-Modified") (.strftime (get metadata "mtime") *gmt-format*))
+                            (.set-header response (str "Expires") (.strftime (+ (.now datetime) (apply relativedelta [] {"seconds" seconds})) *gmt-format*))
+                            (.set-header response (str "Cache-Control") (.format "{}, max-age={}" pragma seconds))
+                            (.set-header response (str "Pragma") pragma)))))
+                    (.set-header response (str "Content-Type") content-type)
+                (apply func args kwargs))
         wrap-fn)
     inner)
 
