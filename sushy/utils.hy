@@ -106,13 +106,17 @@
 (with-decorator (lru-cache)
     (defn get-image-size [filename]
         ; extract image size information from a given filename
-        (try
-            (let [[im   (.open Image filename)]
-                  [size (. im size)]]
-                size)
-        (catch [e Exception]
-            (.warn log (% "Could not extract size from %s" filename))
-            nil))))
+        (let [[im nil]]
+            (try
+                (do
+                    (setv im (.open Image filename))
+                    (let [[size (. im size)]]
+                        (.close im)
+                        size))
+            (catch [e Exception]
+                (if im (.close im))
+                (.warn log (% "Could not extract size from %s" filename))
+                nil)))))
 
            
 (defn sse-pack [data]

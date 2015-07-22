@@ -69,10 +69,11 @@
         (let [[path         (join *store-path* pagename)]
               [page         (.next (filter (fn [item] (exists (join path item))) *base-filenames*))]
               [filename     (join *store-path* pagename page)]
-            [content-type (get *base-types* (get (splitext page) 1))]]
-            (parse-page
-                (.read
-                    (apply open [filename] {"mode" "r" "encoding" "utf-8"})) content-type))
+              [content-type (get *base-types* (get (splitext page) 1))]
+              [handle        (apply open [filename] {"mode" "r" "encoding" "utf-8"})]
+              [buffer        (.read handle)]]
+            (.close handle)
+            (parse-page buffer content-type))
         (catch [e StopIteration]
             (throw (IOError "page not found")))))
 
