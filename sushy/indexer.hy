@@ -1,5 +1,5 @@
 (import
-    [config             [*base-filenames* *bind-address* *store-path* *profiler* *update-socket* *indexer-count* *indexer-fanout* *indexer-control* *database-sink*]]
+    [config             [*base-filenames* *bind-address* *store-path* *profiler*]]
     [cProfile           [Profile]]
     [datetime           [datetime]]
     [hashlib            [sha1]]
@@ -14,8 +14,7 @@
     [transform          [apply-transforms extract-internal-links extract-plaintext]]
     [utils              [utc-date]]
     [watchdog.observers [Observer]]
-    [watchdog.events    [FileSystemEventHandler]]
-    [zmq                [Context Poller *pub* *sub* *push* *pull* *sndhwm* *rcvhwm* *pollin* *subscribe*]])
+    [watchdog.events    [FileSystemEventHandler]])
 
 
 (setv log (getLogger --name--))
@@ -99,9 +98,7 @@
     ; handle file notifications
     [[--init--
         (fn [self]
-            (let [[ctx (Context)]
-                  [(. self sock) (.socket ctx *pub*)]]
-                (.bind (. self sock) *update-socket*)))]
+            (.debug log "preparing to listen for filesystem events"))]
 
      [on-any-event ; TODO: handle deletions and moves separately
         (fn [self event]
@@ -110,8 +107,7 @@
                 (if (in filename *base-filenames*)
                     (index-one
                         {:path (slice path (+ 1 (len *store-path*)))
-                         :mtime (time)}
-                        (. self sock)))))]])
+                         :mtime (time)}))))]])
 
 
 (defn observer [path]

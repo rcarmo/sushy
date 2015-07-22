@@ -11,7 +11,6 @@ pillow>=2.9.0
 pygments>=2.0.2
 python-dateutil>=2.4.2
 pytz>=2015.4
-pyzmq>=14.7.0
 smartypants>=1.8.6
 textile>=2.2.2
 uWSGI>=2.0.11
