@@ -37,18 +37,6 @@
 
 (def *http-port* (.get environ "PORT" "8080"))
 
-; TODO: rename sockets for consistency
-
-(def *update-socket* (.get environ "UPDATE_SOCKET" "ipc:///tmp/sushy-updates"))
-
-(def *indexer-fanout* (.get environ "INDEXER_FANOUT_SOCKET" "ipc:///tmp/sushy-indexer"))
-
-(def *indexer-control* (.get environ "INDEXER_CONTROL_SOCKET" "ipc:///tmp/sushy-control"))
-
-(def *indexer-count* (.get environ "INDEXER_COUNT_SOCKET" "ipc:///tmp/sushy-count"))
-
-(def *database-sink* (.get environ "DATABASE_SINK" "ipc:///tmp/sushy-writer"))
-
 (def *page-route-base* "/space")
 
 (def *page-media-base* "/media")
