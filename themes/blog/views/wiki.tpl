@@ -1,5 +1,6 @@
 <%
 from sushy.utils import utc_date
+from sushy.models import get_next_page, get_prev_page
 
 def fuzzy_time(date):
     intervals = {
@@ -43,13 +44,34 @@ end
 
 <div class="container content">
     <h1 class="post-title">{{!headers["title"]}}</h1>
-    <section id="main">
-       <p> By {{!metadata}}</p>
+    <span class="post-date"> By {{!metadata}}</span>
     <hr>
+    <section id="main">
     {{!body}}
     </section>
+</div>
+<div class="container related">
+<%
+p, n = get_prev_page(pagename), get_next_page(pagename)
+
+if p:
+%>
+<span class="left">
+&laquo; <em>Previous:</em> <a href="{{base_url + page_route_base + "/" + p["name"]}}">{{!p["title"]}}</a>
+</span>
+<%
+end
+
+if n:
+%>
+<span class="right">
+<em>Next:</em> <a href="{{base_url + page_route_base + "/" + n["name"]}}">{{!n["title"]}}</a> &raquo; 
+</span>
+<%
+end
+%>
 </div>
 <div class="container">
 %include('seealso')
 </div>
-%rebase('layout', base_url=base_url, headers=headers, pagename=pagename, seealso=seealso, site_name=site_name, scripts=['eventsource.js','utils.js','app.js'])
+%rebase('layout', **dict(globals()))

@@ -81,6 +81,7 @@
             {"base_url"         (base-url)
              "environ"          (dict environ)
              "headers"          {"title" "Environment dump"}
+             "page_route_base"  *page-route-base*
              "site_description" *site-description*
              "site_name"        *site-name*}
             (abort (int 404) "Page Not Found"))))
@@ -154,12 +155,14 @@
         (if (in "q" (.keys (. request query)))
             {"base_url"         (base-url)
              "headers"          {}
+             "page_route_base"  *page-route-base*
              "query"            (. request query q)
              "results"          (search (. request query q))
              "site_description" *site-description*
              "site_name"        *site-name*}
             {"base_url"         (base-url)
              "headers"          {}
+             "page_route_base"  *page-route-base*
              "site_description" *site-description*
              "site_name"        *site-name*})))
 
@@ -192,6 +195,7 @@
                  "body"             (inner-html (apply-transforms (render-page page) pagename))            
                  "headers"          (:headers page)
                  "pagename"         pagename
+                 "page_route_base"  *page-route-base*                 
                  "seealso"          (list (get-links pagename))
                  "site_description" *site-description*
                  "site_name"        *site-name*})

@@ -223,27 +223,23 @@ def get_closest_matches(name):
             yield page
 
 
-def get_previous_page(name):
+def get_prev_page(name):
     with db.transaction():
-        query = Page.select()
+        query = (Page.select()
                 .where(Page.name < name)
                 .order_by(Page.name.desc())
                 .limit(1)
-                .dicts()
-        try:
-            return query.next()
-        except:
-            return None
+                .dicts())
+        for p in query:
+            return p
 
 
 def get_next_page(name):
     with db.transaction():
-        query = Page.select()
+        query = (Page.select()
                 .where(Page.name > name)
                 .order_by(Page.name.asc())
                 .limit(1)
-                .dicts()
-        try:
-            return query.next()
-        except:
-            return None
+                .dicts())
+        for p in query:
+            return p

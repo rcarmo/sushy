@@ -15,6 +15,16 @@ blockquote {
     font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
+.left {
+    align: left;
+    float: left;
+}
+
+.right {
+    align: right;
+    float: right;
+}
+
 .highlight pre, pre {
     font-family: Menlo, Monaco, "Andale Mono", "Lucida Console", "Courier New", monospace !important;
     padding: 0.5em;

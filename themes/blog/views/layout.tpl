@@ -26,7 +26,7 @@
 %end
 
     </head>
-    <body class="layout-reverse theme-base-0d">
+    <body class="layout-reverse">
         %include('sidebar')
         <div class="wrap">
             <div class="masthead">
@@ -38,11 +38,9 @@
             </div>
             
             {{!base}}
+            <hr>
             <footer class="container">
-                <div class="row">
-                    <div class="six columns">
-                    Powered by <a href="https://github.com/rcarmo/sushy">Sushy</a>.                    </div>
-                </div>
+                Powered by <a href="https://github.com/rcarmo/sushy">Sushy</a>.                    </div>
             </footer>
         </div>
         <label for="sidebar-checkbox" class="sidebar-toggle"></label>
