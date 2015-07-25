@@ -27,7 +27,7 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 * CSS inlining for RSS feeds
 * RSS feeds
 * `multiprocessing`-based indexer (in `feature/multiprocessing`, disabled for ease of profiling)
-* SSE (Server-Sent Events) support for notifying visitors a page has changed
+* SSE (Server-Sent Events) support (in `feature/server-events`) for notifying visitors a page has changed 
 * [New Relic][nr] Support
 * Internal link tracking (`SeeAlso` functionality, as seen on [Yaki][y])
 * Multiple theme support (only the one theme for now)
