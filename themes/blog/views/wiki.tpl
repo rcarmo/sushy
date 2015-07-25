@@ -36,25 +36,20 @@ end
 if "date" in headers:
     post_date = utc_date(headers["date"], "")
     if post_date != "":
-      metadata = metadata + " - %s (%s)" % (post_date.strftime("%B %d, %Y"), fuzzy_time(post_date))
+      metadata = metadata + " - %s (%s)" % (post_date.strftime("%B %d, %Y, %H:%M"), fuzzy_time(post_date))
     end
 end
 %>
 
-<div class="container blog">
-    <div class="row">
-        <article class="twelve columns">
-            <header>
-                <h1 class="post-heading">{{!headers["title"]}}</h1>
-                <div class="metadata">
-                    By {{!metadata}}
-                </div>
-            </header>
-            <div class="content">
-                {{!body}}
-            </div>
-        </article>
+<div class="container content">
+    <h1 class="post-title">{{!headers["title"]}}</h1>
+    <section id="main">
+       <p> By {{!metadata}}</p>
+    <hr>
+    {{!body}}
+    </section>
+</div>
+<div class="container">
 %include('seealso')
-    </div>
 </div>
 %rebase('layout', base_url=base_url, headers=headers, pagename=pagename, seealso=seealso, site_name=site_name, scripts=['eventsource.js','utils.js','app.js'])

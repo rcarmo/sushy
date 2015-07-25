@@ -49,5 +49,5 @@ else:
     include('inline-message', level="error", message="No valid query parameters specified.")
 end
 
-rebase('layout', headers=headers)
+rebase('layout', headers=headers, base_url=base_url, site_description=site_description, site_name=site_name)
 %>

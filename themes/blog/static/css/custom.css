@@ -1,45 +1,23 @@
 /* Shared
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 html {
-    background-color: white; }
-
-.blog {
-    padding-top: 7rem;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 1.0rem;
+    word-wrap: break-word; 
+    -webkit-nbsp-mode: space; 
+    -webkit-line-break: after-white-space; 
+}
+blockquote {
+    font-style: italic;
 }
 
-.topbar {
-/*    position: fixed;
-    z-index: 100;
-    -webkit-transform: scale3d(1,1,1);
-    opacity: 0.95;
-    top: 0;
-    */
-    width: 100%;
-    max-width: 100%;
-    
-    margin: 0;
-    padding: 1rem;
-    background: whitesmoke;
-}
-.topbar h1 {
-  text-transform: uppercase;
-  letter-spacing: .2rem;
-  font-weight: 600;
-  font-size: 3rem;
-}
-.topbar h1, .topbar form {
-      margin-bottom: 0;
+.sidebar {
+    font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
-.topbar a {
-    text-decoration: none;
-    color: black;
-}
-
-.highlight pre {
+.highlight pre, pre {
     font-family: Menlo, Monaco, "Andale Mono", "Lucida Console", "Courier New", monospace !important;
     padding: 0.5em;
-    font-size: 1.2rem;
 }
 
 #seealso {
@@ -71,29 +49,21 @@ a.seelink:hover {
     font-weight: 300;
 }
 
-.blog h1,
-.blog h2,
-.blog h3,
-.blog h4,
-.blog h5,
-.blog h6 {
-  text-transform: uppercase;
-  letter-spacing: .2rem;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: Georgia, 'Times New Roman', Times, serif;
   font-weight: 600; }
 
-.post-heading {
-    margin-bottom: 0px;
+h1,
+h2,
+h3 {
+  letter-spacing: .2rem;
+  text-transform: uppercase;
 }
-.blog header {
-    margin-bottom: 2rem;
-}
-
-.blog h1 { font-size: 1.8rem; }
-.blog h2 { font-size: 1.6rem; }
-.blog h3 { font-size: 1.4rem; }
-.blog h4 { font-size: 1.2rem; }
-.blog h5 { font-size: 1.1rem; }
-.blog h6 { font-size: 1.0rem; }
 
 .message p {
     background-color: whitesmoke;
@@ -103,39 +73,7 @@ a.seelink:hover {
     background-color: antiquewhite;
 }
 
-/* Sections
-–––––––––––––––––––––––––––––––––––––––––––––––––– */
-.section {
-    text-align: center;
-    padding: 2rem 0 2rem;
+footer {
+    margin-top: 2rem;
 }
 
-.section-heading,
-.section-description {
-  margin-bottom: 1.2rem;
-}
-
-
-/* Hero
-–––––––––––––––––––––––––––––––––––––––––––––––––– */
-.hero {
-    height: 220px;
-    padding: 5rem 0 1rem !important;
-}
-
-
-
-/* Media Queries
-–––––––––––––––––––––––––––––––––––––––––––––––––– */
-
-/* Bigger than 550 */
-@media (min-width: 550px) {
-}
-
-/* Bigger than 750 */
-@media (min-width: 750px) {
-}
-
-/* Bigger than 1000 */
-@media (min-width: 1000px) {
-}

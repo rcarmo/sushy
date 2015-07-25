@@ -10,9 +10,12 @@
         <title>{{!headers["title"]}}</title>
         <link rel="shortcut icon" href="/static/favicon.ico">
         <link rel="search" type="application/opensearchdescription+xml" title="{{site_name}}" href="/opensearch.xml"/>
-        <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
-        <link rel="stylesheet" href="/static/css/normalize.css">
-        <link rel="stylesheet" href="/static/css/skeleton.css">
+        <!--
+            <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+        -->
+        <link rel="stylesheet" href="/static/css/poole.css">
+        <link rel="stylesheet" href="/static/css/lanyon.css">
+        <link rel="stylesheet" href="/static/css/rss.css">
         <link rel="stylesheet" href="/static/css/custom.css">
         <link rel="stylesheet" href="/static/css/syntax.css">
 
@@ -23,26 +26,25 @@
 %end
 
     </head>
-    <body>
-        <div class="container topbar">
-            <div class="row">
-                <div class="nine columns">
-                    <a href="/space"><h1>Sushy</h1></a>
-                </div>
-                <div class="three columns">
-                    <form action="/search">
-                        <input id="q" name="q" class="small" type="search" placeholder="Search">
-                    </form>
+    <body class="layout-reverse theme-base-0d">
+        %include('sidebar')
+        <div class="wrap">
+            <div class="masthead">
+                <div class="container">
+                    <h3 class="masthead-title">
+                        <a href="/" title="">Sushy</a>
+                    </h3>
                 </div>
             </div>
+            
+            {{!base}}
+            <footer class="container">
+                <div class="row">
+                    <div class="six columns">
+                    Powered by <a href="https://github.com/rcarmo/sushy">Sushy</a>.                    </div>
+                </div>
+            </footer>
         </div>
-        {{!base}}
-        <footer class="container">
-            <div class="row">
-                <div class="six columns">
-                Powered by <a href="https://github.com/rcarmo/sushy">Sushy</a>, designed with <a href="http://getskeleton.com">Skeleton</a>
-                </div>
-            </div>
-        </footer>
+        <label for="sidebar-checkbox" class="sidebar-toggle"></label>
     </body>
 </html>

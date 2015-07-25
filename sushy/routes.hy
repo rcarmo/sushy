@@ -152,12 +152,14 @@
     (render-view "search")
     (defn handle-search []
         (if (in "q" (.keys (. request query)))
-            {"headers"          {}
+            {"base_url"         (base-url)
+             "headers"          {}
              "query"            (. request query q)
              "results"          (search (. request query q))
              "site_description" *site-description*
              "site_name"        *site-name*}
-            {"headers"          {}
+            {"base_url"         (base-url)
+             "headers"          {}
              "site_description" *site-description*
              "site_name"        *site-name*})))
 
