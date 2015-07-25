@@ -1,6 +1,7 @@
 <%
 from sushy.utils import utc_date
-from sushy.models import get_next_page, get_prev_page
+from sushy.models import *
+from re import match
 
 def fuzzy_time(date):
     intervals = {
@@ -52,7 +53,13 @@ end
 </div>
 <div class="container related">
 <%
-p, n = get_prev_page(pagename), get_next_page(pagename)
+
+pattern = "^(blog|links)/.+$"
+if match(pattern, pagename):
+    p, n = get_prev_by_date(pagename, pattern), get_next_by_date(pagename, pattern)
+else:
+    p, n = get_prev_by_name(pagename), get_next_by_name(pagename)
+end
 
 if p:
 %>

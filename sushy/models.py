@@ -223,7 +223,7 @@ def get_closest_matches(name):
             yield page
 
 
-def get_prev_page(name):
+def get_prev_by_name(name):
     with db.transaction():
         query = (Page.select()
                 .where(Page.name < name)
@@ -234,11 +234,35 @@ def get_prev_page(name):
             return p
 
 
-def get_next_page(name):
+def get_next_by_name(name):
     with db.transaction():
         query = (Page.select()
                 .where(Page.name > name)
                 .order_by(Page.name.asc())
+                .limit(1)
+                .dicts())
+        for p in query:
+            return p
+
+
+def get_prev_by_date(name, regexp):
+    with db.transaction():
+        p = Page.get(Page.name == name)
+        query = (Page.select()
+                .where(Page.name.regexp(regexp) and (Page.pubtime < p.pubtime))
+                .order_by(Page.pubtime.desc())
+                .limit(1)
+                .dicts())
+        for p in query:
+            return p
+
+
+def get_next_by_date(name, regexp):
+    with db.transaction():
+        p = Page.get(Page.name == name)
+        query = (Page.select()
+                .where(Page.name.regexp(regexp) and (Page.pubtime > p.pubtime))
+                .order_by(Page.pubtime.asc())
                 .limit(1)
                 .dicts())
         for p in query:
