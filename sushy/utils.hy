@@ -10,7 +10,9 @@
     [PIL                [Image]]
     [pytz               [timezone]]
     [random             [sample]]
-    [time               [time]])
+    [time               [time]]
+    [urllib             [quote :as uquote]]
+    [urlparse           [urlunparse]])
 
 (setv log (getLogger))
 
@@ -21,7 +23,7 @@
 (setv *utc* (timezone "UTC"))
 
 (defn base-url []
-    (slice (. request url) 0 (- (len (. request path)))))
+    (slice (. request url) 0 (- (len (uquote (. request path))))))
 
 ; a little hash helper
 (defn compact-hash [&rest args]
