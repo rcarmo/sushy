@@ -1,15 +1,15 @@
 (import
-	[config 	        [*exclude-from-feeds* *feed-css* *rss-date-format*]]
+    [config             [*exclude-from-feeds* *feed-css* *rss-date-format*]]
     [cssutils           [log :as *cssutils-log*]]
     [inlinestyler.utils [inline-css]]
     [logging            [getLogger Formatter *error*]]    
     [lxml.etree         [Element fromstring tostring]]    
-	[models 	        [get-latest]]
+    [models             [get-latest]]
     [os.path            [abspath]]
     [pytz               [*utc*]]
-	[render		        [render-page]]
+    [render                [render-page]]
     [store              [get-page]]
-	[transform         [apply-transforms inner-html]])
+    [transform         [apply-transforms inner-html]])
 
 (setv log (getLogger --name--))
 
