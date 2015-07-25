@@ -38,7 +38,6 @@
             </div>
             
             {{!base}}
-            <hr>
             <footer class="container">
                 Powered by <a href="https://github.com/rcarmo/sushy">Sushy</a>.                    </div>
             </footer>

@@ -51,7 +51,7 @@ end
     {{!body}}
     </section>
 </div>
-<div class="container related">
+<div class="pagination">
 <%
 
 pattern = "^(blog|links)/.+$"
@@ -63,7 +63,7 @@ end
 
 if p:
 %>
-<span class="left">
+<span class="pagination-item older">
 &laquo; <em>Previous:</em> <a href="{{base_url + page_route_base + "/" + p["name"]}}">{{!p["title"]}}</a>
 </span>
 <%
@@ -71,7 +71,7 @@ end
 
 if n:
 %>
-<span class="right">
+<span class="pagination-item newer">
 <em>Next:</em> <a href="{{base_url + page_route_base + "/" + n["name"]}}">{{!n["title"]}}</a> &raquo; 
 </span>
 <%
