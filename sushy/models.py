@@ -211,6 +211,8 @@ def levenshtein(a,b):
     return current[n]
 
 
+# TODO: difflib.get_close_matches(word, possibilities)
+
 def get_closest_matches(name):
     with db.transaction():
         query = (Page.select()
@@ -219,3 +221,29 @@ def get_closest_matches(name):
 
         for page in query:
             yield page
+
+
+def get_previous_page(name):
+    with db.transaction():
+        query = Page.select()
+                .where(Page.name < name)
+                .order_by(Page.name.desc())
+                .limit(1)
+                .dicts()
+        try:
+            return query.next()
+        except:
+            return None
+
+
+def get_next_page(name):
+    with db.transaction():
+        query = Page.select()
+                .where(Page.name > name)
+                .order_by(Page.name.asc())
+                .limit(1)
+                .dicts()
+        try:
+            return query.next()
+        except:
+            return None
