@@ -8,15 +8,15 @@ def fuzzy_time(date):
         '00:00-00:59': 'late night',
         '01:00-03:59': 'in the wee hours',
         '04:00-06:59': 'by dawn',
-        '07:00-08:59': 'breakfast',
-        '09:00-12:29': 'morning',
-        '12:30-14:29': 'lunchtime',
-        '14:30-16:59': 'afternoon',
-        '17:00-17:29': 'tea-time',
-        '17:30-18:59': 'late afternoon',
-        '19:00-20:29': 'evening',
-        '20:30-21:29': 'dinnertime',
-        '21:30-22:29': 'night',
+        '07:00-08:59': 'during breakfast',
+        '09:00-12:29': 'in the morning',
+        '12:30-14:29': 'at lunchtime',
+        '14:30-16:59': 'in the afternoon',
+        '17:00-17:29': 'by tea-time',
+        '17:30-18:59': 'by late afternoon',
+        '19:00-20:29': 'in the evening',
+        '20:30-21:29': 'at dinnertime',
+        '21:30-22:29': 'by night',
         '22:30-23:59': 'late night'
     }
     when = date.strftime("%H:%M")
@@ -38,7 +38,7 @@ end
 if "date" in headers:
     post_date = utc_date(headers["date"], "")
     if post_date != "":
-      metadata = metadata + " - %s (%s)" % (post_date.strftime("%B %d, %Y, %H:%M"), fuzzy_time(post_date))
+      metadata = metadata + " - %s, %s" % (post_date.strftime("%B %d, %Y"), fuzzy_time(post_date))
     end
 end
 %>
