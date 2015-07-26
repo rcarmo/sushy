@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta charset="utf-8">
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <meta name="HandheldFriendly" content="True">
@@ -11,9 +10,6 @@
         <title>{{!headers["title"]}}</title>
         <link rel="shortcut icon" href="/static/favicon.ico">
         <link rel="search" type="application/opensearchdescription+xml" title="{{site_name}}" href="/opensearch.xml"/>
-        <!--
-            <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
-        -->
         <link rel="stylesheet" href="/static/css/poole.css">
         <link rel="stylesheet" href="/static/css/lanyon.css">
         <link rel="stylesheet" href="/static/css/custom.css">
