@@ -38,18 +38,31 @@ def fuzzy_time(date):
     return "sometime"
 end
 
+pattern = "^(blog|links)/.+$"
+
 if "from" in headers:
-    metadata = headers["from"]
+    author = headers["from"]
 else:
-    metadata = "Unknown"
+    author = "Unknown"
 end
 
 if "date" in headers:
     post_date = utc_date(headers["date"], "")
+
     if post_date != "":
-      metadata = metadata + " - %s %s %d, %s" % (post_date.strftime("%B"), ordinal(post_date.day), post_date.year, fuzzy_time(post_date))
+         metadata = author + " - %s %s %d, %s" % (post_date.strftime("%B"), ordinal(post_date.day), post_date.year, fuzzy_time(post_date))
+    end
+
+    if not match(pattern, pagename) and "last-modified" in headers:
+        post_date = utc_date(headers["last-modified"], "")
+        if post_date != "":
+            metadata = author + " - last updated on %s %s %d, %s" % (post_date.strftime("%B"), ordinal(post_date.day), post_date.year, fuzzy_time(post_date))
+        end
     end
 end
+
+
+
 %>
 
 <div class="container content">
