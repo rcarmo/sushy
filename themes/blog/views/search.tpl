@@ -5,40 +5,31 @@ if defined("query"):
     items = list(islice(results,0,20))
     if len(items):
 %>
-<div class="container blog">
-    <div class="row">
-        <article class="twelve columns">
-            <header>
-                <h1 class="post-heading">{{!headers["title"]}}</h1>
-                <div class="metadata">
-                    {{!len(items)}} found.
-                </div>
-            </header>
-            <div class="content">
-
+<div class="container content">
+    <h1 class="post-title">Search Results</h1>
+    <span class="post-date">{{!len(items)}} matches found for {{!query}}.</span>
+    <hr>
     <table class="hover alternating">
-    <thead>
-        <tr>
-            <th>Score</th>
-            <th>Page</th>
-            <th>Content</th>
-            <th>Modified</th>
-        </tr>
-    </thead>
-    <tbody>
+        <thead>
+            <tr>
+                <th>Score</th>
+                <th>Page</th>
+                <th>Content</th>
+                <th>Modified</th>
+            </tr>
+        </thead>
+        <tbody>
 %for i in items:
-    <tr>
-        <td>{{!i["score"]}}</td>
-        <td><a href="/space/{{!i["name"]}}">{{!i["title"]}}</td>
-        <td>{{!i["content"]}}</td>
-        <td>{{!i["mtime"]}}</td>
-    </tr>
+            <tr>
+                <td>{{!i["score"]}}</td>
+                <td><a href="/space/{{!i["name"]}}">{{!i["title"]}}</td>
+                <td>{{!i["content"]}}</td>
+                <td>{{!i["mtime"]}}</td>
+            </tr>
 %end
-    </tbody>
-</table>
-            </div>
-        </article>
-      </div>
+        </tbody>
+    </table>
+</div>
 <%
     else:
     headers['title'] = "No results for '%s'" % query

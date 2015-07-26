@@ -18,13 +18,12 @@
     </div>
     <nav class="sidebar-nav">
         <a class="sidebar-nav-item" href="{{!base_url}}/">Home</a>
-        <a class="sidebar-nav-item">Foo</a>
-        <a class="sidebar-nav-item">Bar</a>
+        <a class="sidebar-nav-item">Archives</a>
+        <a class="sidebar-nav-item">Recent Updates</a>
+        <a class="sidebar-nav-item">About</a>
     </nav>
 
     <div class="sidebar-item">
-        <p>
-        Powered by Sushy.
-        </p>
+        <p>Powered by <a href="https://github.com/rcarmo/sushy">Sushy</a>.</p>
     </div>
 </div>

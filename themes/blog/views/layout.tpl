@@ -15,7 +15,6 @@
         -->
         <link rel="stylesheet" href="/static/css/poole.css">
         <link rel="stylesheet" href="/static/css/lanyon.css">
-        <link rel="stylesheet" href="/static/css/rss.css">
         <link rel="stylesheet" href="/static/css/custom.css">
         <link rel="stylesheet" href="/static/css/syntax.css">
 
@@ -38,9 +37,6 @@
             </div>
             
             {{!base}}
-            <footer class="container">
-                Powered by <a href="https://github.com/rcarmo/sushy">Sushy</a>.                    </div>
-            </footer>
         </div>
         <label for="sidebar-checkbox" class="sidebar-toggle"></label>
     </body>

@@ -98,6 +98,49 @@ input[type="search"] {
     padding: 0.5em;
 }
 
+/* resets */
+tbody tr:nth-child(odd) td,
+tbody tr:nth-child(odd) th {
+  background-color: transparent;
+  border: none;
+}
+table, td, th {
+    border: none;
+}
+
+table {
+    font-family: Baskerville, Georgia, 'Times New Roman', Times, serif;
+    background:transparent; 
+    margin: 0px; 
+    padding: 0px; 
+    border-collapse: collapse;
+    font-size: 90%;
+}
+
+
+tr {
+    border-top: 1px solid #aaa;
+}
+
+th {
+    border-bottom: 1px solid black;
+    border-top: 2px solid black; 
+    border-left: none;
+    border-right: none;
+    padding: 4px 4px !important; 
+    font-weight: bold;
+    text-align: center;
+}
+
+td {
+    min-width: 80px;
+    margin: 0px; 
+    padding: 4px 4px !important; 
+    vertical-align: top; 
+    border-top: 1px solid #aaa;
+}
+
+
 #seealso {
     padding-top: 1em;
     text-align: top;
@@ -161,21 +204,21 @@ footer {
 
 /* Larger than mobile */
 @media (min-width: 400px) {
-    .content {
+    .container {
         max-width: 40rem;
     }    
 }
 
 /* Larger than phablet */
 @media (min-width: 550px) {
-    .content {
+    .container {
         max-width: 40rem;
     }    
 }
 
 /* Larger than tablet */
 @media (min-width: 750px) {
-    .content {
+    .container {
         max-width: 45rem;
         font-size: 102%;
     }
@@ -183,7 +226,7 @@ footer {
 
 /* Larger than desktop */
 @media (min-width: 1000px) {
-    .content {
+    .container {
         max-width: 50rem;
         font-size: 105%;
     }    
@@ -191,7 +234,7 @@ footer {
 
 /* Larger than Desktop HD */
 @media (min-width: 1200px) {
-    .content {
+    .container {
         max-width: 55rem;
         font-size: 110%;
     }    
