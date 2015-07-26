@@ -18,8 +18,9 @@
 
 
 (with-decorator (memoize)
-    (defn get-mappings [page]
+    (defn get-mappings 
         ; searches for `pre` tags and builds key/value pairs
+        [page]
         (let [[mappings {}]
             [doc (HTML (render-page (get-page page)))]]
             (for [tag (.xpath doc "//pre")]
@@ -31,8 +32,9 @@
             mappings)))
 
 
-(defn base-href [doc pagename]
+(defn base-href 
     ; inserts the base path into hrefs
+    [doc pagename]
     (for [a (.xpath doc "//a[@href]")]
         (let [[href (get a.attrib "href")]
               [schema (get (urlsplit href) 0)]]
@@ -43,8 +45,9 @@
     doc)
 
 
-(defn interwiki-links [doc]
+(defn interwiki-links 
     ; replaces interwiki hrefs
+    [doc]
     (let [[interwiki-map (get-mappings *interwiki-page*)]]
         (for [a (.xpath doc "//a[@href]")]
             (let [[href (get a.attrib "href")]
@@ -54,8 +57,9 @@
     doc)
 
 
-(defn include-sources [doc pagename]
+(defn include-sources 
     ; searches for `pre` tags with a `src` attribute
+    [doc pagename]
     (for [tag (.xpath doc "//pre[@src]")]
         (let [[filename (get tag.attrib "src")]]
             (try 
@@ -67,8 +71,9 @@
     doc)
 
 
-(defn syntax-highlight [doc]
+(defn syntax-highlight 
     ; searches for `pre` tags with a `syntax` attribute
+    [doc]
     (for [tag (.xpath doc "//pre[@syntax]")]
         (let [[syntax (get tag.attrib "syntax")]
               [lexer  (apply get-lexer-by-name [syntax] {"stripall" true})]
@@ -79,8 +84,9 @@
     doc)
 
 
-(defn image-sources [doc pagename]
+(defn image-sources 
     ; searches for `img` tags with a `src` attribute and gives them an absolute URL path
+    [doc pagename]
     (for [tag (.xpath doc "//img[@src]")]
         (let [[src    (get (. tag attrib) "src")]
               [schema (get (urlsplit src) 0)]]
@@ -106,8 +112,9 @@
 
 ; TODO: include, interwiki links, alias replacements, all the "legacy" Yaki handling
 
-(defn inner-html [doc]
+(defn inner-html 
     ; Returns the content of a doc without extraneous tags
+    [doc]
     (let [[body (get (.xpath doc "//body") 0)]
           [children []]]
         (for [child (.iterchildren body)]
@@ -115,8 +122,9 @@
         (.join "" children)))
 
 
-(defn extract-plaintext [doc]
+(defn extract-plaintext 
     ; Returns a compacted version of the plaintext without duplicate whitespace and with converted entities (lxml's default)
+    [doc]
     (let [[body (get (.xpath doc "//body") 0)]
         [children []]]
         (for [child (.iterchildren body)]
@@ -124,17 +132,25 @@
         (.join " " (.split (.join "" children)))))
 
 
-(defn extract-internal-links [doc]
+(defn extract-internal-links 
     ; Returns a list of internal links
+    [doc]
     (map 
         (fn [tag] 
             (slice (get tag.attrib "href") (+ 1 (len *page-route-base*))))
         (.xpath doc (+ "//a[starts-with(@href,'" *page-route-base* "')]"))))
 
 
+(defn fix-footnotes
+    ; fix footnotes for iOS devices
+    [buffer]
+    (.replace buffer "&#8617;" "&#8617;&#xFE0E;"))
+
+
 (defn apply-transforms [html pagename]
     ; remember that Hy's threading macro manipulates the first argument slot
     (-> html 
+        (fix-footnotes)
         (HTML)
         (interwiki-links)
         (base-href pagename)
