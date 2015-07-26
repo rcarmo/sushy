@@ -6,9 +6,12 @@
 <div class="sidebar" id="sidebar">
 
     <div class="sidebar-item">
-        <form action="/search">
-            <input name="q" placeholder="Search..." autocomplete="off" autocorrect="off" autocapitalize="off" type="search">
-        </form>
+        <div class="search-box">
+            <form action="/search">
+                <span class="search-icon">&#9906;</span>
+                <input id="search" name="q" placeholder="Search..." autocomplete="off" autocorrect="off" autocapitalize="off" type="search">
+            </form>
+         </div>
     </div>
     <div class="sidebar-item">
         {{!site_description}}

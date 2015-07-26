@@ -81,4 +81,7 @@ end
 <div class="container">
 %include('seealso')
 </div>
+<%
+scripts=["zepto.min.js"]
+%>
 %rebase('layout', **dict(globals()))
