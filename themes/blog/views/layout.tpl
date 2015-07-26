@@ -7,6 +7,9 @@
         <meta name="MobileOptimized" content="320">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
         <meta name="theme-color" content="#ffffff">
+%if "tags" in headers:        
+        <meta name="keywords" content="{{!headers["tags"]}}">
+%end        
         <title>{{!headers["title"]}} - {{!site_name}}</title>
         <link rel="shortcut icon" href="/static/favicon.ico">
         <link rel="search" type="application/opensearchdescription+xml" title="{{site_name}}" href="/opensearch.xml"/>

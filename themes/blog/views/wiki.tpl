@@ -39,6 +39,7 @@ def fuzzy_time(date):
 end
 
 pattern = "^(blog|links)/.+$"
+namespace = pagename.split("/")[0].lower()
 
 if "from" in headers:
     author = headers["from"]
@@ -60,16 +61,17 @@ if "date" in headers:
         end
     end
 end
-
-
-
 %>
 
 <div class="container content">
-    <h1 class="post-title">{{!headers["title"]}}</h1>
+% if "x-link" in headers:
+    <h1 class="post-title"><a href="{{!headers["x-link"]}}">{{!headers["title"]}}</a>&nbsp;<a class="permalink-marker" href="{{base_url + page_route_base + "/" + pagename}}" title="permanent link to {{!headers["title"]]}">&#8251;</a></h1>
+% else:    
+    <h1 class="post-title"><a href="{{base_url + page_route_base + "/" + pagename}}" title="permanent link to {{!headers["title"]]}">{{!headers["title"]}}</a> </h1>
+% end
     <span class="post-date"> By {{!metadata}}</span>
     <hr>
-    <section id="main">
+    <section id="main" class="{{!namespace}}-namespace">
     {{!body}}
     </section>
 </div>

@@ -141,6 +141,18 @@
         (.xpath doc (+ "//a[starts-with(@href,'" *page-route-base* "')]"))))
 
 
+(defn make-lead-paragraph
+    ; sets the "lead" class on the first paragraph tag
+    [doc]
+    (for [tag (.xpath doc ".//p")]
+        (if (len (.strip (apply tostring [tag] {"method" "text" "encoding" "unicode"})))
+            (do
+                (assoc (. tag attrib) "class" "lead")
+                (break))))
+    doc)
+                
+
+
 (defn fix-footnotes
     ; fix footnotes for iOS devices
     [buffer]
@@ -149,9 +161,10 @@
 
 (defn apply-transforms [html pagename]
     ; remember that Hy's threading macro manipulates the first argument slot
-    (-> html 
+    (-> html
         (fix-footnotes)
         (HTML)
+        (make-lead-paragraph)
         (interwiki-links)
         (base-href pagename)
         (include-sources pagename)
