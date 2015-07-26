@@ -7,16 +7,16 @@ def fuzzy_time(date):
     intervals = {
         '00:00-00:59': 'late night',
         '01:00-03:59': 'in the wee hours',
-        '04:00-06:59': 'by dawn',
+        '04:00-06:59': 'at dawn',
         '07:00-08:59': 'during breakfast',
         '09:00-12:29': 'in the morning',
         '12:30-14:29': 'at lunchtime',
         '14:30-16:59': 'in the afternoon',
-        '17:00-17:29': 'by tea-time',
-        '17:30-18:59': 'by late afternoon',
+        '17:00-17:29': 'at tea-time',
+        '17:30-18:59': 'at late afternoon',
         '19:00-20:29': 'in the evening',
         '20:30-21:29': 'at dinnertime',
-        '21:30-22:29': 'by night',
+        '21:30-22:29': 'at night',
         '22:30-23:59': 'late night'
     }
     when = date.strftime("%H:%M")
