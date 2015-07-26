@@ -109,7 +109,7 @@ table, td, th {
 }
 
 table {
-    font-family: Baskerville, Georgia, 'Times New Roman', Times, serif;
+    font-family: Georgia, 'Times New Roman', Times, serif;
     background:transparent; 
     margin: 0px; 
     padding: 0px; 
@@ -165,7 +165,7 @@ a.seelink:hover {
 }
 
 .footnote, .metadata {
-    font-size: 85%;
+    font-size: 90%;
     color: #888;
     font-weight: 300;
 }
@@ -177,7 +177,7 @@ h4,
 h5,
 h6 {
   font-family: Georgia, 'Times New Roman', Times, serif;
-  font-weight: 600; }
+  font-weight: normal; }
 
 h1,
 h2,
@@ -202,6 +202,13 @@ footer {
     margin-top: 2rem;
 }
 
+
+.pagination-item {border: none; color: #9a9a9a;}
+
+.post-title, .post-date, h1, h2, h3 {
+    text-align: center;
+}
+
 /* Larger than mobile */
 @media (min-width: 400px) {
     .container {
@@ -213,7 +220,7 @@ footer {
 @media (min-width: 550px) {
     .container {
         max-width: 40rem;
-    }    
+    }
 }
 
 /* Larger than tablet */
@@ -221,6 +228,9 @@ footer {
     .container {
         max-width: 45rem;
         font-size: 102%;
+    }
+    .post-title, .post-date, h1, h2, h3 {
+        text-align: left;
     }
 }
 
