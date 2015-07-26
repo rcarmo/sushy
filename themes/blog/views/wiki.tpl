@@ -3,6 +3,15 @@ from sushy.utils import utc_date
 from sushy.models import *
 from re import match
 
+def ordinal(num):
+    if 10 <= num % 100 <= 20:
+        suffix = 'th'
+    else:
+        suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(num % 10, 'th')
+    end
+    return str(num) + "<sup>" + suffix + "</sup>"
+end
+
 def fuzzy_time(date):
     intervals = {
         '00:00-00:59': 'late night',
@@ -38,7 +47,7 @@ end
 if "date" in headers:
     post_date = utc_date(headers["date"], "")
     if post_date != "":
-      metadata = metadata + " - %s, %s" % (post_date.strftime("%B %d, %Y"), fuzzy_time(post_date))
+      metadata = metadata + " - %s %s %d, %s" % (post_date.strftime("%B"), ordinal(post_date.day), post_date.year, fuzzy_time(post_date))
     end
 end
 %>
