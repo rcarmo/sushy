@@ -52,9 +52,10 @@
         (for [a (.xpath doc "//a[@href]")]
             (let [[href (get a.attrib "href")]
                   [schema (.lower (get (.split href ":") 0))]]
-                (.debug log (% "%s %s" (, href schema)))
                 (if (in schema interwiki-map)
-                    (assoc a.attrib "href" (sub (+ schema ":") (get interwiki-map schema) href 1 *ignorecase*))))))
+                    (if (in "%s" (get interwiki-map schema))
+                        (assoc a.attrib "href" (% (get interwiki-map schema) (get (.split href ":" 1) 1)))
+                        (assoc a.attrib "href" (sub (+ schema ":") (get interwiki-map schema) href 1 *ignorecase*)))))))
     doc)
 
 
