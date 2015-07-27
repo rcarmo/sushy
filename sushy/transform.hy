@@ -154,7 +154,6 @@
                 (assoc (. tag attrib) "class" "lead")
                 (break))))
     doc)
-                
 
 
 (defn fix-footnotes
