@@ -50,11 +50,12 @@
     [doc]
     (let [[interwiki-map (get-mappings *interwiki-page*)]]
         (for [a (.xpath doc "//a[@href]")]
-            (let [[href (get a.attrib "href")]
-                  [schema (.lower (get (.split href ":") 0))]]
-                (if (in schema interwiki-map)
+            (let [[href   (get a.attrib "href")]
+                  [parts  (.split href ":" 1)]
+                  [schema (.lower (get parts 0))]]
+                (if (and (in schema interwiki-map) (> (len parts) 1))
                     (if (in "%s" (get interwiki-map schema))
-                        (assoc a.attrib "href" (% (get interwiki-map schema) (get (.split href ":" 1) 1)))
+                        (assoc a.attrib "href" (% (get interwiki-map schema) (get parts 1)))
                         (assoc a.attrib "href" (sub (+ schema ":") (get interwiki-map schema) href 1 *ignorecase*)))))))
     doc)
 
