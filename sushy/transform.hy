@@ -37,10 +37,11 @@
     [doc pagename]
     (for [a (.xpath doc "//a[@href]")]
         (let [[href (get a.attrib "href")]
-              [schema (get (.split href ":") 0)]]
+              [schema (get (.split href ":" 1) 0)]]
+            (.debug log (, schema href))
             (if (= (get href 0) "#")
                 (assoc a.attrib "href" (+ (join *page-route-base* pagename) href))
-                (if (= "" schema)
+                (if (= href schema)
                     (assoc a.attrib "href" (join *page-route-base* href))))))
     doc)
 
