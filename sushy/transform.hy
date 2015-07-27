@@ -37,7 +37,7 @@
     [doc pagename]
     (for [a (.xpath doc "//a[@href]")]
         (let [[href (get a.attrib "href")]
-              [schema (get (urlsplit href) 0)]]
+              [schema (get (.split href ":") 0)]]
             (if (= (get href 0) "#")
                 (assoc a.attrib "href" (+ (join *page-route-base* pagename) href))
                 (if (= "" schema)
@@ -51,7 +51,8 @@
     (let [[interwiki-map (get-mappings *interwiki-page*)]]
         (for [a (.xpath doc "//a[@href]")]
             (let [[href (get a.attrib "href")]
-                  [schema (get (urlsplit href) 0)]]
+                  [schema (.lower (get (.split href ":") 0))]]
+                (.debug log (% "%s %s" (, href schema)))
                 (if (in schema interwiki-map)
                     (assoc a.attrib "href" (sub (+ schema ":") (get interwiki-map schema) href 1 *ignorecase*))))))
     doc)
@@ -165,8 +166,8 @@
         (fix-footnotes)
         (HTML)
         (make-lead-paragraph)
-        (interwiki-links)
         (base-href pagename)
+        (interwiki-links)
         (include-sources pagename)
         (image-sources pagename)
         (syntax-highlight)))
