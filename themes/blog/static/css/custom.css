@@ -10,6 +10,9 @@ html {
 blockquote {
     font-style: italic;
 }
+sub, sup {
+    font-size: 80%;
+}
 
 .sidebar, .pagination {
     font-family: Georgia, 'Times New Roman', Times, serif;
