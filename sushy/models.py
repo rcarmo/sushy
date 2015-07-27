@@ -1,4 +1,4 @@
-import os, sys, logging
+import os, re, sys, logging
 from peewee import *
 from playhouse.sqlite_ext import *
 from playhouse.kv import PickledKeyStore
@@ -267,3 +267,16 @@ def get_next_by_date(name, regexp):
                 .dicts())
         for p in query:
             return p
+            
+            
+def get_prev_next(name, regexp):
+    p, n = None, None
+    try:
+        if re.match(regexp, name):
+            p, n = get_prev_by_date(name, regexp), get_next_by_date(name, regexp)
+        else:
+            p, n = get_prev_by_name(name), get_next_by_name(name)
+    except Exception as e:
+        log.debug("Could not obtain prev/next for %s: %s" % (name, e))
+        pass
+    return p, n

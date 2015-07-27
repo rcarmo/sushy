@@ -1,7 +1,9 @@
 <%
 from sushy.utils import utc_date
-from sushy.models import *
+from sushy.models import get_prev_next
 from re import match
+
+# Helper functions only used for formatting
 
 def ordinal(num):
     if 10 <= num % 100 <= 20:
@@ -37,6 +39,8 @@ def fuzzy_time(date):
     end
     return "sometime"
 end
+
+# Patterns for time-based navigation and namespace
 
 pattern = "^(blog|links)/.+$"
 namespace = pagename.split("/")[0].lower()
@@ -78,12 +82,7 @@ end
 <div class="pagination">
 <%
 
-pattern = "^(blog|links)/.+$"
-if match(pattern, pagename):
-    p, n = get_prev_by_date(pagename, pattern), get_next_by_date(pagename, pattern)
-else:
-    p, n = get_prev_by_name(pagename), get_next_by_name(pagename)
-end
+p, n = get_prev_next(pagename, pattern)
 
 if p:
 %>
