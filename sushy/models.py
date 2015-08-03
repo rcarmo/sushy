@@ -215,9 +215,7 @@ def levenshtein(a,b):
 @db.func()
 def close_match(a,b):
     """Emulate difflib's get_close_matches"""
-    s = SequenceMatcher()
-    s.set_seq2(a)
-    s.set_seq1(b)
+    s = SequenceMatcher(a=a, b=b)
     cutoff = 0.6
     if s.real_quick_ratio() >= cutoff and \
        s.quick_ratio() >= cutoff and \
