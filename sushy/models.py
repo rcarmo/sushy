@@ -3,6 +3,7 @@ from peewee import *
 from playhouse.sqlite_ext import *
 from playhouse.kv import PickledKeyStore
 import datetime
+from difflib import SequenceMatcher
 from dateutil.relativedelta import relativedelta
 
 log = logging.getLogger(__name__)
@@ -211,12 +212,24 @@ def levenshtein(a,b):
     return current[n]
 
 
-# TODO: difflib.get_close_matches(word, possibilities)
+@db.func()
+def close_match(a,b):
+    """Emulate difflib's get_close_matches"""
+    s = SequenceMatcher()
+    s.set_seq2(a)
+    s.set_seq1(b)
+    cutoff = 0.6
+    if s.real_quick_ratio() >= cutoff and \
+       s.quick_ratio() >= cutoff and \
+       s.ratio() >= cutoff:
+        return s.ratio()
+    return 0
+
 
 def get_closest_matches(name):
     with db.transaction():
         query = (Page.select()
-                .order_by(fn.levenshtein(name, Page.name).asc())
+                .order_by(fn.close_match(name, Page.name).desc())
                 .dicts())
 
         for page in query:
