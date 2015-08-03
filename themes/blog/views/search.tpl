@@ -22,7 +22,7 @@ if defined("query"):
 %for i in items:
             <tr>
                 <td>{{!i["score"]}}</td>
-                <td><a href="/space/{{!i["name"]}}">{{!i["title"]}}</td>
+                <td><a href="{{!page_route_base}}/{{!i["name"]}}">{{!i["title"]}}</td>
                 <td>{{!i["content"]}}</td>
                 <td>{{!i["mtime"]}}</td>
             </tr>
