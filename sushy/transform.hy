@@ -1,6 +1,6 @@
 ; Perform HTML transforms
 (import
-    [config              [*interwiki-page* *page-media-base* *page-route-base*]]
+    [config              [*alias-page* *interwiki-page* *page-media-base* *page-route-base*]]
     [logging             [getLogger]]
     [lxml.etree          [ElementTree HTML fromstring tostring]]
     [messages            [inline-message]]
@@ -38,7 +38,6 @@
     (for [a (.xpath doc "//a[@href]")]
         (let [[href (get a.attrib "href")]
               [schema (get (.split href ":" 1) 0)]]
-            (.debug log (, schema href))
             (if (= (get href 0) "#")
                 (assoc a.attrib "href" (+ (join *page-route-base* pagename) href))
                 (if (= href schema)
@@ -58,6 +57,18 @@
                     (if (in "%s" (get interwiki-map schema))
                         (assoc a.attrib "href" (% (get interwiki-map schema) (get parts 1)))
                         (assoc a.attrib "href" (sub (+ schema ":") (get interwiki-map schema) href 1 *ignorecase*)))))))
+    doc)
+
+
+(defn alias-links 
+    ; replaces aliases
+    [doc]
+    (let [[alias-map (get-mappings *alias-page*)]]
+        (for [a (.xpath doc "//a[@href]")]
+            (let [[href (.lower (get a.attrib "href"))]]
+                (while (in href alias-map)
+                    (setv href (get alias-map href))
+                    (assoc a.attrib "href" href)))))
     doc)
 
 
@@ -168,8 +179,9 @@
         (fix-footnotes)
         (HTML)
         (make-lead-paragraph)
-        (base-href pagename)
+        (alias-links)
         (interwiki-links)
+        (base-href pagename)
         (include-sources pagename)
         (image-sources pagename)
         (syntax-highlight)))
