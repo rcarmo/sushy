@@ -7,9 +7,9 @@
     [models             [get-latest]]
     [os.path            [abspath]]
     [pytz               [*utc*]]
-    [render                [render-page]]
+    [render             [render-page]]
     [store              [get-page]]
-    [transform         [apply-transforms inner-html]])
+    [transform          [apply-transforms inner-html]])
 
 (setv log (getLogger --name--))
 
