@@ -17,13 +17,18 @@
         <link rel="stylesheet" href="/static/css/lanyon.css">
         <link rel="stylesheet" href="/static/css/custom.css">
         <link rel="stylesheet" href="/static/css/syntax.css">
-
 %if defined('scripts'):
     %for script in scripts:    
         <script src="/static/js/{{script}}"></script>
     %end
 %end
-
+        <script type="application/ld+json">
+            {"@context": "http://schema.org",
+             "@type": "WebSite",
+             "name": "{{!site_name}}", 
+             "alternateName": "{{!site_description}}",
+             "url": "{{!site_url}}"}
+        </script>
     </head>
     <body class="layout-reverse">
         %include('sidebar')
