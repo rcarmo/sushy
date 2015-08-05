@@ -1,6 +1,6 @@
 (import
     [bottle      [abort get :as handle-get request redirect response static-file view :as render-view]]
-    [config      [*debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *home-page* *layout-hash* *page-media-base* *page-route-base* *rss-date-format* *site-copyright* *site-description* *site-name* *static-path* *store-path*]]
+    [config      [*debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *home-page* *layout-hash* *page-media-base* *page-route-base* *rss-date-format* *site-copyright* *site-description* *site-name* *static-path* *store-path* *thumbnail-sizes*]]
     [datetime    [datetime]]
     [dateutil.relativedelta  [relativedelta]]
     [email.utils [parsedate]]
@@ -13,7 +13,7 @@
     [store       [get-page]]
     [time        [mktime]]
     [transform   [apply-transforms inner-html]]
-    [utils       [*gmt-format* base-url compact-hash lru-cache ttl-cache report-processing-time]])
+    [utils       [*gmt-format* base-url compact-hash compact-hmac lru-cache ttl-cache report-processing-time]])
 
 
 (setv log (getLogger))
@@ -205,3 +205,15 @@
                         (redirect (+ *page-route-base* "/" match)))
                     (except [e StopIteration]
                         (abort (int 404) "Page not found")))))))
+
+; thumbnails
+(with-decorator
+    (handle-get "/thumbs/<x:int>,<y:int>/<hash>/<filename:path>")
+    (report-processing-time)
+    (defn thumbnail-image [x y hash filename]
+        (let [[size (, x y)]
+              [hmac (compact-hmac *layout-hash* x y filename)]]
+            (if (or (not (in size *thumbnail-sizes*))
+                    (!= hash hmac))
+                (abort (int 403) "Invalid Image Request")
+                (abort (int 404) "Image not found")))))
