@@ -1,12 +1,12 @@
 (import
     [collections        [OrderedDict]]
-    [binascii           [b2a-base64]]
+    [base64             [urlsafe-b64encode]]
     [bottle             [request response]]
     [datetime           [datetime]]
     [dateutil.parser    [parse :as parse-date]]
     [functools          [wraps]]
     [hashlib            [sha1]]
-    [hmac               [new :as new-mac]]
+    [hmac               [new :as new-hmac]]
     [logging            [getLogger]]
     [PIL                [Image]]
     [pytz               [timezone]]
@@ -24,16 +24,18 @@
 (setv *utc* (timezone "UTC"))
 
 (defn base-url []
-    (slice (. request url) 0 (- (len . request path))))))
+    (slice (. request url) 0 (- (len (uquote (. request path))))))
 
 ; hashing and HMAC helpers
 (defn compact-hash [&rest args]
     (let [[hash (sha1 (str args))]]
-        (.strip (b2a-base64 (.digest hash)))))
+        (urlsafe-b64encode (.digest hash))))
+
         
-(defn compact-hmac [key &rest args]
-    (let [[buffer (str args)]]
-        (.strip (b2a-base64 (.digest (new-hmac (key buffer sha1)))))))
+(defn compute-hmac [key &rest args]
+    (let [[buffer (.join "" (map str args))]]
+        (urlsafe-b64encode (.digest (new-hmac key buffer sha1)))))
+
 
 (defn report-processing-time []
     ; timing decorator

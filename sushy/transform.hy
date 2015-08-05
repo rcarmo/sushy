@@ -5,7 +5,7 @@
     [lxml.etree          [ElementTree HTML fromstring tostring]]
     [messages            [inline-message]]
     [os.path             [basename join]]
-    [plugins             [plugin-tagged plugin-rating]]
+    [plugins             [plugin-tagged plugin-quicklook plugin-rating]]
     [pygments            [highlight]]
     [pygments.lexers     [get-lexer-by-name]]
     [pygments.formatters [HtmlFormatter]]

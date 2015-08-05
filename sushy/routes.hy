@@ -13,7 +13,7 @@
     [store       [get-page]]
     [time        [mktime]]
     [transform   [apply-transforms inner-html]]
-    [utils       [*gmt-format* base-url compact-hash compact-hmac lru-cache ttl-cache report-processing-time]])
+    [utils       [*gmt-format* base-url compact-hash compute-hmac lru-cache ttl-cache report-processing-time]])
 
 
 (setv log (getLogger))
@@ -211,8 +211,9 @@
     (handle-get "/thumbs/<x:int>,<y:int>/<hash>/<filename:path>")
     (report-processing-time)
     (defn thumbnail-image [x y hash filename]
-        (let [[size (, x y)]
-              [hmac (compact-hmac *layout-hash* x y filename)]]
+        (let [[size (, (long x) (long y))]
+              [hmac (compute-hmac *layout-hash* x y filename)]]
+            (.debug log (, size hmac hash filename))
             (if (or (not (in size *thumbnail-sizes*))
                     (!= hash hmac))
                 (abort (int 403) "Invalid Image Request")
