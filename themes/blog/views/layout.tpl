@@ -27,7 +27,7 @@
              "@type": "WebSite",
              "name": "{{!site_name}}", 
              "alternateName": "{{!site_description}}",
-             "url": "{{!site_url}}"}
+             "url": "{{!base_url}}"}
         </script>
     </head>
     <body class="layout-reverse">
