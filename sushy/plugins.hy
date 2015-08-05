@@ -21,3 +21,13 @@
                     (.replace (.getparent tag) tag
                         (fromstring (inline-message "error" (% "Could not list pages tagged with '%s'" tagname))))))))
     doc)
+    
+    
+(defn plugin-rating
+    ; searches for `plugin` tags named `rating`
+    [doc]
+    (for [tag (.xpath doc "//plugin[contains(@name,'rating')]")]
+        (let [[value (int (get tag.attrib "value"))]]
+            (.replace (.getparent tag) tag
+                (fromstring (% "<span itemprop=\"ratingValue\" class=\"rating\">%s</span>" (* "&#9733;" value))))))
+    doc)
