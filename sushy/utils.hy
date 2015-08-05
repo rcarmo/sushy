@@ -6,6 +6,7 @@
     [dateutil.parser    [parse :as parse-date]]
     [functools          [wraps]]
     [hashlib            [sha1]]
+    [hmac               [new :as new-mac]]
     [logging            [getLogger]]
     [PIL                [Image]]
     [pytz               [timezone]]
@@ -23,13 +24,16 @@
 (setv *utc* (timezone "UTC"))
 
 (defn base-url []
-    (slice (. request url) 0 (- (len (uquote (. request path))))))
+    (slice (. request url) 0 (- (len . request path))))))
 
-; a little hash helper
+; hashing and HMAC helpers
 (defn compact-hash [&rest args]
     (let [[hash (sha1 (str args))]]
         (.strip (b2a-base64 (.digest hash)))))
-
+        
+(defn compact-hmac [key &rest args]
+    (let [[buffer (str args)]]
+        (.strip (b2a-base64 (.digest (new-hmac (key buffer sha1)))))))
 
 (defn report-processing-time []
     ; timing decorator
