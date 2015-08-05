@@ -187,4 +187,5 @@
         (image-sources pagename)
         (syntax-highlight)
         (plugin-tagged)
-        (plugin-rating)))
+        (plugin-rating)
+        (plugin-quicklook pagename)))
