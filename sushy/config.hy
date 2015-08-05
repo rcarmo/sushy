@@ -47,6 +47,8 @@
 
 (def *profiler* (= (.lower (.get environ "PROFILER" "false")) "true"))
 
+(def *thumbnail-sizes* [(, 320 240) (, 640 320) (, 1280 720)])
+
 (def *aliasing-chars* [" " "." "-" "_"])
 
 (def *alias-page* "meta/Aliases")
