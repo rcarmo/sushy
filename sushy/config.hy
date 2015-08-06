@@ -41,6 +41,8 @@
 
 (def *page-media-base* "/media")
 
+(def *thumb-media-base* "/thumb")
+
 (def *home-page* (+ *page-route-base* "/HomePage"))
 
 (def *debug-mode* (= (.lower (.get environ "DEBUG" "false")) "true"))
@@ -48,6 +50,10 @@
 (def *profiler* (= (.lower (.get environ "PROFILER" "false")) "true"))
 
 (def *thumbnail-sizes* [(, 320 240) (, 640 320) (, 1280 720)])
+
+(def *placeholder-image* "/static/img/placeholder.png")
+
+(def *signed-prefixes* [*page-media-base* *thumb-media-base*])
 
 (def *aliasing-chars* [" " "." "-" "_"])
 
