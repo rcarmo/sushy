@@ -87,7 +87,7 @@ p, n = get_prev_next(pagename, pattern)
 if p:
 %>
 <span class="pagination-item older">
-&laquo; <em>Previous:</em> <a href="{{base_url + page_route_base + "/" + p["name"]}}">{{!p["title"]}}</a>
+&laquo;&nbsp;<em>Previous:</em> <a href="{{base_url + page_route_base + "/" + p["name"]}}">{{!p["title"]}}</a>
 </span>
 <%
 end
@@ -95,7 +95,7 @@ end
 if n:
 %>
 <span class="pagination-item newer">
-<em>Next:</em> <a href="{{base_url + page_route_base + "/" + n["name"]}}">{{!n["title"]}}</a> &raquo; 
+<em>Next:</em> <a href="{{base_url + page_route_base + "/" + n["name"]}}">{{!n["title"]}}</a>&nbsp;&raquo; 
 </span>
 <%
 end

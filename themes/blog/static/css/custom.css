@@ -120,6 +120,11 @@ table {
     font-size: 90%;
 }
 
+tbody {
+    border-top: 2px solid black; 
+    border-bottom: 2px solid black;     
+}
+
 
 tr {
     border-top: 1px solid #aaa;
@@ -199,6 +204,9 @@ h3 {
 
 #main {
     color: black;
+    width: 100%;
+    display: inline-block;
+    clear: both;
 }
 
 footer {
@@ -221,6 +229,20 @@ footer {
     padding-right: 4px;
     padding-left: 3px;
     font-family: Baskerville, Georgia, 'Times New Roman', Times, serif;
+}
+
+.blog-namespace img, .links-namespace img {
+    width: auto;
+    height: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.quicklook {
+    padding-left: 0.25em;
+    padding-bottom: 0.01em;
+    float: right;
 }
 
 

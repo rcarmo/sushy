@@ -18,6 +18,11 @@ table {
     font-size: 90%;
 }
 
+tbody {
+    border-top: 2px solid black; 
+    border-bottom: 2px solid black;     
+}
+
 tr {
     border-top: 1px solid #aaa;
 }
@@ -43,5 +48,5 @@ td {
 }
 
 img {
-    max-width: 100% !important; height: auto;
+    max-width: 100% !important; height: auto !important;
 } 
