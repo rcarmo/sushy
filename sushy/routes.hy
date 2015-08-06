@@ -204,10 +204,13 @@
                  "site_name"        *site-name*})
             (except [e IOError]
                 (try
-                    (let [[match (get (.next (get-closest-matches pagename)) "name")]]
-                        (redirect (+ *page-route-base* "/" match)))
+                    (let [[matches (get-closest-matches pagename)]]
+                        (for [match matches]
+                            (if (!= (get match "name") pagename)
+                                (redirect (+ *page-route-base* "/" (get match "name"))))))
                     (except [e StopIteration]
                         (abort (int 404) "Page not found")))))))
+
 
 ; thumbnails
 (with-decorator
