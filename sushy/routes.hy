@@ -213,7 +213,7 @@
 (with-decorator
     (handle-get (+ *thumb-media-base* "/<hash>/<x:int>,<y:int>/<filename:path>"))
     (report-processing-time)
-    (http-caching "filename" "image/jpeg" 3600)
+    (http-caching nil "image/jpeg" 3600)
     (defn thumbnail-image [hash x y filename]
         (let [[size (, (long x) (long y))]
               [hmac (compute-hmac *layout-hash* *thumb-media-base* (+ (% "/%d,%d" (, x y)) "/" filename))]]

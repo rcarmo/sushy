@@ -134,7 +134,7 @@
         (try
             (do
                 (.thumbnail im (, x y) (. Image *antialias*))
-                (apply .save [im io] {"format" "JPEG" "progressive" true "optimize" true})
+                (apply .save [im io] {"format" "JPEG" "progressive" true "optimize" true "quality" (int 75)})
                 (.getvalue io))
             (catch [e Exception]
                 (.warn log (, e x y filename))
