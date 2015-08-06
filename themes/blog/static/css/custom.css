@@ -209,6 +209,13 @@ h3 {
     clear: both;
 }
 
+#main h1, 
+#main h2, 
+#main h3, 
+#main h4 {
+   padding-top: 0.5rem;
+} 
+
 footer {
     margin-top: 2rem;
 }
@@ -218,6 +225,11 @@ footer {
 
 .post-title, .post-date, h1, h2, h3 {
     text-align: center;
+}
+
+.blog-namespace > p.lead {
+    display: inline-block;
+    clear: both;
 }
 
 .blog-namespace > p.lead:first-child:first-letter { 
