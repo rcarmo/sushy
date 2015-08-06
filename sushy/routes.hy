@@ -1,6 +1,6 @@
 (import
     [bottle      [abort get :as handle-get request redirect response static-file view :as render-view]]
-    [config      [*debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *home-page* *layout-hash* *page-media-base* *page-route-base* *rss-date-format* *site-copyright* *site-description* *site-name* *static-path* *store-path* *thumbnail-sizes*]]
+    [config      [*debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *home-page* *layout-hash* *page-media-base* *page-route-base* *rss-date-format* *site-copyright* *site-description* *site-name* *static-path* *store-path* *thumb-media-base* *thumbnail-sizes*]]
     [datetime    [datetime]]
     [dateutil.relativedelta  [relativedelta]]
     [email.utils [parsedate]]
@@ -8,6 +8,7 @@
     [logging     [getLogger]]
     [models      [search get-links get-all get-closest-matches get-metadata get-latest]]
     [os          [environ]]
+    [os.path     [join]]
     [pytz        [*utc*]]
     [render      [render-page]]
     [store       [get-page]]
@@ -176,9 +177,11 @@
         
 ; page media
 (with-decorator 
-    (handle-get (+ *page-media-base* "/<filename:path>"))
-    (defn page-media [filename]
-        (apply static-file [filename] {"root" *store-path*})))
+    (handle-get (+ *page-media-base* "/<hash>/<filename:path>"))
+    (defn page-media [hash filename]
+        (if (compute-hmac *layout-hash* *page-media-base* filename)
+            (apply static-file [filename] {"root" *store-path*})
+            (redirect *placeholder-image*))))
 
 
 ; page content
@@ -208,13 +211,13 @@
 
 ; thumbnails
 (with-decorator
-    (handle-get "/thumbs/<x:int>,<y:int>/<hash>/<filename:path>")
+    (handle-get (+ *thumb-media-base* "/<hash>/<x:int>,<y:int>/<filename:path>")
     (report-processing-time)
-    (defn thumbnail-image [x y hash filename]
+    (defn thumbnail-image [hash x y filename]
         (let [[size (, (long x) (long y))]
-              [hmac (compute-hmac *layout-hash* x y filename)]]
+              [hmac (compute-hmac *layout-hash* *thumb-media-base* (join (% "/%d,%d" (, x y)) filename))]]
             (.debug log (, size hmac hash filename))
             (if (or (not (in size *thumbnail-sizes*))
                     (!= hash hmac))
                 (abort (int 403) "Invalid Image Request")
-                (abort (int 404) "Image not found")))))
+                (redirect "/static/img/placeholder.png"))))))

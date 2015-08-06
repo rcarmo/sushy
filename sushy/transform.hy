@@ -1,10 +1,10 @@
 ; Perform HTML transforms
 (import
-    [config              [*alias-page* *interwiki-page* *page-media-base* *page-route-base*]]
+    [config              [*alias-page* *interwiki-page* *layout-hash* *page-media-base* *page-route-base* *signed-prefixes*]]
     [logging             [getLogger]]
     [lxml.etree          [ElementTree HTML fromstring tostring]]
     [messages            [inline-message]]
-    [os.path             [basename join]]
+    [os.path             [basename join split]]
     [plugins             [plugin-tagged plugin-quicklook plugin-rating]]
     [pygments            [highlight]]
     [pygments.lexers     [get-lexer-by-name]]
@@ -12,7 +12,7 @@
     [re                  [*ignorecase* sub]]
     [store               [asset-exists? asset-path get-page open-asset]]
     [render              [render-page]]
-    [utils               [memoize get-image-size]]
+    [utils               [compute-hmac memoize get-image-size]]
     [urlparse            [urlsplit]])
 
 (setv log (getLogger))
@@ -174,6 +174,23 @@
     (.replace buffer "&#8617;" "&#8617;&#xFE0E;"))
 
 
+(defn sign-assets
+    ; add an HMAC signature to asset pathnames
+    [doc]
+    (for [tag (.xpath doc "//img[@src]")]
+        (let [[src             (get (. tag attrib) "src")]
+              [(, prefix path) (split src)]]
+            (if (in prefix *signed-prefixes*)
+                (assoc tag.attrib "src" (.join "/" [prefix (compute-hmac *layout-hash* prefix path) path])))))
+    (for [tag (.xpath doc "//a[@href]")]
+        (let [[href            (get (. tag attrib) "href")]
+              [(, prefix path) (split src)]]
+            (if (in prefix *signed-prefixes*)
+                (assoc tag.attrib "href" (.join "/" [prefix (compute-hmac *layout-hash* prefix path) path])))))
+    doc)
+
+
+
 (defn apply-transforms [html pagename]
     ; remember that Hy's threading macro manipulates the first argument slot
     (-> html
@@ -188,4 +205,5 @@
         (syntax-highlight)
         (plugin-tagged)
         (plugin-rating)
-        (plugin-quicklook pagename)))
+        (plugin-quicklook pagename)
+        (sign-assets)))
