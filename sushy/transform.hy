@@ -178,15 +178,19 @@
     ; add an HMAC signature to asset pathnames
     [doc]
     (for [tag (.xpath doc "//img[@src]")]
-        (let [[src             (get (. tag attrib) "src")]
-              [(, _ prefix path) (map (fn [p] (+ "/" p)) (.split src "/" 2))]]
-            (if (in prefix *signed-prefixes*)
-                (assoc tag.attrib "src" (+ prefix "/" (compute-hmac *layout-hash* prefix path) path)))))
+        (try
+            (let [[src             (get (. tag attrib) "src")]
+                  [(, _ prefix path) (map (fn [p] (+ "/" p)) (.split src "/" 2))]]
+                (if (in prefix *signed-prefixes*)
+                    (assoc tag.attrib "src" (+ prefix "/" (compute-hmac *layout-hash* prefix path) path))))
+            (except [e ValueError])))
     (for [tag (.xpath doc "//a[@href]")]
-        (let [[href              (get (. tag attrib) "href")]
-              [(, _ prefix path) (map (fn [p] (+ "/" p)) (.split href "/" 2))]]
-            (if (in prefix *signed-prefixes*)
-                (assoc tag.attrib "href" (+ prefix "/" (compute-hmac *layout-hash* prefix path) path)))))
+        (try
+            (let [[href              (get (. tag attrib) "href")]
+                  [(, _ prefix path) (map (fn [p] (+ "/" p)) (.split href "/" 2))]]
+                (if (in prefix *signed-prefixes*)
+                    (assoc tag.attrib "href" (+ prefix "/" (compute-hmac *layout-hash* prefix path) path))))
+            (except [e ValueError])))
     doc)
 
 
