@@ -8,13 +8,13 @@
     [logging     [getLogger]]
     [models      [search get-links get-all get-closest-matches get-metadata get-latest]]
     [os          [environ]]
-    [os.path     [join]]
+    [os.path     [join split]]
     [pytz        [*utc*]]
     [render      [render-page]]
-    [store       [get-page]]
+    [store       [asset-exists? asset-path get-page]]
     [time        [mktime]]
     [transform   [apply-transforms inner-html]]
-    [utils       [*gmt-format* base-url compact-hash compute-hmac lru-cache ttl-cache report-processing-time]])
+    [utils       [*gmt-format* base-url compact-hash compute-hmac get-thumbnail lru-cache ttl-cache report-processing-time]])
 
 
 (setv log (getLogger))
@@ -37,6 +37,7 @@
 (defn http-caching [page-key content-type seconds]
     (defn inner [func]
         (defn wrap-fn [&rest args &kwargs kwargs]
+            (.set-header response (str "Content-Type") content-type)
             (if *debug-mode*
                 (apply func args kwargs)
                 (let [[pagename    (if page-key (get kwargs page-key) nil)]
@@ -58,7 +59,6 @@
                             (.set-header response (str "Expires") (.strftime (+ (.now datetime) (apply relativedelta [] {"seconds" seconds})) *gmt-format*))
                             (.set-header response (str "Cache-Control") (.format "{}, max-age={}" pragma seconds))
                             (.set-header response (str "Pragma") pragma)))))
-                    (.set-header response (str "Content-Type") content-type)
                 (apply func args kwargs))
         wrap-fn)
     inner)
@@ -213,6 +213,7 @@
 (with-decorator
     (handle-get (+ *thumb-media-base* "/<hash>/<x:int>,<y:int>/<filename:path>"))
     (report-processing-time)
+    (http-caching "filename" "image/jpeg" 3600)
     (defn thumbnail-image [hash x y filename]
         (let [[size (, (long x) (long y))]
               [hmac (compute-hmac *layout-hash* *thumb-media-base* (+ (% "/%d,%d" (, x y)) "/" filename))]]
@@ -220,4 +221,13 @@
             (if (or (not (in size *thumbnail-sizes*))
                     (!= hash hmac))
                 (abort (int 403) "Invalid Image Request")
-                (redirect "/static/img/placeholder.png")))))
+                (let [[(, pagename asset) (split filename)]]
+                    (if (asset-exists? pagename asset)
+                        (let [[buffer (get-thumbnail x y (asset-path pagename asset))]
+                              [length (len buffer)]]
+                            (if length
+                                (do
+                                    (.set-header response (str "Content-Length") length)
+                                    buffer)
+                                (redirect "/static/img/placeholder.png")))
+                        (redirect "/static/img/placeholder.png")))))))

@@ -8,9 +8,10 @@
     [hashlib            [sha1]]
     [hmac               [new :as new-hmac]]
     [logging            [getLogger]]
-    [PIL                [Image]]
+    [PIL                [Image  ]]
     [pytz               [timezone]]
     [random             [sample]]
+    [StringIO           [StringIO]]
     [time               [time]]
     [urllib             [quote :as uquote]]
     [urlparse           [urlunparse]])
@@ -121,12 +122,26 @@
                     (let [[size (. im size)]]
                         (.close im)
                         size))
-            (catch [e Exception]
-                (if im (.close im))
-                (.warn log (% "Could not extract size from %s" filename))
-                nil)))))
+                (catch [e Exception]
+                    (.warn log (, e filename))
+                    nil)
+                (finally (if im (.close im)))))))
 
-           
+
+(defn get-thumbnail [x y filename]
+    (let [[im (.open Image filename)]
+          [io (StringIO)]]
+        (try
+            (do
+                (.thumbnail im (, x y) (. Image *antialias*))
+                (apply .save [im io] {"format" "JPEG" "progressive" true "optimize" true})
+                (.getvalue io))
+            (catch [e Exception]
+                (.warn log (, e x y filename))
+                "")
+            (finally (.close io)))))
+
+
 (defn sse-pack [data]
     ; pack data in SSE format
     (+ (.join "" 
