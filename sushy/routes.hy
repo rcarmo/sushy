@@ -1,6 +1,6 @@
 (import
     [bottle      [abort get :as handle-get request redirect response static-file view :as render-view]]
-    [config      [*debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *home-page* *layout-hash* *page-media-base* *page-route-base* *rss-date-format* *site-copyright* *site-description* *site-name* *static-path* *store-path* *thumb-media-base* *thumbnail-sizes*]]
+    [config      [*debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *home-page* *layout-hash* *page-media-base* *page-route-base* *placeholder-image* *rss-date-format* *site-copyright* *site-description* *site-name* *static-path* *store-path* *thumb-media-base* *thumbnail-sizes*]]
     [datetime    [datetime]]
     [dateutil.relativedelta  [relativedelta]]
     [email.utils [parsedate]]
@@ -179,7 +179,7 @@
 (with-decorator 
     (handle-get (+ *page-media-base* "/<hash>/<filename:path>"))
     (defn page-media [hash filename]
-        (if (compute-hmac *layout-hash* *page-media-base* filename)
+        (if (= hash (compute-hmac *layout-hash* *page-media-base* (+ "/" filename)))
             (apply static-file [filename] {"root" *store-path*})
             (redirect *placeholder-image*))))
 
@@ -211,13 +211,13 @@
 
 ; thumbnails
 (with-decorator
-    (handle-get (+ *thumb-media-base* "/<hash>/<x:int>,<y:int>/<filename:path>")
+    (handle-get (+ *thumb-media-base* "/<hash>/<x:int>,<y:int>/<filename:path>"))
     (report-processing-time)
     (defn thumbnail-image [hash x y filename]
         (let [[size (, (long x) (long y))]
-              [hmac (compute-hmac *layout-hash* *thumb-media-base* (join (% "/%d,%d" (, x y)) filename))]]
+              [hmac (compute-hmac *layout-hash* *thumb-media-base* (+ (% "/%d,%d" (, x y)) "/" filename))]]
             (.debug log (, size hmac hash filename))
             (if (or (not (in size *thumbnail-sizes*))
                     (!= hash hmac))
                 (abort (int 403) "Invalid Image Request")
-                (redirect "/static/img/placeholder.png"))))))
+                (redirect "/static/img/placeholder.png")))))

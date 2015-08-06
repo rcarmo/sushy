@@ -1,6 +1,6 @@
 ; Handle legacy Yaki plugin tags
 (import
-    [config     [*layout-hash*]]
+    [config     [*layout-hash* *thumb-media-base*]]
     [models     [search]]
     [logging    [getLogger]]
     [lxml.etree [fromstring tostring]]
@@ -39,9 +39,7 @@
     [doc pagename &optional [x 320] [y 240]]
     (for [tag (.xpath doc "//plugin[contains(@name,'quicklook')]")]
         (let [[src  (get tag.attrib "src")]
-              [path (.join "/" [pagename src])]
-              [hmac (compute-hmac *layout-hash* x y path)]]
-            (.debug log (, (, x y) hmac path))
+              [path (.join "/" [pagename src])]]
             (.replace (.getparent tag) tag
-                (fromstring (% "<img src=\"/thumbs/%d,%d/%s/%s\"/>" (, x y hmac path))))))
+                (fromstring (% "<img class=\"quicklook\" width=\"%d\" height=\"%d\" src=\"%s/%d,%d/%s\"/>" (, x y *thumb-media-base* x y path))))))
     doc)

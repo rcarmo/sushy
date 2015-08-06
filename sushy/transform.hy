@@ -179,14 +179,14 @@
     [doc]
     (for [tag (.xpath doc "//img[@src]")]
         (let [[src             (get (. tag attrib) "src")]
-              [(, prefix path) (split src)]]
+              [(, _ prefix path) (map (fn [p] (+ "/" p)) (.split src "/" 2))]]
             (if (in prefix *signed-prefixes*)
-                (assoc tag.attrib "src" (.join "/" [prefix (compute-hmac *layout-hash* prefix path) path])))))
+                (assoc tag.attrib "src" (+ prefix "/" (compute-hmac *layout-hash* prefix path) path)))))
     (for [tag (.xpath doc "//a[@href]")]
-        (let [[href            (get (. tag attrib) "href")]
-              [(, prefix path) (split src)]]
+        (let [[href              (get (. tag attrib) "href")]
+              [(, _ prefix path) (map (fn [p] (+ "/" p)) (.split href "/" 2))]]
             (if (in prefix *signed-prefixes*)
-                (assoc tag.attrib "href" (.join "/" [prefix (compute-hmac *layout-hash* prefix path) path])))))
+                (assoc tag.attrib "href" (+ prefix "/" (compute-hmac *layout-hash* prefix path) path)))))
     doc)
 
 
