@@ -25,7 +25,7 @@
 (setv *utc* (timezone "UTC"))
 
 (defn base-url []
-    (slice (. request url) 0 (- (len (uquote (. request path))))))
+    (slice (. request fullpath) 0 (- (len (uquote (. request path))))))
 
 ; hashing and HMAC helpers
 (defn compact-hash [&rest args]
