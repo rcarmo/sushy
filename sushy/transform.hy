@@ -1,5 +1,6 @@
 ; Perform HTML transforms
 (import
+    [cgi                 [escape]]
     [config              [*alias-page* *interwiki-page* *layout-hash* *page-media-base* *page-route-base* *signed-prefixes*]]
     [logging             [getLogger]]
     [lxml.etree          [ElementTree HTML fromstring tostring]]
@@ -145,7 +146,7 @@
         [children []]]
         (for [child (.iterchildren body)]
             (.append children (apply tostring [child] {"method" "text" "encoding" "unicode"})))
-        (.join " " (.split (.join "" children)))))
+        (escape (.join " " (.split (.join "" children))))))
 
 
 (defn extract-internal-links 
