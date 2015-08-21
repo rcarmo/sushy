@@ -1,4 +1,5 @@
 import os, re, sys, logging
+from bottle import hook
 from peewee import *
 from playhouse.sqlite_ext import *
 from playhouse.kv import PickledKeyStore
@@ -15,6 +16,7 @@ log = logging.getLogger(__name__)
 db = SqliteExtDatabase(os.environ['DATABASE_PATH'], threadlocals=True)
 
 KVS = PickledKeyStore(ordered=True, database=db)
+
 
 class Page(Model):
     """Metadata table"""
@@ -281,3 +283,14 @@ def get_prev_next(name, regexp):
         log.debug("Could not obtain prev/next for %s: %s" % (name, e))
         pass
     return p, n
+
+
+@hook('before_request')
+def _connect_db():
+    db.connect()
+
+
+@hook('after_request')
+def _close_db():
+    if not db.is_closed():
+        db.close()
