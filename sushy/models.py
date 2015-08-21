@@ -63,7 +63,7 @@ def init_db():
 
 def add_wiki_link(**kwargs):
     """Adds a wiki link"""
-    with db.transaction(): # deferring transactions gives us a nice speed boost
+    with db.atomic(): # deferring transactions gives us a nice speed boost
         try:
             return Link.create(**kwargs)
         except IntegrityError as e:
@@ -71,7 +71,7 @@ def add_wiki_link(**kwargs):
 
 
 def del_wiki_page(page):
-    with db.transaction():
+    with db.atomic():
         page = Page.get(Page.name == page)
         FTSPage.delete().where(FTSPage.page == page).execute()
         Page.delete().where(Page.name == page).execute()
@@ -80,7 +80,7 @@ def del_wiki_page(page):
 
 def index_wiki_page(**kwargs):
     """Adds wiki page metatada and FTS data."""
-    with db.transaction():
+    with db.atomic():
         values = {}
         for k in [u"name", u"title", u"tags", u"hash", u"mtime", u"pubtime"]:
             values[k] = kwargs[k]
@@ -104,8 +104,7 @@ def index_wiki_page(**kwargs):
 
 def get_metadata(name):
     try:
-        with db.transaction():
-            return Page.get(Page.name == name)._data
+        return Page.get(Page.name == name)._data
     except Exception as e:
         log.warn(e)
         return None
@@ -114,82 +113,77 @@ def get_metadata(name):
 def get_links(page_name):
     # Backlinks (links to current page)
     try:
-        with db.transaction():
-            query = (Page.select()
-                     .join(Link, on=(Link.page == Page.name))
-                     .where((Link.link == page_name))
-                     .order_by(SQL('mtime').desc())
-                     .dicts())
+        query = (Page.select()
+                    .join(Link, on=(Link.page == Page.name))
+                    .where((Link.link == page_name))
+                    .order_by(SQL('mtime').desc())
+                    .dicts())
 
-            for page in query:
-                yield page
+        for page in query:
+            yield page
 
         # Links from current page to valid pages
-        with db.transaction():
-            query = (Page.select()
-                     .join(Link, on=(Link.link == Page.name))
-                     .where((Link.page == page_name))
-                     .order_by(SQL('mtime').desc())
-                     .dicts())
+        query = (Page.select()
+                    .join(Link, on=(Link.link == Page.name))
+                    .where((Link.page == page_name))
+                    .order_by(SQL('mtime').desc())
+                    .dicts())
 
-            for page in query:
-                yield page
+        for page in query:
+            yield page
     except OperationalError as e:
         log.warn(e)
         return        
 
 
 def get_latest(limit=20, regexp=None):
-    with db.transaction():
-        if regexp:
-            query = (Page.select()
-                    .where(Page.name.regexp(regexp))
-                    .order_by(SQL('mtime').desc())
-                    .limit(limit)
-                    .dicts())
-        else:
-            query = (Page.select()
-                    .order_by(SQL('mtime').desc())
-                    .limit(limit)
-                    .dicts())
+    if regexp:
+        query = (Page.select()
+                .where(Page.name.regexp(regexp))
+                .order_by(SQL('mtime').desc())
+                .limit(limit)
+                .dicts())
+    else:
+        query = (Page.select()
+                .order_by(SQL('mtime').desc())
+                .limit(limit)
+                .dicts())
 
-        for page in query:
-            yield page
+    for page in query:
+        yield page
 
 
 def get_all():
-    with db.transaction():
-        query = (Page.select()
-                .order_by(SQL('mtime').desc())
-                .dicts())
+    query = (Page.select()
+            .order_by(SQL('mtime').desc())
+            .dicts())
 
-        for page in query:
-            yield page
+    for page in query:
+        yield page
 
 
 def search(qstring, limit=50):
-    with db.transaction():
-        query = (FTSPage.select(Page,
-                             FTSPage,
-                             # this is not supported yet: FTSPage.snippet(FTSPage.content).alias('extract'),
-                             # so we hand-craft the SQL for it
-                             SQL('snippet(ftspage) as extract'),
-                             FTSPage.bm25(FTSPage.content).alias('score'))
-                     .join(Page)
-                     .where(FTSPage.match(qstring))
-                     .order_by(SQL('score').desc())
-                     .order_by(Page.mtime.desc())
-                     .limit(limit))
+    query = (FTSPage.select(Page,
+                            FTSPage,
+                            # this is not supported yet: FTSPage.snippet(FTSPage.content).alias('extract'),
+                            # so we hand-craft the SQL for it
+                            SQL('snippet(ftspage) as extract'),
+                            FTSPage.bm25(FTSPage.content).alias('score'))
+                    .join(Page)
+                    .where(FTSPage.match(qstring))
+                    .order_by(SQL('score').desc())
+                    .order_by(Page.mtime.desc())
+                    .limit(limit))
 
-        for page in query:
-            yield {
-                "content"     : page.extract,
-                "title"       : page.page.title,
-                "score"       : round(page.score, 2),
-                "mtime"       : page.page.mtime,
-                "tags"        : page.page.tags,
-                "name"        : page.page.name
-            }
+    for page in query:
+        yield {
+            "content"     : page.extract,
+            "title"       : page.page.title,
+            "score"       : round(page.score, 2),
+            "mtime"       : page.page.mtime,
+            "tags"        : page.page.tags,
+            "name"        : page.page.name
+        }
 
 
 @db.func()
@@ -226,59 +220,54 @@ def close_match(a,b):
 
 
 def get_closest_matches(name):
-    with db.transaction():
-        query = (Page.select()
-                .order_by(fn.close_match(name, Page.name).desc())
-                .dicts())
+    query = (Page.select()
+            .order_by(fn.close_match(name, Page.name).desc())
+            .dicts())
 
-        for page in query:
-            yield page
+    for page in query:
+        yield page
 
 
 def get_prev_by_name(name):
-    with db.transaction():
-        query = (Page.select()
-                .where(Page.name < name)
-                .order_by(Page.name.desc())
-                .limit(1)
-                .dicts())
-        for p in query:
-            return p
+    query = (Page.select()
+            .where(Page.name < name)
+            .order_by(Page.name.desc())
+            .limit(1)
+            .dicts())
+    for p in query:
+        return p
 
 
 def get_next_by_name(name):
-    with db.transaction():
-        query = (Page.select()
-                .where(Page.name > name)
-                .order_by(Page.name.asc())
-                .limit(1)
-                .dicts())
-        for p in query:
-            return p
+    query = (Page.select()
+            .where(Page.name > name)
+            .order_by(Page.name.asc())
+            .limit(1)
+            .dicts())
+    for p in query:
+        return p
 
 
 def get_prev_by_date(name, regexp):
-    with db.transaction():
-        p = Page.get(Page.name == name)
-        query = (Page.select()
-                .where(Page.name.regexp(regexp) and (Page.pubtime < p.pubtime))
-                .order_by(Page.pubtime.desc())
-                .limit(1)
-                .dicts())
-        for p in query:
-            return p
+    p = Page.get(Page.name == name)
+    query = (Page.select()
+            .where(Page.name.regexp(regexp) and (Page.pubtime < p.pubtime))
+            .order_by(Page.pubtime.desc())
+            .limit(1)
+            .dicts())
+    for p in query:
+        return p
 
 
 def get_next_by_date(name, regexp):
-    with db.transaction():
-        p = Page.get(Page.name == name)
-        query = (Page.select()
-                .where(Page.name.regexp(regexp) and (Page.pubtime > p.pubtime))
-                .order_by(Page.pubtime.asc())
-                .limit(1)
-                .dicts())
-        for p in query:
-            return p
+    p = Page.get(Page.name == name)
+    query = (Page.select()
+            .where(Page.name.regexp(regexp) and (Page.pubtime > p.pubtime))
+            .order_by(Page.pubtime.asc())
+            .limit(1)
+            .dicts())
+    for p in query:
+        return p
             
             
 def get_prev_next(name, regexp):
