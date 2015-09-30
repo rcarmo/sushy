@@ -5,7 +5,7 @@
     [logging             [getLogger]]
     [lxml.etree          [ElementTree HTML fromstring tostring]]
     [messages            [inline-message]]
-    [os.path             [basename join split]]
+    [os.path             [basename join normpath split]]
     [plugins             [plugin-tagged plugin-quicklook plugin-rating]]
     [pygments            [highlight]]
     [pygments.lexers     [get-lexer-by-name]]
@@ -20,7 +20,7 @@
 
 
 (with-decorator (memoize)
-    (defn get-mappings 
+    (defn get-mappings
         ; searches for `pre` tags and builds key/value pairs
         [page]
         (let [[mappings {}]
@@ -34,7 +34,7 @@
             mappings)))
 
 
-(defn base-href 
+(defn base-href
     ; inserts the base path into hrefs
     [doc pagename]
     (for [a (.xpath doc "//a[@href]")]
@@ -47,7 +47,7 @@
     doc)
 
 
-(defn interwiki-links 
+(defn interwiki-links
     ; replaces interwiki hrefs
     [doc]
     (let [[interwiki-map (get-mappings *interwiki-page*)]]
@@ -62,7 +62,7 @@
     doc)
 
 
-(defn alias-links 
+(defn alias-links
     ; replaces aliases
     [doc]
     (let [[alias-map (get-mappings *alias-page*)]]
@@ -74,12 +74,12 @@
     doc)
 
 
-(defn include-sources 
+(defn include-sources
     ; searches for `pre` tags with a `src` attribute
     [doc pagename]
     (for [tag (.xpath doc "//pre[@src]")]
         (let [[filename (get tag.attrib "src")]]
-            (try 
+            (try
                 (let [[buffer (.read (open-asset pagename filename))]]
                     (setv tag.text buffer))
                 (catch [e Exception]
@@ -88,7 +88,7 @@
     doc)
 
 
-(defn syntax-highlight 
+(defn syntax-highlight
     ; searches for `pre` tags with a `syntax` attribute
     [doc]
     (for [tag (.xpath doc "//pre[@syntax]")]
@@ -101,11 +101,11 @@
     doc)
 
 
-(defn image-sources 
+(defn image-sources
     ; searches for `img` tags with a `src` attribute and gives them an absolute URL path
     [doc pagename]
     (for [tag (.xpath doc "//img[@src]")]
-        (let [[src    (get (. tag attrib) "src")]
+        (let [[src    (normpath (get (. tag attrib) "src"))]
               [schema (get (urlsplit src) 0)]]
             ; if this is a local image
             (if (= "" schema)
@@ -115,7 +115,7 @@
                     (if (not (in "width" (. tag attrib)))
                         ; ...get it from the image file
                         (let [[size (get-image-size (asset-path pagename src))]]
-                            (if size 
+                            (if size
                                 (do
                                     (assoc (. tag attrib) "width" (str (get size 0)))
                                     (assoc (. tag attrib) "height" (str (get size 1))))
@@ -124,12 +124,12 @@
                     (.replace (.getparent tag) tag
                         (fromstring (inline-message "error" (% "Could not find image '%s'" src))))))
             (assoc (. tag attrib) "src" (join *page-media-base* pagename src))))
-    doc) 
+    doc)
 
 
 ; TODO: include, interwiki links, alias replacements, all the "legacy" Yaki handling
 
-(defn inner-html 
+(defn inner-html
     ; Returns the content of a doc without extraneous tags
     [doc]
     (let [[body (get (.xpath doc "//body") 0)]
@@ -139,7 +139,7 @@
         (.join "" children)))
 
 
-(defn extract-plaintext 
+(defn extract-plaintext
     ; Returns a compacted version of the plaintext without duplicate whitespace and with converted entities (lxml's default)
     [doc]
     (let [[body (get (.xpath doc "//body") 0)]
@@ -149,11 +149,11 @@
         (escape (.join " " (.split (.join "" children))))))
 
 
-(defn extract-internal-links 
+(defn extract-internal-links
     ; Returns a list of internal links
     [doc]
-    (map 
-        (fn [tag] 
+    (map
+        (fn [tag]
             (slice (get tag.attrib "href") (+ 1 (len *page-route-base*))))
         (.xpath doc (+ "//a[starts-with(@href,'" *page-route-base* "')]"))))
 
