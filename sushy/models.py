@@ -45,7 +45,7 @@ class Link(Model):
 
 class FTSPage(FTSModel):
     """Full text indexing table"""
-    page = ForeignKeyField(Page, primary_key=True)
+    page = ForeignKeyField(Page, index=True)
     content = TextField()
 
     class Meta:
