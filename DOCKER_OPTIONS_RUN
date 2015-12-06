@@ -1,1 +1,1 @@
--v /srv/data/sushy:/data
+-v /srv/data/sushy:/app/data
