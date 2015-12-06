@@ -109,8 +109,8 @@ These are set in the `Makefile` (which I use for a variety of purposes).
 ## Trying it out
 
 ```
-# make sure you have libxml and libxslt headers - the following is for Ubuntu 14.04
-sudo apt-get install libxml2-dev libxslt1-dev
+# make sure you have libxml and libxslt headers, as well as the JPEG library - the following is for Ubuntu 14.04
+sudo apt-get install libxml2-dev libxslt1-dev libjpeg-dev
 # install dependencies
 make deps
 # run the indexing daemon (updates upon file changes)
