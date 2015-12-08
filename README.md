@@ -46,7 +46,9 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 * <strike>Revision history</strike> (you're supposed to manage your content with [Dropbox][db] or `git`)
 * <strike>Comment support</strike>
 
-### Principles of Operation
+---
+
+# Principles of Operation
 
 * All your Textile, Markdown or ReStructured Text content lives in a filesystem tree, with a folder per page
 * Sushy grabs and renders those on demand with fine-tuned HTTP headers (this is independently of whether or not you put Varnish or CloudFlare in front for caching)
@@ -84,6 +86,8 @@ But there's no reason why this can't be easily modified to pre-render and save t
 
 Thanks to [Hy][hy], this should run just as well under Python 2 and Python 3. My target environment is 2.7.8/PyPy, though, so your mileage may vary. Check the `requirements.txt` file - I've taken pains to make sure dependencies are there _for a reason_ and not just because they're trendy.
 
+---
+
 # Deployment
 
 This repository is deployable as-is on [Dokku-alt][da], and will instantiate a production-ready [uWSGI][uwsgi] server (using `gevent`) and a background indexing worker. 
@@ -107,13 +111,15 @@ and templates/views are stored
 
 These are set in the `Makefile` (which I use for a variety of purposes).
 
-## Sample Dokku Config
+---
+
+## Sample Dokku Configuration
 
 Deploying Sushy in [dokku][dokku] implies setting things up so that the separate processes (`web` and `worker`, which are instantiated in separate Docker containers) can share at least one storage volume (two if you need to keep the indexing database and the content tree separate).
 
 The example below shows a finished configuration that mounts the `/srv/data/sushy` host path inside both containers as `/app/data`, so that both can access the index and the content tree:
 
-### Docker settings for exposing host directory as shared volume
+### Docker options for exposing host directory as shared volume
 ```
 $ dokku docker-options staging.no-bolso.com
 Deploy options:
@@ -130,6 +136,7 @@ DATABASE_PATH:     /app/data/sushy.db
 DEBUG:             True
 THEME_PATH:        themes/blog
 ```
+---
 
 ## Trying it out
 
