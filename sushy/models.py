@@ -170,8 +170,8 @@ def search(qstring, limit=50):
                             FTSPage.bm25().alias('score'))
                     .join(Page)
                     .where(FTSPage.match(qstring))
-                    .order_by(SQL('score').desc())
-                    .order_by(Page.mtime.desc())
+                    .order_by(SQL('score').asc())
+                    #.order_by(Page.mtime.desc())
                     .limit(limit))
 
     for page in query:
