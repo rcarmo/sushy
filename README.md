@@ -140,7 +140,7 @@ THEME_PATH:        themes/blog
 
 ## Trying it out
 
-Make sure you have libxml and libxslt headers, as well as the JPEG library - the following is for Ubuntu 14.04
+Make sure you have `libxml` and `libxslt` headers, as well as the JPEG library - the following is for Ubuntu 14.04:
 ```
 sudo apt-get install libxml2-dev libxslt1-dev libjpeg-dev
 # install dependencies
