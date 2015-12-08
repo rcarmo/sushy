@@ -107,6 +107,31 @@ and templates/views are stored
 
 These are set in the `Makefile` (which I use for a variety of purposes).
 
+## Sample Dokku Config
+
+Deploying Sushy in [dokku][dokku] implies setting things up so that the separate processes (`web` and `worker`, which are instantiated in separate Docker containers) can share at least one storage volume (two if you need to keep the indexing database and the content tree separate).
+
+The example below shows a finished configuration that mounts the `/srv/data/sushy` host path inside both containers as `/app/data/` so that both can access the index and the content tree:
+
+```
+# Application environment settings
+
+$ dokku config staging.no-bolso.com
+=====> staging.no-bolso.com config vars
+CONTENT_PATH:      /app/data/space
+DATABASE_PATH:     /app/data/sushy.db
+DEBUG:             True
+THEME_PATH:        themes/blog
+
+# Docker settings for mounting a local directory as a volume
+
+$ dokku docker-options staging.no-bolso.com
+Deploy options:
+    -v /srv/data/sushy:/app/data
+Run options:
+    -v /srv/data/sushy:/app/data
+```
+
 ## Trying it out
 
 ```
