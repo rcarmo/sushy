@@ -111,31 +111,30 @@ These are set in the `Makefile` (which I use for a variety of purposes).
 
 Deploying Sushy in [dokku][dokku] implies setting things up so that the separate processes (`web` and `worker`, which are instantiated in separate Docker containers) can share at least one storage volume (two if you need to keep the indexing database and the content tree separate).
 
-The example below shows a finished configuration that mounts the `/srv/data/sushy` host path inside both containers as `/app/data/` so that both can access the index and the content tree:
+The example below shows a finished configuration that mounts the `/srv/data/sushy` host path inside both containers as `/app/data`, so that both can access the index and the content tree:
 
+### Docker settings for exposing host directory as shared volume
 ```
-# Application environment settings
-
-$ dokku config staging.no-bolso.com
-=====> staging.no-bolso.com config vars
-CONTENT_PATH:      /app/data/space
-DATABASE_PATH:     /app/data/sushy.db
-DEBUG:             True
-THEME_PATH:        themes/blog
-
-# Docker settings for mounting a local directory as a volume
-
 $ dokku docker-options staging.no-bolso.com
 Deploy options:
     -v /srv/data/sushy:/app/data
 Run options:
     -v /srv/data/sushy:/app/data
 ```
+### Application Settings
+```
+$ dokku config staging.no-bolso.com
+=====> staging.no-bolso.com config vars
+CONTENT_PATH:      /app/data/space
+DATABASE_PATH:     /app/data/sushy.db
+DEBUG:             True
+THEME_PATH:        themes/blog
+```
 
 ## Trying it out
 
+Make sure you have libxml and libxslt headers, as well as the JPEG library - the following is for Ubuntu 14.04
 ```
-# make sure you have libxml and libxslt headers, as well as the JPEG library - the following is for Ubuntu 14.04
 sudo apt-get install libxml2-dev libxslt1-dev libjpeg-dev
 # install dependencies
 make deps
