@@ -152,10 +152,10 @@
 (defn extract-internal-links
     ; Returns a list of internal links
     [doc]
-    (map
+    (list (set (map
         (fn [tag]
             (slice (get tag.attrib "href") (+ 1 (len *page-route-base*))))
-        (.xpath doc (+ "//a[starts-with(@href,'" *page-route-base* "')]"))))
+        (.xpath doc (+ "//a[starts-with(@href,'" *page-route-base* "')]"))))))
 
 
 (defn make-lead-paragraph
