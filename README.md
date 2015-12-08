@@ -12,11 +12,11 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Roadmap
 
-* Page aliasing (i.e., multiple URLs for a page)
+* Friendlier search results
 * Blog homepage/excerpts/archive navigation
 * Image thumbnailing
-* Site thumbnailing (for taking screenshots of external links)
-* Docker deployment (currently deploying on [Dokku-alt][da] using a `Procfile`, waiting for the dust to settle to build a proper reference container)
+* Page aliasing (i.e., multiple URLs for a page)
+* Docker deployment (currently deploying on [Dokku-alt][da] using a `Procfile`
 
 ### Done
 
@@ -36,11 +36,12 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 * Run under [uWSGI][uwsgi] using `gevent` workers
 * Full-text indexing and search
 * Syntax highlighting for inline code samples
-* [Ink][ink]-based site layout and templates
+* [Ink][ink]-based site layout and templates (replaced by a new layout in the `feature/blog` branch)
 * Baseline markup rendering (Textile, Markdown and ReST)
 
 ### Stuff that will never happen:
 
+* <strike>Site thumbnailing (for taking screenshots of external links)</strike> - moved to a separate app
 * Web-based UI for editing pages (you're supposed to do this out-of-band)
 * Revision history (you're supposed to manage your content with [Dropbox][db] or `git`)
 * Commenting
