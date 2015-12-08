@@ -96,7 +96,7 @@
                                   "formatter" "http"
                                   "level"     "WARNING"
                                   "capacity"  200}}
-         "loggers"    {"peewee"       {"level"     "WARNING"
+         "loggers"    {"peewee"       {"level"     "DEBUG"
                                        "handlers"  ["ram" "console"]}
                        "__init__"     {"level" "WARNING"}; for Markdown
                        "sushy.models" {"level" "WARNING"}
