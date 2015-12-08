@@ -2,6 +2,7 @@ bottle>=0.12.9
 docutils>=0.12
 gevent>=1.0.2
 hy==0.11.0
+cssutils>=1.0.1
 inlinestyler>=0.2.3
 lxml>=3.4.4
 Markdown>=2.6.4
@@ -12,6 +13,7 @@ pygments>=2.0.2
 python-dateutil>=2.4.2
 pytz>=2015.7
 smartypants>=1.8.6
+requests>=2.8.1
 textile>=2.2.2
 uWSGI>=2.0.11
 watchdog>=0.8.3
