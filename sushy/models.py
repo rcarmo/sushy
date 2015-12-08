@@ -46,10 +46,13 @@ class Link(Model):
 class FTSPage(FTSModel):
     """Full text indexing table"""
     page = ForeignKeyField(Page, index=True)
-    content = TextField()
+    title = TextField()
+    tags = TextField()
+    body = TextField()
 
     class Meta:
         database = db
+        extension_options = {'tokenize': 'porter'}
 
 
 def init_db():
@@ -90,17 +93,13 @@ def index_wiki_page(**kwargs):
         try:
             page = Page.create(**values)
         except IntegrityError:
-            page = Page.get(Page.name == values["name"])
+            page = Page.get(Page.name == values['name'])
             page.update(**values)
         if len(kwargs['body']):
-            parts = []
-            for k in ['title', 'body', 'tags']:
-                if kwargs[k]:
-                    parts.append(kwargs[k])
-            content = '\n'.join(parts)
+            values['body'] = kwargs['body']
             # Not too happy about this, but FTS update() seems to be buggy and indexes keep growing
             FTSPage.delete().where(FTSPage.page == page).execute()
-            FTSPage.create(page = page, content = content)
+            FTSPage.create(page = page, **values)
         return page
 
 
@@ -167,10 +166,8 @@ def get_all():
 def search(qstring, limit=50):
     query = (FTSPage.select(Page,
                             FTSPage,
-                            # this is not supported yet: FTSPage.snippet(FTSPage.content).alias('extract'),
-                            # so we hand-craft the SQL for it
-                            SQL('snippet(ftspage) as extract'),
-                            FTSPage.bm25(FTSPage.content).alias('score'))
+                            fn.snippet(FTSPage.as_entity()).alias('extract'),
+                            FTSPage.bm25().alias('score'))
                     .join(Page)
                     .where(FTSPage.match(qstring))
                     .order_by(SQL('score').desc())
