@@ -42,9 +42,9 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 ### Stuff that will never happen:
 
 * <strike>Site thumbnailing (for taking screenshots of external links)</strike> - moved to a separate app
-* Web-based UI for editing pages (you're supposed to do this out-of-band)
-* Revision history (you're supposed to manage your content with [Dropbox][db] or `git`)
-* Commenting
+* <strike>Web-based UI for editing pages</strike> (you're supposed to do this out-of-band)
+* <strike>Revision history</strike> (you're supposed to manage your content with [Dropbox][db] or `git`)
+* <strike>Comment support</strike>
 
 ### Principles of Operation
 
