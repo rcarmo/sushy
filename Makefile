@@ -35,7 +35,7 @@ clean:
 	rm -f *.zip
 	rm -f $(BYTECODE)
 	rm -f $(PYTHONCODE)
-	rm -f $(DATABASE_PATH)
+	rm -f $(DATABASE_PATH)*
 
 # Turn Hy files into bytecode so that we can use a standard Python interpreter
 %.pyc: %.hy
