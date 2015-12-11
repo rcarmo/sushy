@@ -7,7 +7,7 @@
     </div>
 </div>
 <script>
-	var links = Array.prototype.slice.call(document.getElementById("seealso").getElementsByTagName("a"));
+    var links = Array.prototype.slice.call(document.getElementById("seealso").getElementsByTagName("a"));
     var colors = gradient.generate("#fff", "#8D7", links.length)
     var height = Math.max.apply(Math, Array.prototype.map.call(links, function(e) { 
         return e.clientHeight;
