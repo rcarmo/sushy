@@ -6,6 +6,7 @@
     [dateutil.parser    [parse :as parse-date]]
     [functools          [wraps]]
     [hashlib            [sha1]]
+    [itertools          [ifilter]]
     [hmac               [new :as new-hmac]]
     [logging            [getLogger]]
     [PIL                [Image  ]]
@@ -21,6 +22,21 @@
 (def *datetime-format* "%Y%m%dT%H:%M:%S.%f")
 
 (def *gmt-format* "%a, %d %b %Y %H:%M:%S GMT")
+
+(def *time-intervals*
+    {"00:00-00:59" "late night"
+     "01:00-04:59" "in the wee hours"
+     "05:00-06:59" "at dawn"
+     "07:00-08:59" "at breakfast"
+     "09:00-12:29" "in the morning"
+     "12:30-14:29" "at lunchtime"
+     "14:30-16:59" "in the afternoon"
+     "17:00-17:29" "at teatime"
+     "17:30-18:59" "at late afternoon"
+     "19:00-20:29" "in the evening"
+     "20:30-21:29" "at dinnertime"
+     "21:30-22:29" "at night"
+     "22:30-23:59" "late night"})
 
 (setv *utc* (timezone "UTC"))
 
@@ -161,6 +177,22 @@
         (if (. date tzinfo)
             (.astimezone date *utc*)
             date)))
+
+
+(defn ordinal [num]
+    (+ (str num) "<sup>"
+        (if (<= 10 (% num 100) 20)
+            "th"
+            (.get {1 "st" 2 "nd" 3 "rd"} (% num 10) "th"))
+        "</sup>"))
+
+
+(defn fuzzy-time [date]
+    (let [[when (.strftime date "%H:%M")]]
+        (.get
+            *time-intervals* 
+            (.next (ifilter (fn [x] (if x <= when)) (.keys *time-intervals*)))
+            "sometime")))
 
 
 (defmacro timeit [block iterations]
