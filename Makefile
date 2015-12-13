@@ -12,6 +12,7 @@ export NEW_RELIC_LICENSE_KEY?=''
 export PYTHONIOENCODING=UTF_8:replace
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
+export CURRENT_GIT_BRANCH?=`git symbolic-ref --short HEAD`
 
 # Experimental zip bundle
 BUNDLE=sushy.zip
@@ -36,6 +37,10 @@ clean:
 	rm -f $(BYTECODE)
 	rm -f $(PYTHONCODE)
 	rm -f $(DATABASE_PATH)*
+
+# Deploy the current branch to a dokku micro-PaaS (assumes you set up a git remote called dokku)
+deploy:
+	git push dokku:$(CURRENT_GIT_BRANCH):master
 
 # Turn Hy files into bytecode so that we can use a standard Python interpreter
 %.pyc: %.hy
@@ -83,3 +88,5 @@ endif
 	python tools/gprof2dot.py -f pstats $< | dot -Tpng -o $@
 
 profile: $(CALL_DIAGRAMS)
+
+debug-%: ; @echo $*=$($*)
