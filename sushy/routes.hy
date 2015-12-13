@@ -184,6 +184,29 @@
             (redirect *placeholder-image*))))
 
 
+; blog index
+(with-decorator
+    (handle-get *page-route-base*)
+    (report-processing-time)
+    (http-caching "route-base" "text/html" 3600)
+    (ttl-cache 60)
+    (render-view "blog")
+    (defn blog-homepage []
+        (try
+            (let [[latest   (apply get-latest [] {"regexp" "^blog"})]
+                  [pagename (get (.next latest) "name")]
+                  [page     (get-page pagename)]]
+                {"base_url"         (base-url)
+                 "body"             (inner-html (apply-transforms (render-page page) pagename))            
+                 "headers"          (:headers page)
+                 "pagename"         pagename
+                 "page_route_base"  *page-route-base*                 
+                 "site_description" *site-description*
+                 "site_name"        *site-name*})
+            (except [e Exception]
+                (abort (int 500) (+ "Internal Server Error" (str e))))))) 
+
+
 ; page content
 (with-decorator 
     (handle-get (+ *page-route-base* "/<pagename:path>"))

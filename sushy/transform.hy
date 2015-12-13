@@ -169,6 +169,14 @@
     doc)
 
 
+(defn extract-lead-paragraph
+    ; returns the lead paragraph of a page
+    [page]
+    (let [[doc            (apply-transforms (render-page page))]
+          [lead-paragraph (.xpath doc ".//pi[1]")]]
+        (inner-html lead-paragraph)))
+
+
 (defn fix-footnotes
     ; fix footnotes for iOS devices
     [buffer]
