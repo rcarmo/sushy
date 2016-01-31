@@ -25,8 +25,10 @@
 
 (defn parse-page [buffer &optional [content-type "text/plain"]]
     ; parse a page and return a header map and the raw markup
+    (.debug log buffer)
     (try 
-        (let [[parts        (.split buffer "\n\n" 1)]
+        (let [[delimiter     (if (in "\r\n" buffer) "\r\n\r\n" "\n\n")]
+              [ parts        (.split buffer delimiter 1)]
               [header-lines (.splitlines (get parts 0))]
               [headers      (dict (map split-header-line header-lines))]
               [body         (.strip (get parts 1))]]
@@ -37,8 +39,8 @@
               {:headers headers
                :body    body})
         (catch [e Exception]
-            (.error log "Could not parse page")
-            (throw (IOError "Invalid Page Format.")))))
+            (.error log (, e "Could not parse page"))
+            (throw (RuntimeError "Could not parse page")))))
 
 
 (defn asset-path [pagename asset]
