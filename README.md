@@ -20,6 +20,7 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Done
 
+* Preliminary support for rendering IPython notebooks
 * Closest-match URLs (i.e., fix typos)
 * HTTP caching (`Etag`, `Last-Modified`, `HEAD` support, etc.)
 * Sitemap
