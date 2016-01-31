@@ -65,6 +65,7 @@
 
 (def *base-types*
     {".txt"      "text/x-textile"; TODO: this should be reverted to text/plain later in the testing cycle
+     ".ipynb"    "application/x-ipynb+json"
      ".htm"      "text/html"
      ".html"     "text/html"
      ".rst"      "text/x-rst"

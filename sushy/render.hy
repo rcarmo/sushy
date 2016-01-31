@@ -1,13 +1,16 @@
 (import
-    [docutils.core      [publish-parts]]
-    [logging            [getLogger]]    
-    [lxml.etree         [Element tostring fromstring]]
-    [markdown           [Markdown]]
-    [models             [get-latest]]
-    [smartypants        [smartypants]]
-    [store              [get-page]]
-    [textile            [Textile]]
-    [time               [time]])
+    [docutils.core       [publish-parts]]
+    [json                [loads]]
+    [logging             [getLogger]]    
+    [lxml.etree          [Element tostring fromstring]]
+    [markdown            [Markdown]]
+    [models              [get-latest]]
+    [nbformat            [reads]]
+    [nbconvert           [HTMLExporter]]
+    [smartypants         [smartypants]]
+    [store               [get-page]]
+    [textile             [Textile]]
+    [time                [time]])
 
 (setv log (getLogger))
 
@@ -23,6 +26,12 @@
 
 (def textile-renderer
     (apply Textile [] {"html_type" "html5"}))
+
+
+(defn render-ipynb [raw]
+    (let [[exporter (HTMLExporter)]]
+        (setv (. exporter template-file) "basic")
+        (get (.from-notebook-node exporter (reads raw 4)) 0)))
 
 
 (defn render-html [raw]
@@ -50,15 +59,16 @@
 
 
 (def render-map 
-    {"text/plain"          render-plaintext
-     "text/rst"            render-restructured-text ; unofficial, but let's be lenient
-     "text/x-rst"          render-restructured-text ; official
-     "text/x-web-markdown" render-markdown
-     "text/x-markdown"     render-markdown
-     "text/markdown"       render-markdown
-     "text/textile"        render-textile
-     "text/x-textile"      render-textile
-     "text/html"           render-html})
+    {"text/plain"               render-plaintext
+     "text/rst"                 render-restructured-text ; unofficial, but let's be lenient
+     "text/x-rst"               render-restructured-text ; official
+     "application/x-ipynb+json" render-ipynb
+     "text/x-web-markdown"      render-markdown
+     "text/x-markdown"          render-markdown
+     "text/markdown"            render-markdown
+     "text/textile"             render-textile
+     "text/x-textile"           render-textile
+     "text/html"                render-html})
     
     
 (defn render-page [page]

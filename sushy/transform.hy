@@ -123,7 +123,8 @@
                                     (fromstring (inline-message "error" (% "Could not read size from '%s'" src)))))))
                     (.replace (.getparent tag) tag
                         (fromstring (inline-message "error" (% "Could not find image '%s'" src))))))
-            (assoc (. tag attrib) "src" (join *page-media-base* pagename src))))
+            (if (not (= "data" schema)) 
+                (assoc (. tag attrib) "src" (join *page-media-base* pagename src)))))
     doc)
 
 
@@ -188,10 +189,12 @@
     [doc]
     (for [tag (.xpath doc "//img[@src]")]
         (try
-            (let [[src             (get (. tag attrib) "src")]
-                  [(, _ prefix path) (map (fn [p] (+ "/" p)) (.split src "/" 2))]]
-                (if (in prefix *signed-prefixes*)
-                    (assoc tag.attrib "src" (+ prefix "/" (compute-hmac *layout-hash* prefix path) path))))
+            (let [[src               (get (. tag attrib) "src")]
+                  [(, _ prefix path) (map (fn [p] (+ "/" p)) (.split src "/" 2))]
+                  [schema            (get (urlsplit src) 0)]]
+                (if (not (= "data" schema))
+                    (if (in prefix *signed-prefixes*)
+                        (assoc tag.attrib "src" (+ prefix "/" (compute-hmac *layout-hash* prefix path) path)))))
             (except [e ValueError])))
     (for [tag (.xpath doc "//a[@href]")]
         (try
