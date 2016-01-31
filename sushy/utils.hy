@@ -54,6 +54,18 @@
         (urlsafe-b64encode (.digest (new-hmac key buffer sha1)))))
 
 
+(defn trace-flow []
+    ; dump arguments and data to the debug log
+    (defn inner [func]
+        (defn trace-fn [&rest args &kwargs kwargs]
+            (.debug log (, "trace ->" args kwargs))
+            (let [[result (apply func args kwargs)]]
+                (.debug log (, "trace <-" result))
+                result))
+        trace-fn)
+    inner)
+
+
 (defn report-processing-time []
     ; timing decorator
     (defn inner [func]
