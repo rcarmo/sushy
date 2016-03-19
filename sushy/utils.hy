@@ -203,7 +203,8 @@
     (let [[when (.strftime date "%H:%M")]]
         (.get
             *time-intervals* 
-            (.next (ifilter (fn [x] (if x <= when)) (.keys *time-intervals*)))
+            (.next (ifilter (fn [x] (let [[(, l u) (.split x "-")]] (and (<= l when) (<= when u)))) 
+                (sorted (.keys *time-intervals*))))
             "sometime")))
 
 
