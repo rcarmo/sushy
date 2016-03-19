@@ -1,5 +1,6 @@
 import os, re, sys, logging
 from bottle import hook
+from itertools import ifilter
 from peewee import *
 from playhouse.sqlite_ext import *
 from playhouse.kv import PickledKeyStore
@@ -247,38 +248,32 @@ def get_next_by_name(name):
         return p
 
 
-def get_prev_by_date(name, regexp):
+def get_prev_by_date(name, pattern):
     p = Page.get(Page.name == name)
-    query = (Page.select()
-            .where(Page.name.regexp(regexp) and (Page.pubtime < p.pubtime))
+    regexp = re.compile(pattern)
+    query = (Page.select(Page.name, Page.title)
+            .where(Page.pubtime < p.pubtime)
             .order_by(Page.pubtime.desc())
-            .limit(1)
             .dicts())
-    for p in query:
+    for p in ifilter(lambda x: regexp.match(x['name']), query):
         return p
 
 
-def get_next_by_date(name, regexp):
+def get_next_by_date(name, pattern):
     p = Page.get(Page.name == name)
-    query = (Page.select()
-            .where(Page.name.regexp(regexp) and (Page.pubtime > p.pubtime))
+    regexp = re.compile(pattern)
+    query = (Page.select(Page.name, Page.title)
+            .where(Page.pubtime > p.pubtime)
             .order_by(Page.pubtime.asc())
-            .limit(1)
             .dicts())
-    for p in query:
+    for p in ifilter(lambda x: regexp.match(x['name']), query):
         return p
             
-            
-def get_prev_next(name, regexp):
-    p, n = None, None
-    try:
-        if re.match(regexp, name):
-            p, n = get_prev_by_date(name, regexp), get_next_by_date(name, regexp)
-        else:
-            p, n = get_prev_by_name(name), get_next_by_name(name)
-    except Exception as e:
-        log.debug("Could not obtain prev/next for %s: %s" % (name, e))
-        pass
+
+def get_prev_next(name, pattern):
+    p, n = get_prev_by_date(name, pattern), get_next_by_date(name, pattern)
+    log.warn("%s, %s" % (name, pattern))
+    log.warn("%s, %s" % (p, n))      
     return p, n
 
 
