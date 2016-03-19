@@ -110,4 +110,4 @@
 (.insert *template-path* 0 (abspath *view-path*))
 
 ; compute a sha1 hash for the HTML layout, so that etag generation is related to HTTP payload
-(def *layout-hash* (.hexdigest (sha1 (template "layout" {"base" "" "base_url" "" "headers" {"title" ""} "site_name" "" "site_description" ""}))))
+(def *layout-hash* (.hexdigest (sha1 (template "layout" {"base" "" "base_url" "" "headers" {"title" ""} "site_name" "" "site_description" "" "page_route_base" ""}))))

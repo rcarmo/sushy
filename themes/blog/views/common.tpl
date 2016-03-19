@@ -1,7 +1,7 @@
 <%
 from sushy.utils import utc_date, fuzzy_time, ordinal
 from re import match
-
+pattern = "^(blog|links)/.+$"
 if "from" in headers:
     author = headers["from"]
 else:

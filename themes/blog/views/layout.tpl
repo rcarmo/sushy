@@ -31,7 +31,7 @@
         </script>
     </head>
     <body class="layout-reverse">
-        %include('sidebar')
+        %include('sidebar', **globals())
         <div class="wrap">
             <div class="masthead">
                 <div class="container">
