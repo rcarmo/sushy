@@ -2,6 +2,7 @@
     [collections        [OrderedDict]]
     [base64             [urlsafe-b64encode]]
     [bottle             [request response]]
+    [calendar           [timegm]]
     [datetime           [datetime]]
     [dateutil.parser    [parse :as parse-date]]
     [functools          [wraps]]
@@ -37,6 +38,14 @@
      "20:30-21:29" "at dinnertime"
      "21:30-22:29" "at night"
      "22:30-23:59" "late night"})
+     
+(def *readable-intervals* 
+    {31556926 "year"
+     2592000 "month"
+     604800 "week"
+     86400 "day"
+     3600 "hour"
+     60 "minute"})
 
 (setv *utc* (timezone "UTC"))
 
@@ -200,6 +209,7 @@
 
 
 (defn fuzzy-time [date]
+    ; describes a date as a time of day
     (let [[when (.strftime date "%H:%M")]]
         (.get
             *time-intervals* 
@@ -207,6 +217,31 @@
                 (sorted (.keys *time-intervals*))))
             "sometime")))
 
+            
+(defn time-chunks [begin-interval &optional [end-interval nil]]
+    ; breaks down a time interval into a sequence of time chunks 
+    (let [[chunks   (apply sorted [(.keys *readable-intervals*)] {"reverse" true})]
+          [the-end  (if end-interval end-interval (datetime.now))]
+          [interval (- (timegm (.timetuple the-end)) (timegm (.timetuple begin-interval)))]
+          [values []]]
+        (for [i chunks]
+            (setv (, d r) (divmod interval i))
+            (.append values (, (int d) (.get *readable-intervals* i)))
+            (setv interval r))
+        (filter (fn [x] (pos? (get x 0))) values)))
+
+
+(defn string-plurals [chunk]
+    (let [[(, v s) chunk]]
+        (.join " " (map str (, v (if (> v 1) (+ s "s") s))))))
+
+
+(defn time-since [begin-interval &optional [end-interval nil]]
+    (let [[chunks (list (map string-plurals (time-chunks begin-interval end-interval)))]]
+        (if (not (len (list chunks)))
+            "sometime"
+            (.join ", " (take 2 chunks)))))
+        
 
 (defmacro timeit [block iterations]
     `(let [[t (time)]]

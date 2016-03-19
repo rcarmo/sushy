@@ -1,5 +1,6 @@
 <%
 from itertools import islice
+from sushy.utils import time_since
 if defined("query"):
     headers['title'] = "Search results for '%s'" % query
     items = list(islice(results,0,20))
@@ -12,7 +13,6 @@ if defined("query"):
     <table class="hover alternating">
         <thead>
             <tr>
-                <th>Score</th>
                 <th>Page</th>
                 <th>Content</th>
                 <th>Modified</th>
@@ -21,10 +21,9 @@ if defined("query"):
         <tbody>
 %for i in items:
             <tr>
-                <td>{{!i["score"]}}</td>
                 <td><a href="{{!page_route_base}}/{{!i["name"]}}">{{!i["title"]}}</td>
                 <td>{{!i["content"]}}</td>
-                <td>{{!i["mtime"]}}</td>
+                <td>{{!time_since(i["mtime"])}} ago</td>
             </tr>
 %end
         </tbody>
