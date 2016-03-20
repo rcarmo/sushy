@@ -30,9 +30,6 @@ repl:
 	hy -i "(import sushy.app)"
 
 deps:
-	pip install -U -r requirements.txt
-
-dev-deps:
 	pip install -U -r requirements-dev.txt
 
 notebook:
