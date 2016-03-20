@@ -32,6 +32,12 @@ repl:
 deps:
 	pip install -U -r requirements.txt
 
+dev-deps:
+	pip install -U -r requirements-dev.txt
+
+notebook:
+	jupyter notebook
+
 clean:
 	rm -f *.zip
 	rm -f $(BYTECODE)
