@@ -41,6 +41,10 @@
 
 (def *page-media-base* "/media")
 
+(def *blog-archive-base* "/archives")
+
+(def *blog-entries* (.compile re "^(blog|links)/.+$"))
+
 (def *thumb-media-base* "/thumb")
 
 (def *home-page* (+ *page-route-base* "/HomePage"))
