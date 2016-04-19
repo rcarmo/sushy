@@ -229,7 +229,7 @@ def get_closest_matches(name):
 
 
 def get_prev_by_name(name):
-    query = (Page.select()
+    query = (Page.select(Page.name, Page.title)
             .where(Page.name < name)
             .order_by(Page.name.desc())
             .limit(1)
@@ -239,7 +239,7 @@ def get_prev_by_name(name):
 
 
 def get_next_by_name(name):
-    query = (Page.select()
+    query = (Page.select(Page.name, Page.title)
             .where(Page.name > name)
             .order_by(Page.name.asc())
             .limit(1)
@@ -248,9 +248,8 @@ def get_next_by_name(name):
         return p
 
 
-def get_prev_by_date(name, pattern):
+def get_prev_by_date(name, regexp):
     p = Page.get(Page.name == name)
-    regexp = re.compile(pattern)
     query = (Page.select(Page.name, Page.title)
             .where(Page.pubtime < p.pubtime)
             .order_by(Page.pubtime.desc())
@@ -259,9 +258,8 @@ def get_prev_by_date(name, pattern):
         return p
 
 
-def get_next_by_date(name, pattern):
+def get_next_by_date(name, regexp):
     p = Page.get(Page.name == name)
-    regexp = re.compile(pattern)
     query = (Page.select(Page.name, Page.title)
             .where(Page.pubtime > p.pubtime)
             .order_by(Page.pubtime.asc())
@@ -270,10 +268,11 @@ def get_next_by_date(name, pattern):
         return p
             
 
-def get_prev_next(name, pattern):
-    p, n = get_prev_by_date(name, pattern), get_next_by_date(name, pattern)
-    log.warn("%s, %s" % (name, pattern))
-    log.warn("%s, %s" % (p, n))      
+def get_prev_next(name, pattern = None):
+    if pattern:
+        p, n = get_prev_by_date(name, pattern), get_next_by_date(name, pattern)
+    else:
+        p, n = get_prev_by_name(name)), get_next_by_name(name)
     return p, n
 
 

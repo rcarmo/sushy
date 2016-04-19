@@ -1,12 +1,12 @@
 <%
 from sushy.utils import utc_date
 from sushy.models import get_prev_next, get_latest
+from sushy.config import BLOG_ENTRIES
 from re import match
 
-pattern = "^(blog)/.+$"
 namespace = pagename.split("/")[0].lower()
 
-latest = get_latest(regexp=pattern)
+latest = get_latest(regexp=BLOG_ENTRIES)
 
 if "from" in headers:
     author = headers["from"]
