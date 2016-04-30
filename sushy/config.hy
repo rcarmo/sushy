@@ -4,6 +4,7 @@
     [logging        [getLogger basicConfig *debug* *info*]]
     [logging.config [dictConfig]]
     [os             [environ]]
+    [pytz           [timezone]]
     [re]
     [sys            [stdout]]
     [codecs         [getwriter]]
@@ -13,11 +14,13 @@
 
 (setv stdout ((getwriter "utf-8") stdout))
 
+(def *timezone* (timezone (.get environ "TIMEZONE" "UTC")))
+
 (def *store-path* (.get environ "CONTENT_PATH" "pages"))
 
 (def *theme-path* (.get environ "THEME_PATH" "themes/wiki"))
 
-(def *feed-css* (.get environ "FEED_CSS" "themes/wiki/static/css/rss.css"))
+(def *feed-css* (.get environ "FEED_CSS" (+ *theme-path* "/static/css/rss.css")))
 
 (def *feed-ttl* 1800); in seconds
 
@@ -37,21 +40,15 @@
 
 (def *http-port* (.get environ "PORT" "8080"))
 
-; TODO: rename sockets for consistency
-
-(def *update-socket* (.get environ "UPDATE_SOCKET" "ipc:///tmp/sushy-updates"))
-
-(def *indexer-fanout* (.get environ "INDEXER_FANOUT_SOCKET" "ipc:///tmp/sushy-indexer"))
-
-(def *indexer-control* (.get environ "INDEXER_CONTROL_SOCKET" "ipc:///tmp/sushy-control"))
-
-(def *indexer-count* (.get environ "INDEXER_COUNT_SOCKET" "ipc:///tmp/sushy-count"))
-
-(def *database-sink* (.get environ "DATABASE_SINK" "ipc:///tmp/sushy-writer"))
-
 (def *page-route-base* "/space")
 
 (def *page-media-base* "/media")
+
+(def *blog-archive-base* "/archives")
+
+(def *blog-entries* (.compile re "^(blog|links)/.+$"))
+
+(def *thumb-media-base* "/thumb")
 
 (def *home-page* (+ *page-route-base* "/HomePage"))
 
@@ -59,7 +56,15 @@
 
 (def *profiler* (= (.lower (.get environ "PROFILER" "false")) "true"))
 
+(def *thumbnail-sizes* [(, 320 240) (, 640 320) (, 1280 720)])
+
+(def *placeholder-image* "/static/img/placeholder.png")
+
+(def *signed-prefixes* [*page-media-base* *thumb-media-base*])
+
 (def *aliasing-chars* [" " "." "-" "_"])
+
+(def *redirect-page* "meta/Redirects")
 
 (def *alias-page* "meta/Aliases")
 
@@ -67,8 +72,11 @@
 
 (def *exclude-from-feeds* (.compile re "^meta.*"))
 
+(def *root-junk* (.join "|" ["favicon\.ico" "apple-touch-icon\.png" "apple-touch-icon-precomposed\.png" "keybase\.txt"]))
+
 (def *base-types*
     {".txt"      "text/x-textile"; TODO: this should be reverted to text/plain later in the testing cycle
+     ".ipynb"    "application/x-ipynb+json"
      ".htm"      "text/html"
      ".html"     "text/html"
      ".rst"      "text/x-rst"
@@ -91,7 +99,7 @@
     (dictConfig 
         {"version"    1
          "formatters" {"http"    {"format" "localhost - - [%(asctime)s] %(process)d %(levelname)s %(filename)s:%(funcName)s:%(lineno)d %(message)s"
-                                 "datefmt" "%Y/%m/%d %H:%M:%S"}}
+                                  "datefmt" "%Y/%m/%d %H:%M:%S"}}
          "handlers"   {"console" {"class"     "logging.StreamHandler"
                                   "formatter" "http"
                                   "level"     "DEBUG"
@@ -100,7 +108,7 @@
                                   "formatter" "http"
                                   "level"     "WARNING"
                                   "capacity"  200}}
-         "loggers"    {"peewee"       {"level"     "WARNING"
+         "loggers"    {"peewee"       {"level"     "DEBUG"
                                        "handlers"  ["ram" "console"]}
                        "__init__"     {"level" "WARNING"}; for Markdown
                        "sushy.models" {"level" "WARNING"}
@@ -113,4 +121,4 @@
 (.insert *template-path* 0 (abspath *view-path*))
 
 ; compute a sha1 hash for the HTML layout, so that etag generation is related to HTTP payload
-(def *layout-hash* (.hexdigest (sha1 (template "layout" {"base" "" "headers" {"title" ""} "site_name" "" "site_description" ""}))))
+(def *layout-hash* (.hexdigest (sha1 (template "layout" {"base" "" "base_url" "" "headers" {"title" ""} "site_name" "" "site_description" "" "page_route_base" ""}))))

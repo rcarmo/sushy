@@ -1,0 +1,53 @@
+body {
+    font-family: Georgia, "Times New Roman", Times, serif;
+}
+
+pre {
+    font-family: Menlo, Consolas, Courier New, Courier, monospace;
+}
+
+a:link {
+  color: #0000cc;
+} 
+
+table {
+    background:transparent; 
+    margin: 0px; 
+    padding: 0px; 
+    border-collapse: collapse;
+    font-size: 90%;
+}
+
+tbody {
+    border-top: 2px solid black; 
+    border-bottom: 2px solid black;     
+}
+
+tr {
+    border-top: 1px solid #aaa;
+}
+
+th {
+    border-bottom: 1px solid black; 
+    border-top: 2px solid black; 
+    padding: 4px 4px !important; 
+    font-weight: bold;
+    text-align: center;
+}
+
+tr {
+    border-top: 1px solid #aaa;
+}
+
+td {
+    min-width: 80px;
+    margin: 0px; 
+    padding: 4px 4px !important; 
+    vertical-align: top; 
+    border-top: 1px solid #aaa;
+}
+
+img {
+    max-width: 100% !important; 
+    height: auto !important;
+} 

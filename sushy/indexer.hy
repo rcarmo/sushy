@@ -1,35 +1,32 @@
 (import
-    [config             [*base-filenames* *bind-address* *store-path* *profiler* *update-socket* *indexer-count* *indexer-fanout* *indexer-control* *database-sink*]]
+    [sushy.config       [*base-filenames* *bind-address* *store-path* *timezone* *profiler*]]
     [cProfile           [Profile]]
-    [datetime           [datetime]]
-    [dateutil.parser    [parse :as parse-date]]
+    [datetime           [datetime timedelta]]
     [hashlib            [sha1]]
     [json               [dumps]]
     [logging            [getLogger Formatter]]
-    [models             [db add-wiki-link index-wiki-page init-db]]
-    [os.path            [basename dirname]]
+    [sushy.models       [db add-wiki-link delete-wiki-page index-wiki-page init-db get-page-indexing-time]]
+    [newrelic           [agent]]
+    [os                 [environ]]
+    [os.path            [basename dirname join]]
     [pstats             [Stats]]
-    [pytz               [timezone]]
-    [render             [render-page]]
-    [store              [is-page? gen-pages get-page]]
+    [sushy.render       [render-page]]
+    [sushy.store        [is-page? gen-pages get-page]]
     [time               [sleep time]]
-    [transform          [apply-transforms extract-internal-links extract-plaintext]]
+    [sushy.transform    [apply-transforms count-images extract-internal-links extract-plaintext]]
+    [sushy.utils        [parse-naive-date strip-timezone utc-date]]
     [watchdog.observers [Observer]]
-    [watchdog.events    [FileSystemEventHandler]]
-    [zmq                [Context Poller *pub* *sub* *push* *pull* *sndhwm* *rcvhwm* *pollin* *subscribe*]])
-
+    [watchdog.events    [FileSystemEventHandler]])
 
 (setv log (getLogger --name--))
 
-(setv *utc* (timezone "UTC"))
-
-(def *logging-modulo* 10)
+(def *logging-modulo* 100)
 
 (defn transform-tags [line]
     ; expand tags to be "tag:value", which enables us to search for tags using FTS
     (let [[tags (.split (.strip line) ",")]]
         (if (!= tags [""])
-            (.join ", " (list (map (fn [tag] (+ "tag:" (.strip tag))) tags)))
+            (.lower (.join ", " (list (map (fn [tag] (+ "tag:" (.strip tag))) tags))))
             "")))
 
 
@@ -44,87 +41,120 @@
         false))
 
 
-(defn utc-date [string fallback]
-    (let [[date (try
-                    (parse-date string)
-                    (catch [e Exception]
-                        fallback))]]
-        (if (. date tzinfo)
-            (.astimezone date *utc*)
-            date)))
-
-
 (defn gather-item-data [item]
     ; Takes a map with basic item info and builds all the required indexing data
-    ;(.debug log (:path item))
+    (.info log (:path item))
     (let [[pagename     (:path item)]
-          [mtime        (.fromtimestamp datetime (:mtime item))]
+          [mtime        (:mtime item)]
+          [mdate        (.fromtimestamp datetime (:mtime item))]
           [page         (get-page pagename)]
           [headers      (:headers page)]
           [doc          (apply-transforms (render-page page) pagename)]
           [plaintext    (extract-plaintext doc)]
-          [links        (extract-internal-links doc)]]
+          [word-count   (len (.split plaintext))]
+          [image-count  (count-images doc)]
+          [links        (extract-internal-links doc)]
+          [pubtime      (parse-naive-date (.get headers "date") mdate *timezone*)]]
         {"name"     pagename
          "body"     (if (hide-from-search? headers) "" plaintext)
          "hash"     (.hexdigest (sha1 (.encode plaintext "utf-8")))
          "title"    (.get headers "title" "Untitled")
          "tags"     (transform-tags (.get headers "tags" ""))
-         ; this allows us to override the filesystem modification time through front matter
-         "mtime"    (utc-date (.get headers "last-modified") mtime)
-         ; if there isn't any front matter info, fall back to mtime
-         "pubtime"  (utc-date (.get headers "date") mtime)
+         "pubtime"  (strip-timezone (utc-date pubtime))
+         "mtime"    (strip-timezone (utc-date (parse-naive-date (.get headers "last-modified") pubtime *timezone*)))
+         "idxtime"  mtime
+         "readtime" (int (+ (* 12.0 image-count) (/ word-count 4.5)))
          "headers"  headers
          "links"    (list links)}))
 
 
-(defn index-one [item &optional [sock None]]
-    (let [[pagename (.get item "pagename")]
-          [headers  (.get item "headers")]
-          [links    (.get item "links")]]
-        (if sock
-            (.send-pyobj sock
-                [(str "indexing")
-                 (dumps {"pagename" pagename
-                         "title"    (.get headers "title" "Untitled")})]))
+(defn index-one [item]
+    (try
+        (let [[page    (.get item "name")]
+              [headers (.get item "headers")]
+              [links   (.get item "links")]]
 
-        (for [link links]
-            (apply add-wiki-link []
-                {"page" pagename
-                 "link" link}))
-        (apply index-wiki-page [] item)))
+            (for [link links]
+                (apply add-wiki-link []
+                    {"page" page
+                     "link" link}))
+            (apply index-wiki-page [] item))
+        (catch [e Exception]
+            (.warning log (% "%s:%s handling %s" (, (type e) e item))))))
 
 
-(defn filesystem-walk [path]
+(defn filesystem-walk [path &optional [suffix ""]]
     ; walk the filesystem and perform full-text and front matter indexing
-    (let [[item-count 0]]
-        (try
-            (for [item (gen-pages path)]
-                (if (= 0 (% item-count *logging-modulo*))
-                    (.debug log (% "indexing %d" item-count)))
+    (let [[item-count 0]
+          [skipped-count 0]]
+        (for [item (gen-pages path)]
+            (.debug log item)
+            (if (= 0 (% item-count *logging-modulo*))
+                (.info log (% "indexing %d" item-count)))
+            (setv item-count (inc item-count))
+            (.debug log (:path item))
+            (setv idxtime (get-page-indexing-time (:path item)))
+            (if (not idxtime)
                 (index-one (gather-item-data item))
-                (setv item-count (inc item-count)))
-            (catch [e Exception]
-                (.error log (% "%s:%s handling %s" (, (type e) e item)))))
-        (.debug log (% "exiting filesystem walker: %d items handled" item-count))))
+                (if (> (:mtime item) idxtime)
+                    (index-one (gather-item-data item))
+                    (setv skipped-count (inc skipped-count)))))
+        (.info log (% "exiting filesystem walker: %d indexed, %d skipped" (, item-count skipped-count)))))
 
 
 (defclass IndexingHandler [FileSystemEventHandler]
     ; handle file notifications
     [[--init--
         (fn [self]
-            (let [[ctx (Context)]
-                  [(. self sock) (.socket ctx *pub*)]]
-                (.bind (. self sock) *update-socket*)))]
+            (.debug log "preparing to listen for filesystem events"))]
 
-     [on-any-event ; TODO: handle deletions and moves separately
+     [do-update
+        (fn [self path]
+            (.info log (% "updating %s" path))
+            (index-one (gather-item-data
+                        {:path  (slice path (+ 1 (len *store-path*)))
+                         :mtime (int (time))})))]
+
+     [do-delete
+        (fn [self path]
+            (.debug log (% "deleting %s" path))
+            (delete-wiki-page (slice path (+ 1 (len *store-path*)))))]
+
+     [on-created
         (fn [self event]
+            (.debug log (% "creation of %s" event))
             (let [[filename (basename (. event src-path))]
                   [path     (dirname  (. event src-path))]]
                 (if (in filename *base-filenames*)
-                    (index-one
-                        {:path (slice path (+ 1 (len *store-path*)))
-                         :mtime (time)}
-                        (. self sock)))))]])
+                    (.do-update self path))))]
+
+     [on-deleted
+        (fn [self event]
+            (.debug log (% "deletion of %s" event))
+            (let [[filename (basename (. event src-path))]
+                  [path     (dirname  (. event src-path))]]
+                (if (in filename *base-filenames*)
+                    (.do-delete self path))))]
+
+     [on-modified
+        (fn [self event]
+            (.debug log (% "modification of %s" event))
+            (let [[filename (basename (. event src-path))]
+                  [path     (dirname  (. event src-path))]]
+                (if (in filename *base-filenames*)
+                    (.do-update self path))))]
+
+     [on-moved
+        (fn [self event]
+            (.debug log (% "renaming of %s" event))
+            (let [[srcfile (basename (. event src-path))]
+                  [srcpath (dirname  (. event src-path))]
+                  [dstfile (basename (. event dest-path))]
+                  [dstpath (dirname  (. event dest-path))]]
+                (if (in srcfile *base-filenames*)
+                    (.do-delete self srcpath))
+                (if (in dstfile *base-filenames*)
+                    (.do-update self dstpath))))]])
 
 
 (defn observer [path]
@@ -142,14 +172,25 @@
         (.join observer)))
 
 
+(defn fast-start [n]
+    ; TODO: fast start indexing by peeking at the past 3 months 
+    (let [[when (.now datetime)] [delta (apply timedelta [] {"weeks" -4})]]
+        (for [step (range 0 4)]
+           (yield (.strftime (+ when (* step delta)) "%Y/%m")))))
+
+
 (defmain [&rest args]
-    (let [[p (Profile)]]
+    (let [[p        (Profile)]
+          [app-name (.get environ "NEW_RELIC_APP_NAME" "Sushy")]]
+        (setv (get environ "NEW_RELIC_APP_NAME") (+ app-name " - Indexer")) 
+        (.initialize agent)
         (if *profiler*
             (.enable p))
         (init-db)
         ; close database connection to remove contention
         (.close db)
         (setv start-time (time))
+        
         (filesystem-walk *store-path*)
         (.info log "Indexing done in %fs" (- (time) start-time))
         (if *profiler*
@@ -157,7 +198,7 @@
                 (.disable p)
                 (.info log "dumping stats")
                 (.dump_stats (Stats p) "indexer.pstats")))
-    (if (in "watch" args)
-        (do
-            (.info log "Starting watcher...")
-            (observer *store-path*)))))
+        (if (in "watch" args)
+            (do
+                (.info log "Starting watcher...")
+                (observer *store-path*)))))

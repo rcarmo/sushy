@@ -12,14 +12,15 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Roadmap
 
-* Page aliasing (i.e., multiple URLs for a page)
+* Friendlier search results
 * Blog homepage/excerpts/archive navigation
 * Image thumbnailing
-* Site thumbnailing (for taking screenshots of external links)
-* Docker deployment (currently deploying on [Dokku-alt][da] using a `Procfile`, waiting for the dust to settle to build a proper reference container)
+* Page aliasing (i.e., multiple URLs for a page)
+* Docker deployment (currently deploying on [Dokku-alt][da] using a `Procfile`
 
 ### Done
 
+* Preliminary support for rendering IPython notebooks
 * Closest-match URLs (i.e., fix typos)
 * HTTP caching (`Etag`, `Last-Modified`, `HEAD` support, etc.)
 * Sitemap
@@ -27,7 +28,7 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 * CSS inlining for RSS feeds
 * RSS feeds
 * `multiprocessing`-based indexer (in `feature/multiprocessing`, disabled for ease of profiling)
-* SSE (Server-Sent Events) support for notifying visitors a page has changed
+* SSE (Server-Sent Events) support (in `feature/server-events`) for notifying visitors a page has changed 
 * [New Relic][nr] Support
 * Internal link tracking (`SeeAlso` functionality, as seen on [Yaki][y])
 * Multiple theme support (only the one theme for now)
@@ -36,16 +37,19 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 * Run under [uWSGI][uwsgi] using `gevent` workers
 * Full-text indexing and search
 * Syntax highlighting for inline code samples
-* [Ink][ink]-based site layout and templates
+* [Ink][ink]-based site layout and templates (replaced by a new layout in the `feature/blog` branch)
 * Baseline markup rendering (Textile, Markdown and ReST)
 
 ### Stuff that will never happen:
 
-* Web-based UI for editing pages (you're supposed to do this out-of-band)
-* Revision history (you're supposed to manage your content with [Dropbox][db] or `git`)
-* Commenting
+* <strike>Site thumbnailing (for taking screenshots of external links)</strike> - moved to a separate app
+* <strike>Web-based UI for editing pages</strike> (you're supposed to do this out-of-band)
+* <strike>Revision history</strike> (you're supposed to manage your content with [Dropbox][db] or `git`)
+* <strike>Comment support</strike>
 
-### Principles of Operation
+---
+
+# Principles of Operation
 
 * All your Textile, Markdown or ReStructured Text content lives in a filesystem tree, with a folder per page
 * Sushy grabs and renders those on demand with fine-tuned HTTP headers (this is independently of whether or not you put Varnish or CloudFlare in front for caching)
@@ -83,6 +87,8 @@ But there's no reason why this can't be easily modified to pre-render and save t
 
 Thanks to [Hy][hy], this should run just as well under Python 2 and Python 3. My target environment is 2.7.8/PyPy, though, so your mileage may vary. Check the `requirements.txt` file - I've taken pains to make sure dependencies are there _for a reason_ and not just because they're trendy.
 
+---
+
 # Deployment
 
 This repository is deployable as-is on [Dokku-alt][da], and will instantiate a production-ready [uWSGI][uwsgi] server (using `gevent`) and a background indexing worker. 
@@ -106,9 +112,38 @@ and templates/views are stored
 
 These are set in the `Makefile` (which I use for a variety of purposes).
 
+---
+
+## Sample Dokku Configuration
+
+Deploying Sushy in [dokku][dokku] implies setting things up so that the separate processes (`web` and `worker`, which are instantiated in separate Docker containers) can share at least one storage volume (two if you need to keep the indexing database and the content tree separate).
+
+The example below shows a finished configuration that mounts the `/srv/data/sushy` host path inside both containers as `/app/data`, so that both can access the index and the content tree:
+
+### Docker options for exposing host directory as shared volume
+```
+$ dokku docker-options staging.no-bolso.com
+Deploy options:
+    -v /srv/data/sushy:/app/data
+Run options:
+    -v /srv/data/sushy:/app/data
+```
+### Application Settings
+```
+$ dokku config staging.no-bolso.com
+=====> staging.no-bolso.com config vars
+CONTENT_PATH:      /app/data/space
+DATABASE_PATH:     /app/data/sushy.db
+DEBUG:             True
+THEME_PATH:        themes/blog
+```
+---
+
 ## Trying it out
 
+Make sure you have `libxml` and `libxslt` headers, as well as the JPEG library - the following is for Ubuntu 14.04:
 ```
+sudo apt-get install libxml2-dev libxslt1-dev libjpeg-dev
 # install dependencies
 make deps
 # run the indexing daemon (updates upon file changes)

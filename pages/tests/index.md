@@ -6,6 +6,10 @@ Content-Type: text/x-markdown
 
 * [Aliases](tests/aliases)
 
+## Ongoing:
+
+* [IPython Notebook](tests/ipynb)
+
 ## Passed:
 
 * [InterWiki Map](tests/interwiki)

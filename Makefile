@@ -1,20 +1,18 @@
 # Set these if not defined already
 export BIND_ADDRESS?=0.0.0.0
 export PORT?=8080
-export DEBUG?=False
+export DEBUG?=True
 export PROFILER?=False
 export CONTENT_PATH?=pages
-export THEME_PATH?=themes/wiki
+export THEME_PATH?=themes/blog
 export DATABASE_PATH?=/tmp/sushy.db
 export SITE_NAME?=Sushy
 export NEW_RELIC_APP_NAME?=$(SITE_NAME)
 export NEW_RELIC_LICENSE_KEY?=''
-export UPDATE_SOCKET?=ipc:///tmp/sushy-updates
-export INDEXER_FANOUT?=ipc:///tmp/sushy-indexer
-export DATABASE_SINK?=ipc:///tmp/sushy-writer
 export PYTHONIOENCODING=UTF_8:replace
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
+export CURRENT_GIT_BRANCH?=`git symbolic-ref --short HEAD`
 
 # Experimental zip bundle
 BUNDLE=sushy.zip
@@ -32,19 +30,22 @@ repl:
 	hy -i "(import sushy.app)"
 
 deps:
-	pip install -U -r requirements.txt
+	pip install -U -r requirements-dev.txt
+
+notebook:
+	jupyter notebook
 
 clean:
 	rm -f *.zip
 	rm -f $(BYTECODE)
 	rm -f $(PYTHONCODE)
-	rm -f $(DATABASE_PATH)
+	rm -f $(DATABASE_PATH)*
 
 # Turn Hy files into bytecode so that we can use a standard Python interpreter
 %.pyc: %.hy
 	hyc $<
 
-# Turn Hy files into Python source so that PyPy will be happy
+# Turn Hy files into Python source so that PyPy will (eventually) be happy
 %.py: %.hy
 	hy2py $< > $@
 
@@ -56,8 +57,8 @@ bundle: $(HYFILES) $(PYFILES)
 	rm -f sushy/*.pyc
 
 # Run with the embedded web server
-serve: build
-	python -m sushy.app
+serve:
+	hy -m sushy.app
 
 # Run with uwsgi
 uwsgi: build
@@ -71,18 +72,34 @@ uwsgi-ini: build
 	uwsgi --ini uwsgi.ini
 
 # Run indexer
-index: build
-	python -m sushy.indexer
+index:
+	hy -m sushy.indexer
 
 # Run indexer and watch for changes
-index-watch: build
+index-watch:
 ifneq ($(NEW_RELIC_LICENSE_KEY),'')
 	newrelic-admin run-python -m sushy.indexer watch
 endif
-	python -m sushy.indexer watch
+	hy -m sushy.indexer watch
 
 # Render pstats profiler files into nice PNGs (requires dot)
 %.png: %.pstats
 	python tools/gprof2dot.py -f pstats $< | dot -Tpng -o $@
 
 profile: $(CALL_DIAGRAMS)
+
+debug-%: ; @echo $*=$($*)
+
+# Commands for deploying to a piku instance
+restart-production:
+	ssh piku@piku restart sushy
+
+deploy-production:
+	git push production master
+
+reset-production:
+	ssh piku@piku destroy sushy
+
+redeploy: reset-production deploy-production restart-production
+
+deploy: deploy-production restart-production
