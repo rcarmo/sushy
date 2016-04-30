@@ -1,10 +1,10 @@
 # Set these if not defined already
 export BIND_ADDRESS?=0.0.0.0
 export PORT?=8080
-export DEBUG?=False
+export DEBUG?=True
 export PROFILER?=False
 export CONTENT_PATH?=pages
-export THEME_PATH?=themes/wiki
+export THEME_PATH?=themes/blog
 export DATABASE_PATH?=/tmp/sushy.db
 export SITE_NAME?=Sushy
 export NEW_RELIC_APP_NAME?=$(SITE_NAME)
@@ -41,15 +41,11 @@ clean:
 	rm -f $(PYTHONCODE)
 	rm -f $(DATABASE_PATH)*
 
-# Deploy the current branch to a dokku micro-PaaS (assumes you set up a git remote called dokku)
-deploy:
-	git push dokku:$(CURRENT_GIT_BRANCH):master
-
 # Turn Hy files into bytecode so that we can use a standard Python interpreter
 %.pyc: %.hy
 	hyc $<
 
-# Turn Hy files into Python source so that PyPy will be happy
+# Turn Hy files into Python source so that PyPy will (eventually) be happy
 %.py: %.hy
 	hy2py $< > $@
 
@@ -61,8 +57,8 @@ bundle: $(HYFILES) $(PYFILES)
 	rm -f sushy/*.pyc
 
 # Run with the embedded web server
-serve: build
-	python -m sushy.app
+serve:
+	hy -m sushy.app
 
 # Run with uwsgi
 uwsgi: build
@@ -76,15 +72,15 @@ uwsgi-ini: build
 	uwsgi --ini uwsgi.ini
 
 # Run indexer
-index: build
-	python -m sushy.indexer
+index:
+	hy -m sushy.indexer
 
 # Run indexer and watch for changes
-index-watch: build
+index-watch:
 ifneq ($(NEW_RELIC_LICENSE_KEY),'')
 	newrelic-admin run-python -m sushy.indexer watch
 endif
-	python -m sushy.indexer watch
+	hy -m sushy.indexer watch
 
 # Render pstats profiler files into nice PNGs (requires dot)
 %.png: %.pstats
@@ -93,3 +89,17 @@ endif
 profile: $(CALL_DIAGRAMS)
 
 debug-%: ; @echo $*=$($*)
+
+# Commands for deploying to a piku instance
+restart-production:
+	ssh piku@piku restart sushy
+
+deploy-production:
+	git push production master
+
+reset-production:
+	ssh piku@piku destroy sushy
+
+redeploy: reset-production deploy-production restart-production
+
+deploy: deploy-production restart-production

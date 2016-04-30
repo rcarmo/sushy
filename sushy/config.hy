@@ -4,6 +4,7 @@
     [logging        [getLogger basicConfig *debug* *info*]]
     [logging.config [dictConfig]]
     [os             [environ]]
+    [pytz           [timezone]]
     [re]
     [sys            [stdout]]
     [codecs         [getwriter]]
@@ -13,11 +14,13 @@
 
 (setv stdout ((getwriter "utf-8") stdout))
 
+(def *timezone* (timezone (.get environ "TIMEZONE" "UTC")))
+
 (def *store-path* (.get environ "CONTENT_PATH" "pages"))
 
 (def *theme-path* (.get environ "THEME_PATH" "themes/wiki"))
 
-(def *feed-css* (.get environ "FEED_CSS" "themes/wiki/static/css/rss.css"))
+(def *feed-css* (.get environ "FEED_CSS" (+ *theme-path* "/static/css/rss.css")))
 
 (def *feed-ttl* 1800); in seconds
 
@@ -61,11 +64,15 @@
 
 (def *aliasing-chars* [" " "." "-" "_"])
 
+(def *redirect-page* "meta/Redirects")
+
 (def *alias-page* "meta/Aliases")
 
 (def *interwiki-page* "meta/InterWikiMap")
 
 (def *exclude-from-feeds* (.compile re "^meta.*"))
+
+(def *root-junk* (.join "|" ["favicon\.ico" "apple-touch-icon\.png" "apple-touch-icon-precomposed\.png" "keybase\.txt"]))
 
 (def *base-types*
     {".txt"      "text/x-textile"; TODO: this should be reverted to text/plain later in the testing cycle
@@ -92,7 +99,7 @@
     (dictConfig 
         {"version"    1
          "formatters" {"http"    {"format" "localhost - - [%(asctime)s] %(process)d %(levelname)s %(filename)s:%(funcName)s:%(lineno)d %(message)s"
-                                 "datefmt" "%Y/%m/%d %H:%M:%S"}}
+                                  "datefmt" "%Y/%m/%d %H:%M:%S"}}
          "handlers"   {"console" {"class"     "logging.StreamHandler"
                                   "formatter" "http"
                                   "level"     "DEBUG"

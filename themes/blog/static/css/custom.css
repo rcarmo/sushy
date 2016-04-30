@@ -6,7 +6,14 @@ html {
     word-wrap: break-word; 
     -webkit-nbsp-mode: space; 
     -webkit-line-break: after-white-space;
+    font-kerning: normal;
+    text-rendering: optimizeLegibility;
 }
+a {
+  color: #903030;
+  text-decoration: none;
+}
+
 blockquote {
     font-style: italic;
 }
@@ -66,7 +73,7 @@ input[type="search"] {
   -moz-border-radius: 5px;
   border-radius: 5px;
   
-   -webkit-transition: background .25s ease;
+  -webkit-transition: background .25s ease;
   -moz-transition: background .25s ease;
   -ms-transition: background .25s ease;
   -o-transition: background .25s ease;
@@ -148,26 +155,40 @@ td {
     border-top: 1px solid #aaa;
 }
 
+.masthead {
+    margin-bottom: 1rem;
+}
+
+.quicklook {
+    -webkit-animation: fade-in 1s;
+    -moz-animation: fade-in 1s;
+    -ms-animation: fade-in 1s;
+    animation: fade-in 1s;
+    display: block;
+    background: url("/static/img/placeholder.png") no-repeat;
+}
 
 #seealso {
     padding-top: 1em;
+    width: 100%;
     text-align: top;
     margin: 0px;
     display: table;
+    font-size: 0.8rem;
 }
 #seealso .holder {
     display: table-row;
 }
 #seealso a {
-    display: inline-table;
+    display: table-cell;
     margin: 0px;
-    padding: 0.3em;
-    height: 4em;
+    padding: 1rem;
+    height: 4rem;
     background: white;
 }
 
 a.seelink:hover {
-    background: #4c9220 !important;
+    background: #933 !important;
     color: white;
     text-decoration: none;
 }
@@ -220,11 +241,60 @@ footer {
     margin-top: 2rem;
 }
 
+.inner-container {
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom: 4rem;
+    width: 100%;
+}
 
 .pagination-item {border: none; color: #9a9a9a;}
 
-.post-title, .post-date, h1, h2, h3 {
+.author-avatar {
+    display: table-cell;
+    vertical-align: top;
+}
+.author-avatar > img {
+    width: 2rem;
+    height: auto;
+    vertical-align: top;
+}
+
+.post-metadata {
+    display: table;
+    vertical-align: middle;
+    align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.post-date {
+    font-size: 0.8rem;
+    padding-left: 0.5rem;
+    display: table-cell;
+}
+
+.post-title, h1, h2, h3 {
     text-align: center;
+}
+
+#latest-content > .container {
+    padding-bottom: 3rem;
+    width: 100%;
+}
+
+.links-content {
+    display: inline-block;
+    clear: both;
+}
+
+.links-title {
+    font-size: 1.5rem;
+}
+
+.links-namespace > .lead, .links-namespace > p {
+  font-size: 1rem;
+  font-weight: 300;
 }
 
 .blog-namespace > p.lead {
@@ -252,11 +322,15 @@ footer {
 }
 
 .quicklook {
-    padding-left: 0.25em;
-    padding-bottom: 0.01em;
+    margin-left: 0.5rem !important;
+    margin-bottom: 0.4rem;
     float: right;
+    box-shadow: 0px 0px 2px #333;
 }
 
+.sidebar-toggle {
+    box-shadow: 0px 0px 2px #666;    
+}
 
 /* Larger than mobile */
 @media (min-width: 400px) {
@@ -278,8 +352,14 @@ footer {
         max-width: 45rem;
         font-size: 102%;
     }
-    .post-title, .post-date, h1, h2, h3 {
+    .post-title, h1, h2, h3 {
         text-align: left;
+    }
+    .post-metadata {
+       margin-left: 0;  
+    }
+    #carbonads-container {
+        margin-right: 1rem !important;
     }
 }
 
@@ -288,6 +368,9 @@ footer {
     .container {
         max-width: 50rem;
         font-size: 105%;
+    }
+    #carbonads-container {
+        margin-right: 4rem !important;
     }    
 }
 
@@ -297,4 +380,79 @@ footer {
         max-width: 55rem;
         font-size: 110%;
     }    
+    #carbonads-container {
+        margin-right: 8rem !important;
+    }    
+}
+
+
+@-webkit-keyframes fade-in {
+    from { opacity: 0 }
+    to { opacity: 1 }
+}
+
+@-moz-keyframes fade-in {
+    from { opacity: 0 }
+    to { opacity: 1 }
+}
+
+@keyframes fade-in {
+    from { opacity: 0 }
+    to { opacity: 1 }
+}
+
+@-webkit-keyframes pop-in {
+    0% {
+        opacity: 0;
+        -moz-transform: scale(0.5);
+        -webkit-transform: scale(0.5)
+    }
+
+    100% {
+        opacity: 1;
+        -moz-transform: scale(1);
+        -webkit-transform: scale(1)
+    }
+}
+
+@-moz-keyframes pop-in {
+    0% {
+        opacity: 0;
+        -moz-transform: scale(0.5);
+        -webkit-transform: scale(0.5)
+    }
+
+    100% {
+        opacity: 1;
+        -moz-transform: scale(1);
+        -webkit-transform: scale(1)
+    }
+}
+
+@-ms-keyframes pop-in {
+    0% {
+        opacity: 0;
+        -moz-transform: scale(0.5);
+        -webkit-transform: scale(0.5)
+    }
+
+    100% {
+        opacity: 1;
+        -moz-transform: scale(1);
+        -webkit-transform: scale(1)
+    }
+}
+
+@keyframes pop-in {
+    0% {
+        opacity: 0;
+        -moz-transform: scale(0.5);
+        -webkit-transform: scale(0.5)
+    }
+
+    100% {
+        opacity: 1;
+        -moz-transform: scale(1);
+        -webkit-transform: scale(1)
+    }
 }

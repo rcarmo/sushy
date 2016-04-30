@@ -18,8 +18,7 @@
     </div>
     <nav class="sidebar-nav">
         <a class="sidebar-nav-item" href="{{!base_url}}/">Home</a>
-        <a class="sidebar-nav-item">Archives</a>
-        <a class="sidebar-nav-item">Recent Updates</a>
+        <a class="sidebar-nav-item">Archives (coming soon!)</a>
         <a class="sidebar-nav-item" href="{{!base_url + page_route_base}}/meta/About">About</a>
     </nav>
 

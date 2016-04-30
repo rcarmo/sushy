@@ -16,7 +16,7 @@
     [StringIO           [StringIO]]
     [time               [time]]
     [urllib             [quote :as uquote]]
-    [urlparse           [urlunparse]])
+    [urlparse           [urlsplit urlunparse]])
 
 (setv log (getLogger))
 
@@ -50,7 +50,9 @@
 (setv *utc* (timezone "UTC"))
 
 (defn base-url []
-    (slice (. request fullpath) 0 (- (len (uquote (. request path))))))
+    (let [[(, scheme netloc path query fragment) (urlsplit (. request url))]
+          [base                                  (urlunparse (, scheme netloc "" "" "" ""))]]
+        base))
 
 ; hashing and HMAC helpers
 (defn compact-hash [&rest args]
@@ -190,14 +192,27 @@
         "\n"))
 
 
-(defn utc-date [string fallback]
-    (let [[date (try
-                    (parse-date string)
-                    (catch [e Exception]
-                        fallback))]]
-        (if (. date tzinfo)
-            (.astimezone date *utc*)
-            date)))
+(defn utc-date [date &optional [tz *utc*]]
+    ; convert naive (or not) dates into UTC
+    (if (. date tzinfo)
+        (.astimezone date *utc*)
+        (.astimezone (.localize tz date) *utc*)))
+
+
+(defn strip-timezone [date]
+    (apply .replace [date] {"tzinfo" nil}))
+
+
+(defn parse-naive-date [string fallback &optional [tz *utc*]]
+    ; parse a date string and return a UTC date
+    (if string
+        (let [[date (try
+                        (parse-date string)
+                        (catch [e Exception]
+                            (.warning log (% "Could not parse %s" string))
+                            fallback))]]
+            (utc-date date tz))
+        fallback))
 
 
 (defn ordinal [num]

@@ -1,5 +1,5 @@
-body, div {
-    font-family: Georgia, 'Times New Roman', Times, serif;
+body {
+    font-family: Georgia, "Times New Roman", Times, serif;
 }
 
 pre {
@@ -48,5 +48,6 @@ td {
 }
 
 img {
-    max-width: 100% !important; height: auto !important;
+    max-width: 100% !important; 
+    height: auto !important;
 } 

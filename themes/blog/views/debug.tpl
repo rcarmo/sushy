@@ -1,7 +1,7 @@
 <table class="ink-table bordered hover alternating">
     <thead>
         <tr>
-            <th>Variable</th>
+            <th>Key</th>
             <th>Value</th>
         </tr>
     </thead>

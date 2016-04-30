@@ -11,7 +11,7 @@
     [pygments.lexers     [get-lexer-by-name]]
     [pygments.formatters [HtmlFormatter]]
     [re                  [*ignorecase* sub]]
-    [store               [asset-exists? asset-path get-page open-asset]]
+    [store               [asset-exists? asset-path get-page page-exists? open-asset]]
     [render              [render-page]]
     [utils               [compute-hmac memoize get-image-size]]
     [urlparse            [urlsplit]])
@@ -23,15 +23,18 @@
     (defn get-mappings
         ; searches for `pre` tags and builds key/value pairs
         [page]
-        (let [[mappings {}]
-            [doc (HTML (render-page (get-page page)))]]
-            (for [tag (.xpath doc "//pre")]
-                (let [[lines (.splitlines tag.text)]
-                    [pairs (map (fn [x] (.split x)) lines)]]
-                    (for [pair pairs]
-                        (if (= 2  (len pair))
-                            (assoc mappings (.lower (get pair 0)) (get pair 1))))))
-            mappings)))
+        (if (not (page-exists? page))
+            {}
+            (let [[mappings {}]
+                [doc (HTML (render-page (get-page page)))]]
+                (for [tag (.xpath doc "//pre")]
+                    (let [[lines (.splitlines tag.text)]
+                          [pairs (map (fn [x] (.split x)) lines)]]
+                        (for [pair pairs]
+                            (if (= 2 (len pair))
+                                (assoc mappings (.lower (get pair 0)) (get pair 1))
+))))
+                mappings))))
 
 
 (defn base-href
@@ -98,6 +101,20 @@
             (if tag.text
                 (.replace (.getparent tag) tag
                     (fromstring (highlight tag.text lexer formatter))))))
+    doc)
+
+
+(defn count-images
+    ; counts image and picture tags
+    [doc]
+    (+ (len (list (.xpath doc "//img[@src]"))) (len (list (.xpath doc "//figure")))))
+
+
+(defn prepend-asset-sources
+    ; prepend a prefix to image 'src' attributes, for feed generation
+    [doc prefix]
+    (for [tag (.xpath doc "//img[@src]")]
+        (assoc (. tag attrib) "src" (+ prefix (get (. tag attrib) "src"))))
     doc)
 
 

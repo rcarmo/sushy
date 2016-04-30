@@ -1,7 +1,6 @@
 bottle>=0.12.9
 cssutils>=1.0.1
 docutils>=0.12
-gevent>=1.1.1
 hy==0.11.1
 inlinestyler>=0.2.3
 ipython>=4.2.0
@@ -17,5 +16,4 @@ pytz>=2016.4
 requests>=2.9.1
 smartypants>=1.8.6
 textile>=2.2.2
-uWSGI>=2.0.12
 watchdog>=0.8.3

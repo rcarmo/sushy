@@ -27,6 +27,8 @@ class Page(Model):
     hash        = CharField(null=True, index=True) # plaintext hash, used for etags
     mtime       = DateTimeField(index=True) # UTC
     pubtime     = DateTimeField(index=True) # UTC
+    idxtime     = IntegerField(index=True) # epoch
+    readtime    = IntegerField(null=True) # seconds
 
     class Meta:
         database = db
@@ -76,7 +78,7 @@ def add_wiki_link(**kwargs):
             log.debug(e) # skip duplicate links
 
 
-def del_wiki_page(page):
+def delete_wiki_page(page):
     with db.atomic():
         page = Page.get(Page.name == page)
         FTSPage.delete().where(FTSPage.page == page).execute()
@@ -88,7 +90,7 @@ def index_wiki_page(**kwargs):
     """Adds wiki page metatada and FTS data."""
     with db.atomic():
         values = {}
-        for k in [u"name", u"title", u"tags", u"hash", u"mtime", u"pubtime"]:
+        for k in [u"name", u"title", u"tags", u"hash", u"mtime", u"pubtime", u"idxtime", u"readtime"]:
             values[k] = kwargs[k]
         log.debug(values)
         try:
@@ -104,7 +106,7 @@ def index_wiki_page(**kwargs):
         return page
 
 
-def get_metadata(name):
+def get_page_metadata(name):
     try:
         return Page.get(Page.name == name)._data
     except Exception as e:
@@ -138,10 +140,26 @@ def get_links(page_name):
         return        
 
 
+def get_page_indexing_time(name):
+    try:
+        return Page.get(Page.name == name).idxtime
+    except Exception as e:
+        return None
+
+
+def get_last_update_time():
+    query = (Page.select()
+            .order_by(SQL('mtime').desc())
+            .limit(1)
+            .dicts())
+    for page in query:
+        return page["mtime"]
+
+
 def get_latest(limit=20, regexp=None):
     if regexp:
         query = (Page.select()
-                .where(Page.name.regexp(regexp))
+                .where(Page.name.regexp(regexp.pattern))
                 .order_by(SQL('mtime').desc())
                 .limit(limit)
                 .dicts())
@@ -268,12 +286,20 @@ def get_next_by_date(name, regexp):
         return p
             
 
-def get_prev_next(name, pattern = None):
-    if pattern:
-        p, n = get_prev_by_date(name, pattern), get_next_by_date(name, pattern)
+def get_prev_next(name, regexp = None):
+    if regexp:
+        p, n = get_prev_by_date(name, regexp), get_next_by_date(name, regexp)
     else:
-        p, n = get_prev_by_name(name)), get_next_by_name(name)
+        p, n = get_prev_by_name(name), get_next_by_name(name)
     return p, n
+
+
+def get_table_stats():
+    return {
+        "pages": Page.select().count(),
+        "links": Link.select().count(),
+        "fts": FTSPage.select().count()
+    }
 
 
 @hook('before_request')

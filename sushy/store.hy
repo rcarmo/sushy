@@ -1,11 +1,12 @@
 ; Find, retrieve and parse raw page markup
 (import 
-    [codecs  [open]]
-    [config  [*base-filenames* *base-types* *ignored-folders* *store-path*]]
-    [logging [getLogger]]
-    [os      [walk stat]]
-    [os.path [join exists splitext]]
-    [stat    [ST_MTIME]])
+    [codecs   [open]]
+    [config   [*base-filenames* *base-types* *ignored-folders* *store-path* *timezone*]]
+    [datetime [datetime]]
+    [logging  [getLogger]]
+    [os       [walk]]
+    [os.path  [join exists splitext getmtime]]
+    [utils    [utc-date]])
 
 (setv log (getLogger --name--))
 
@@ -30,22 +31,23 @@
         {:headers {"from" "Unknown Author"
                    "title" "Untitled Notebook"
                    "content-type" content-type}
-         :body    buffer} 
-        (try 
-            (let [[delimiter    (if (in "\r\n" buffer) "\r\n\r\n" "\n\n")]
-                [parts        (.split buffer delimiter 1)]
-                [header-lines (.splitlines (get parts 0))]
-                [headers      (dict (map split-header-line header-lines))]
-                [body         (.strip (get parts 1))]]
-                (if (not (in "from" headers))
-                    (assoc headers "from" "Unknown Author"))
-                (if (not (in "content-type" headers))
-                    (assoc headers "content-type" content-type))
-                {:headers headers
-                :body    body})
-            (catch [e Exception]
-                (.error log (, e "Could not parse page"))
-                (throw (RuntimeError "Could not parse page"))))))
+         :body    buffer}
+        (let [[unix-buffer (.replace buffer "\r\n" "\n")]]
+            (try 
+                (let [[delimiter    "\n\n"]
+                      [parts        (.split unix-buffer delimiter 1)]
+                      [header-lines (.splitlines (get parts 0))]
+                      [headers      (dict (map split-header-line header-lines))]
+                      [body         (.strip (get parts 1))]]
+                    (if (not (in "from" headers))
+                        (assoc headers "from" "Unknown Author"))
+                    (if (not (in "content-type" headers))
+                        (assoc headers "content-type" content-type))
+                    {:headers headers
+                     :body    body})
+                (catch [e Exception]
+                    (.error log (, e "Could not parse page"))
+                    (throw (RuntimeError "Could not parse page")))))))
 
 
 (defn asset-path [pagename asset]
@@ -60,6 +62,10 @@
     ; open a page asset/attachment
     (let [[filename (asset-path pagename asset)]]
         (open filename "rb")))
+
+
+(defn page-exists? [pagename]
+    (is-page? (join *store-path* pagename)))
 
 
 (defn is-page? [path]
@@ -77,8 +83,8 @@
               [page         (.next (filter (fn [item] (exists (join path item))) *base-filenames*))]
               [filename     (join *store-path* pagename page)]
               [content-type (get *base-types* (get (splitext page) 1))]
-              [handle        (apply open [filename] {"mode" "r" "encoding" "utf-8"})]
-              [buffer        (.read handle)]]
+              [handle       (apply open [filename] {"mode" "r" "encoding" "utf-8"})]
+              [buffer       (.read handle)]]
             (.close handle)
             (parse-page buffer content-type))
         (catch [e StopIteration]
@@ -103,8 +109,8 @@
 (defn walk-folders [root-path]
     ; generate a sequence of folder data
     (for [(, folder subfolders files) (walk root-path)]
-        ; setting this helps guide os.path.walk()
-        (setv subfolders (filtered-names subfolders))
+        ; setting this helps guide os.walk()
+        (setv subfolders (filtered-names subfolders))        
         (yield {:path folder
                 :files files})))
 
@@ -117,7 +123,7 @@
                 (yield
                     {:path     (slice (:path folder) (+ 1 (len root-path)))
                      :filename base
-                     :mtime    (get (stat (join (:path folder) base)) ST_MTIME)})))))
+                     :mtime    (int (getmtime (join (:path folder) base)))})))))
 
 
 (defn gen-pages [root-path]

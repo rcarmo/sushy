@@ -1,20 +1,20 @@
 (import
     [bottle      [abort get :as handle-get request redirect response static-file view :as render-view]]
-    [config      [*debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *home-page* *layout-hash* *page-media-base* *page-route-base* *placeholder-image* *rss-date-format* *site-copyright* *site-description* *site-name* *static-path* *store-path* *thumb-media-base* *thumbnail-sizes*]]
+    [config      [*debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *home-page* *layout-hash* *page-media-base* *page-route-base* *placeholder-image* *site-copyright* *site-description* *site-name* *static-path* *store-path* *thumb-media-base* *thumbnail-sizes* *timezone* *root-junk* *redirect-page*]]
     [datetime    [datetime]]
     [dateutil.relativedelta  [relativedelta]]
     [email.utils [parsedate]]
     [feeds       [render-feed-items]]
     [logging     [getLogger]]
-    [models      [search get-links get-all get-closest-matches get-metadata get-latest]]
+    [models      [search get-links get-all get-closest-matches get-page-metadata get-latest get-last-update-time get-table-stats]]
     [os          [environ]]
     [os.path     [join split]]
     [pytz        [*utc*]]
     [render      [render-page]]
     [store       [asset-exists? asset-path get-page]]
     [time        [mktime]]
-    [transform   [apply-transforms inner-html]]
-    [utils       [*gmt-format* base-url compact-hash compute-hmac get-thumbnail lru-cache ttl-cache report-processing-time trace-flow]])
+    [transform   [apply-transforms inner-html get-mappings]]
+    [utils       [*gmt-format* base-url compact-hash compute-hmac get-thumbnail lru-cache ttl-cache report-processing-time trace-flow utc-date]])
 
 
 (setv log (getLogger))
@@ -25,7 +25,7 @@
     (ttl-cache 30)
     (defn wrap-metadata [pagename]
         (if pagename
-            (get-metadata pagename)
+            (get-page-metadata pagename)
             (try
                 (next (get-latest 1))
                 (catch [e Exception]
@@ -40,7 +40,7 @@
             (.set-header response (str "Content-Type") content-type)
             (if *debug-mode*
                 (apply func args kwargs)
-                (let [[pagename    (if page-key (get kwargs page-key) nil)]
+                (let [[pagename    (if page-key (.get kwargs page-key nil) nil)]
                       [etag-seed   (if page-key *layout-hash* (. request url))] 
                       [metadata    (wrap-metadata pagename)]
                       [req-headers (. request headers)]]
@@ -59,16 +59,17 @@
                             (.set-header response (str "Expires") (.strftime (+ (.now datetime) (apply relativedelta [] {"seconds" seconds})) *gmt-format*))
                             (.set-header response (str "Cache-Control") (.format "{}, max-age={}" pragma seconds))
                             (.set-header response (str "Pragma") pragma)))))
-                (apply func args kwargs))
+            (apply func args kwargs))
         wrap-fn)
     inner)
 
 
+; root to /space
 (with-decorator 
     (handle-get "/")
-    (handle-get *page-route-base*)
+    ;(handle-get *page-route-base*)
     (defn home-page []
-        (redirect *home-page*)))
+        (redirect *page-route-base*)))
 
 
 ; environment dump
@@ -88,19 +89,38 @@
             (abort (int 404) "Page Not Found"))))
 
 
-; RSS feed
+; database stats
 (with-decorator
+    (handle-get "/stats")
+    (report-processing-time)
+    (http-caching nil "text/html" 0)
+    (render-view "debug")
+    (defn debug-dump []
+        (if *debug-mode*
+            {"base_url"         (base-url)
+             "environ"          (get-table-stats)
+             "headers"          {"title" "Database Statistics"}
+             "page_route_base"  *page-route-base*
+             "site_description" *site-description*
+             "site_name"        *site-name*}
+            (abort (int 404) "Page Not Found"))))
+
+
+; RSS/atom feed
+(with-decorator
+    (handle-get "/atom")
+    (handle-get "/feed")
     (handle-get "/rss")
     (report-processing-time)
-    (http-caching nil "application/rss+xml" *feed-ttl*)
+    (http-caching nil "application/atom+xml" *feed-ttl*)
     (ttl-cache (/ *feed-ttl* 4))
-    (render-view "rss")
+    (render-view "atom")
     (defn serve-feed []
         {"base_url"         (base-url)
          "feed_ttl"         *feed-ttl*
-         "items"            (render-feed-items)
+         "items"            (render-feed-items (base-url))
          "page_route_base"  *page-route-base*
-         "pubdate"          (.strftime (.localize *utc* (.now datetime)) *rss-date-format*)
+         "pubdate"          (utc-date (get-last-update-time))
          "site_copyright"   *site-copyright*
          "site_description" *site-description*
          "site_name"        *site-name*}))
@@ -118,6 +138,13 @@
         {"base_url"         (base-url)
          "items"            (get-all)
          "page_route_base"  *page-route-base*}))
+
+
+; junk that needs to be at root level
+(with-decorator
+    (handle-get (% "/<filename:re:(%s)>" *root-junk*))
+    (defn static-root [filename]
+        (apply static-file [filename] {"root" (join *static-path* "root")})))
 
 
 ; robots.txt
@@ -192,19 +219,13 @@
     (ttl-cache 60)
     (render-view "blog")
     (defn blog-homepage []
-        (try
-            (let [[latest   (apply get-latest [] {"regexp" "^blog"})]
-                  [pagename (get (.next latest) "name")]
-                  [page     (get-page pagename)]]
                 {"base_url"         (base-url)
-                 "body"             (inner-html (apply-transforms (render-page page) pagename))            
-                 "headers"          (:headers page)
-                 "pagename"         pagename
+                 "body"             ""
+                 "headers"          {"title" "Home Page"}
+                 "pagename"         *site-name*
                  "page_route_base"  *page-route-base*                 
                  "site_description" *site-description*
-                 "site_name"        *site-name*})
-            (except [e Exception]
-                (abort (int 500) (+ "Internal Server Error" (str e))))))) 
+                 "site_name"        *site-name*})) 
 
 
 ; page content
@@ -215,25 +236,33 @@
     (ttl-cache 30)
     (render-view "wiki")
     (defn wiki-page [pagename] 
-        (try
-            (let [[page (get-page pagename)]]
-                {"base_url"         (base-url)
-                 "body"             (inner-html (apply-transforms (render-page page) pagename))            
-                 "headers"          (:headers page)
-                 "pagename"         pagename
-                 "page_route_base"  *page-route-base*                 
-                 "seealso"          (list (get-links pagename))
-                 "site_description" *site-description*
-                 "site_name"        *site-name*})
-            (except [e IOError]
+        (let [[redirects (get-mappings *redirect-page*)]
+              [key (.lower pagename)]]
+            (if (in key redirects)
+                (let [[target (get redirects key)]]
+(.debug log (, key target))
+                    (if (or (= "/" (get target 0)) (in "http" target))
+                        (redirect target)
+                        (redirect (+ *page-route-base* "/" target))))
                 (try
-                    (let [[matches (get-closest-matches pagename)]]
-                        (for [match matches]
-                            (if (!= (get match "name") pagename)
-                                (redirect (+ *page-route-base* "/" (get match "name")))))
-                        (abort (int 404) "Could not find alternate page"))
-                    (except [e StopIteration]
-                        (abort (int 404) "Page not found")))))))
+                    (let [[page (get-page pagename)]]
+                        {"base_url"         (base-url)
+                        "body"             (inner-html (apply-transforms (render-page page) pagename))            
+                        "headers"          (:headers page)
+                        "pagename"         pagename
+                        "page_route_base"  *page-route-base*                 
+                        "seealso"          (list (get-links pagename))
+                        "site_description" *site-description*
+                        "site_name"        *site-name*})
+                    (except [e IOError]
+                        (try
+                            (let [[matches (get-closest-matches pagename)]]
+                                (for [match matches]
+                                    (if (!= (get match "name") pagename)
+                                        (redirect (+ *page-route-base* "/" (get match "name")))))
+                                (abort (int 404) "Could not find alternate page"))
+                            (except [e StopIteration]
+                                (abort (int 404) "Page not found")))))))))
 
 
 ; thumbnails
