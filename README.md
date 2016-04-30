@@ -4,29 +4,33 @@
 
 A wiki/blogging engine with a static file back-end. 
 
-Demo site: <a href="http://sushy.no-bolso.com">http://sushy.no-bolso.com</a>.
+Demo site: <a href="http://taoofmac.com">http://taoofmac.com</a>.
 
 ## Status
 
-Currently working out-of-the box, with full-text indexing and markup support already in place. Deployable _now_ to [Dokku-alt][da]/[Dokku][dokku]/[Heroku][heroku].
+Currently working out-of-the box, with full-text indexing and markup support already in place. Deployable _now_ to [piku]/[Dokku-alt][da]/[Dokku][dokku]/[Heroku][heroku].
 
 ### Roadmap
 
+* More CSS tweaks
+* Blog archive
 * Friendlier search results
-* Blog homepage/excerpts/archive navigation
 * Image thumbnailing
+* Azure Application Insights (because the free NewRelic tier doesn't let me monitor background workers)
 * Page aliasing (i.e., multiple URLs for a page)
-* Docker deployment (currently deploying on [Dokku-alt][da] using a `Procfile`
+* Docker deployment (currently deploying on [piku][piku] and [Dokku][dokku] using specific `Procfile`s)
 
 ### Done
 
+* Atom feeds
+* [piku][piku] deployment
+* Blog homepage/prev-next navigation
 * Preliminary support for rendering IPython notebooks
 * Closest-match URLs (i.e., fix typos)
 * HTTP caching (`Etag`, `Last-Modified`, `HEAD` support, etc.)
 * Sitemap
 * OpenSearch support (search directly from the omnibar on some browsers)
-* CSS inlining for RSS feeds
-* RSS feeds
+* CSS inlining for Atom feeds
 * `multiprocessing`-based indexer (in `feature/multiprocessing`, disabled for ease of profiling)
 * SSE (Server-Sent Events) support (in `feature/server-events`) for notifying visitors a page has changed 
 * [New Relic][nr] Support
@@ -57,7 +61,7 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Markup Support
 
-Sushy supports plaintext, HTML and Textile for legacy reasons, and Markdown as its preferred format. ReStructured Text is also supported, but since I don't use it for anything (and find it rather a pain to read, let alone write), I can't make any guarantees as to its reliability.
+Sushy supports plaintext, HTML and Textile for legacy reasons, and Markdown as its preferred format. ReStructured Text is also supported, but since I don't use it for anything (and find it rather a pain to read, let alone write), I can't make any guarantees as to its reliability. Work is ongoing for supporting Jupyter notebooks (which have no metadata/frontmatter conventions).
 
 All markup formats MUST be preceded by "front matter" handled like RFC2822 headers (see the `pages` folder for examples and test cases). Sushy uses the file extension to determine a suitable renderer, but that can be overriden if you specify a `Content-Type` header (see `config.hy` for the mappings).
 
@@ -91,9 +95,7 @@ Thanks to [Hy][hy], this should run just as well under Python 2 and Python 3. My
 
 # Deployment
 
-This repository is deployable as-is on [Dokku-alt][da], and will instantiate a production-ready [uWSGI][uwsgi] server (using `gevent`) and a background indexing worker. 
-
-Vanilla [Dokku][dokku] may work as well with the `foreman` plugin, but I haven't tested it.
+This repository should be deployable on [piku][piku] (my featherweight version of [Heroku][heroku]) and [Dokku][dokku] -- where it will instantiate a production-ready [uWSGI][uwsgi] server (using `gevent`) and a background indexing worker.
 
 As is (for development) the content ships with the code repo. Changing things to work off a separate mount point (or a shared container volume) is trivial.
 
@@ -151,7 +153,7 @@ make index-watch &
 # run the standalone server (or uwsgi)
 make serve
 ```
-
+[piku]: https://github.com/rcarmo/piku
 [heroku]: https://www.heroku.com/
 [da]: http://dokku-alt.github.io
 [dokku]: https://github.com/progrium/dokku
