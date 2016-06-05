@@ -1,5 +1,6 @@
 -r requirements.txt
 jupyter
 hy-kernel
-uWSGI>=2.0.12
-gevent>=1.1.1
+#uWSGI>=2.0.12
+#gevent>=1.1.1
+css-html-js-minify
