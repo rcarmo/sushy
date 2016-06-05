@@ -12,16 +12,15 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Roadmap
 
-* More CSS tweaks
 * Blog archive
-* Friendlier search results
-* Image thumbnailing
-* Azure Application Insights (because the free NewRelic tier doesn't let me monitor background workers)
-* Page aliasing (i.e., multiple URLs for a page)
 * Docker deployment (currently deploying on [piku][piku] and [Dokku][dokku] using specific `Procfile`s)
 
 ### Done
 
+* Page aliasing (i.e., multiple URLs for a page)
+* Image thumbnailing
+* Friendlier search results
+* More CSS tweaks
 * Atom feeds
 * [piku][piku] deployment
 * Blog homepage/prev-next navigation
