@@ -18,18 +18,12 @@
         <link rel="apple-touch-icon" href="/apple-touch-icon-precomposed.png">
         <link rel="alternate" type="application/atom+xml" title="{{site_name}}" href="/feed"/>
         <link rel="search" type="application/opensearchdescription+xml" title="{{site_name}}" href="/opensearch.xml"/>
-%if True:
-        <link rel="stylesheet" href="/static/css/bundle-20160530.css">
-%else:
         <link rel="stylesheet" href="/static/css/poole.css">
         <link rel="stylesheet" href="/static/css/lanyon.css">
         <link rel="stylesheet" href="/static/css/custom.css">
         <link rel="stylesheet" href="/static/css/syntax.css">
-%end
 %include('custom_meta', **globals())
-%if True:
-        <script async src="/static/js/bundle-20160508.js"></script>
-%elif defined('scripts'):
+%if defined('scripts'):
     %for script in scripts:    
         <script src="/static/js/{{script}}"></script>
     %end
