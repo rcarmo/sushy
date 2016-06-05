@@ -12,6 +12,7 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 
 ### Roadmap
 
+* A little more documentation (there's never enough)
 * Blog archive
 * Docker deployment (currently deploying on [piku][piku] and [Dokku][dokku] using specific `Procfile`s)
 
@@ -25,7 +26,7 @@ Currently working out-of-the box, with full-text indexing and markup support alr
 * [piku][piku] deployment
 * Blog homepage/prev-next navigation
 * Preliminary support for rendering IPython notebooks
-* Closest-match URLs (i.e., fix typos)
+* <strike>Closest-match URLs (i.e., fix typos)</strike> (removed for performance concerns on large sites)
 * HTTP caching (`Etag`, `Last-Modified`, `HEAD` support, etc.)
 * Sitemap
 * OpenSearch support (search directly from the omnibar on some browsers)
