@@ -1,5 +1,7 @@
 (import
     [bottle         [*template-path* template]]
+    [collections    [defaultdict]]
+    [datetime       [timedelta]]
     [hashlib        [sha1]]
     [logging        [getLogger basicConfig *debug* *info*]]
     [logging.config [dictConfig]]
@@ -12,70 +14,102 @@
 
 (setv log (getLogger --name--))
 
+; force stdout to use UTF-8
 (setv stdout ((getwriter "utf-8") stdout))
 
-(def *timezone* (timezone (.get environ "TIMEZONE" "UTC")))
-
-(def *store-path* (.get environ "CONTENT_PATH" "pages"))
-
-(def *theme-path* (.get environ "THEME_PATH" "themes/wiki"))
-
-(def *feed-css* (.get environ "FEED_CSS" (+ *theme-path* "/static/css/rss.css")))
-
-(def *feed-ttl* 1800); in seconds
-
-(def *rss-date-format* "%a, %d %b %Y %H:%M:%S %z")
+; for running standalone
+(def *http-port* (.get environ "PORT" "8080"))
 
 (def *site-name* (.get environ "SITE_NAME" "Sushy"))
+
+; core settings
+(def *bind-address* (.get environ "BIND_ADDRESS" "127.0.0.1"))
 
 (def *site-description* (.get environ "SITE_DESCRIPTION" "A Sushy-powered site"))
 
 (def *site-copyright* (.get environ "SITE_COPYRIGHT" "CC Attribution-NonCommercial-NoDerivs 3.0"))
 
+(def *store-path* (.get environ "CONTENT_PATH" "pages"))
+
+(def *theme-path* (.get environ "THEME_PATH" "themes/wiki"))
+
 (def *static-path* (join *theme-path* "static"))
 
 (def *view-path* (join *theme-path* "views"))
 
-(def *bind-address* (.get environ "BIND_ADDRESS" "127.0.0.1"))
+; prepend the theme template path to bottle's search list
+(.insert *template-path* 0 (abspath *view-path*))
 
-(def *http-port* (.get environ "PORT" "8080"))
+(def *timezone* (timezone (.get environ "TIMEZONE" "UTC")))
 
+; feed settings
+(def *feed-css* (.get environ "FEED_CSS" (+ *theme-path* "/static/css/rss.css")))
+
+(def *feed-ttl* 1800); in seconds
+
+(def *feed-time-window* (apply timedelta [] {"weeks" -4}))
+
+(def *feed-item-window* 20)
+
+(def *exclude-from-feeds* (.compile re "^(meta)/.+$"))
+
+; Azure App Insights
+(def *instrumentation-key* (.get environ "INSTRUMENTATION_KEY" nil))
+
+; UDP remote statistics
+(def *stats-address* (.get environ "STATS_ADDRESS" "127.0.0.1"))
+
+(def *stats-port* (int (.get environ "STATS_PORT" "0")))
+
+; Base routes
 (def *page-route-base* "/space")
 
 (def *page-media-base* "/media")
 
 (def *blog-archive-base* "/archives")
 
+(def *scaled-media-base* "/thumb")
+
 (def *blog-entries* (.compile re "^(blog|links)/.+$"))
 
-(def *thumb-media-base* "/thumb")
+; files that are supposed to be hosted at the site root
+(def *root-junk* (.join "|" ["favicon\.ico" "apple-touch-icon\.png" "apple-touch-icon-precomposed\.png" "keybase\.txt"]))
 
-(def *home-page* (+ *page-route-base* "/HomePage"))
+; Image handling
+(def *lazyload-images* (= (.lower (.get environ "LAZY_LOADING" "false")) "true"))
 
-(def *debug-mode* (= (.lower (.get environ "DEBUG" "false")) "true"))
+; maximum non-retina image size
+(def *max-image-size* 1024)
 
-(def *profiler* (= (.lower (.get environ "PROFILER" "false")) "true"))
+(def *min-image-size* 16)
 
-(def *thumbnail-sizes* [(, 320 240) (, 640 320) (, 1280 720)])
+(def *thumbnail-sizes* [(, 40 30) (, 160 120) (, 320 240) (, 640 480) (, 1280 720)])
 
 (def *placeholder-image* "/static/img/placeholder.png")
 
-(def *signed-prefixes* [*page-media-base* *thumb-media-base*])
+; HMAC asset signing
+(def *asset-key* (.get environ "ASSET_KEY" ""))
 
-(def *aliasing-chars* [" " "." "-" "_"])
+(def *asset-hash* (.hexdigest (sha1 (+ *site-name* *site-description* *asset-key*))))
 
+(def *signed-prefixes* [*page-media-base* *scaled-media-base*])
+
+(def *aliasing-chars* [" " "." "-" "_" "+"])
+
+; meta pages we need to run
 (def *redirect-page* "meta/Redirects")
 
 (def *alias-page* "meta/Aliases")
 
+(def *banned-agents-page* "meta/BannedAgents")
+
 (def *interwiki-page* "meta/InterWikiMap")
 
-(def *exclude-from-feeds* (.compile re "^meta.*"))
+(def *links-page* "meta/Footer")
 
-(def *root-junk* (.join "|" ["favicon\.ico" "apple-touch-icon\.png" "apple-touch-icon-precomposed\.png" "keybase\.txt"]))
-
+; markup file extensions
 (def *base-types*
-    {".txt"      "text/x-textile"; TODO: this should be reverted to text/plain later in the testing cycle
+    {".txt"      "text/x-textile"; TODO: this should be reverted to text/plain after legacy content is cleared out
      ".ipynb"    "application/x-ipynb+json"
      ".htm"      "text/html"
      ".html"     "text/html"
@@ -93,7 +127,10 @@
 
 (def *ignored-folders* ["CVS" ".hg" ".svn" ".git" ".AppleDouble" ".TemporaryItems"])
 
-; TODO: cleanup the logging dict
+; debugging
+(def *debug-mode* (= (.lower (.get environ "DEBUG" "false")) "true"))
+
+(def *profiler* (= (.lower (.get environ "PROFILER" "false")) "true"))
 
 (if *debug-mode*
     (dictConfig 
@@ -116,9 +153,3 @@
          "root"       {"level"    "DEBUG" 
                        "handlers" ["console"]}})
     (apply basicConfig [] {"level" *info* "format" "%(asctime)s %(levelname)s:%(process)d:%(funcName)s %(message)s"}))
-
-; prepend the theme template path to bottle's search list
-(.insert *template-path* 0 (abspath *view-path*))
-
-; compute a sha1 hash for the HTML layout, so that etag generation is related to HTTP payload
-(def *layout-hash* (.hexdigest (sha1 (template "layout" {"base" "" "base_url" "" "headers" {"title" ""} "site_name" "" "site_description" "" "page_route_base" ""}))))

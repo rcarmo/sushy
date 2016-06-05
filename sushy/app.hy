@@ -3,7 +3,7 @@
     [sushy.config [*debug-mode* *bind-address* *http-port*]]
     ;[gevent       [monkey]]
     [logging      [getLogger]]
-     sushy.routes)
+    sushy.routes)
 
 (setv *debug* *debug-mode*)
 

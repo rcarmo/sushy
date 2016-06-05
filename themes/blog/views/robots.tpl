@@ -1,6 +1,6 @@
 Sitemap: {{base_url}}/sitemap.xml
 
-% for nuisance in ["MJ12bot", "Covario-IDS", "TopBlogsInfo", "spbot", "attributor", "psbot", "SiteSucker", "Scooter", "ZyBorg", "Slurp", "Pompos", "inetbot"]:
+% for nuisance in ["AhrefsBot", "BLEXBot", "MJ12bot", "Covario-IDS", "TopBlogsInfo", "spbot", "attributor", "psbot", "SemrushBot", "SemrushBot-SA", "SiteSucker", "Scooter", "ZyBorg", "Slurp", "Pompos", "inetbot", "Domain Re-Animator Bot"]:
 User-agent: {{nuisance}}
 Disallow: /
 

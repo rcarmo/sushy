@@ -18,16 +18,22 @@
         <link rel="apple-touch-icon" href="/apple-touch-icon-precomposed.png">
         <link rel="alternate" type="application/atom+xml" title="{{site_name}}" href="/feed"/>
         <link rel="search" type="application/opensearchdescription+xml" title="{{site_name}}" href="/opensearch.xml"/>
+%if True:
+        <link rel="stylesheet" href="/static/css/bundle-20160530.css">
+%else:
         <link rel="stylesheet" href="/static/css/poole.css">
         <link rel="stylesheet" href="/static/css/lanyon.css">
         <link rel="stylesheet" href="/static/css/custom.css">
         <link rel="stylesheet" href="/static/css/syntax.css">
-%if defined('scripts'):
-    %for script in scripts:    
-        <script async src="/static/js/{{script}}"></script>
-    %end
 %end
 %include('custom_meta', **globals())
+%if True:
+        <script async src="/static/js/bundle-20160508.js"></script>
+%elif defined('scripts'):
+    %for script in scripts:    
+        <script src="/static/js/{{script}}"></script>
+    %end
+%end
         <script type="application/ld+json">
             {"@context": "http://schema.org",
              "@type": "WebSite",
@@ -42,7 +48,8 @@
             <div class="masthead">
                 <div class="container">
                     <h3 class="masthead-title">
-                        <a href="/" title="">{{!site_name}}</a>
+                        <a href="/" title="">
+                        <img class="logo" src="/apple-touch-icon.png" width="36" height="36">{{!site_name}}</a>
                     </h3>
                 </div>
             </div>
@@ -51,5 +58,8 @@
         </div>
         <label for="sidebar-checkbox" class="sidebar-toggle"></label>
         <!-- TODO: edit sidebar, fat footer template -->
+        <footer>
+        %include('custom_footer', **globals())
+        </footer>
     </body>
 </html>

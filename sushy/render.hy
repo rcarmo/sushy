@@ -55,7 +55,7 @@
                 
 
 (defn render-textile [raw]
-    (smartypants (apply textile-renderer.parse [raw] {"head_offset" 0})))
+    (smartypants (apply textile-renderer.parse [raw] {}))) 
 
 
 (def render-map 

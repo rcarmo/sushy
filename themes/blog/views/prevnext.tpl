@@ -1,11 +1,12 @@
 <%
 import re
 from sushy.models import get_prev_next
+from sushy.config import BLOG_ENTRIES
 if 'meta' not in headers.get('tags',''):
 %>
 <div class="pagination">
 <%
-p, n = get_prev_next(pagename, re.compile("^(blog|links)/.+$"))
+p, n = get_prev_next(pagename, BLOG_ENTRIES)
 if p:
 %>
 <span class="pagination-item older">

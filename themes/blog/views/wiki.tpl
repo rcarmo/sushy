@@ -12,6 +12,6 @@ namespace = pagename.split("/")[0].lower()
 %include('seealso')
 </div>
 <%
-scripts=["zepto.min.js"]
+scripts=["zepto.min.js", "unveil.js", "footnotes.js"]
 %>
 %rebase('layout', **dict(globals()))

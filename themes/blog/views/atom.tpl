@@ -24,6 +24,10 @@
 <content type="html"><![CDATA[
 {{!item["description"]}}
 ]]></content>
+%for tag in item['tags']:
+% tag = tag.replace('tag:','')
+<category term="{{tag}}" label="{{tag}}" />
+%end
 </entry>
 %end
 </feed>

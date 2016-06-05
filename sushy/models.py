@@ -1,30 +1,29 @@
 import os, re, sys, logging
 from bottle import hook
+import datetime
+from dateutil.relativedelta import relativedelta
+from difflib import SequenceMatcher
 from itertools import ifilter
 from peewee import *
 from playhouse.sqlite_ext import *
 from playhouse.kv import PickledKeyStore
-import datetime
-from difflib import SequenceMatcher
-from dateutil.relativedelta import relativedelta
+from os.path import basename
 
 log = logging.getLogger(__name__)
 
-# Database models for metadata caching and full text indexing using SQLite3 (handily beats Whoosh and makes for a single index file)
-
-# TODO: port these to Hy (if at all possible given that Peewee relies on inner classes)
+# Database models for metadata caching and full text indexing using SQLite3 
+# (handily beats Whoosh and makes for a single index file)
 
 db = SqliteExtDatabase(os.environ['DATABASE_PATH'], threadlocals=True)
 
 KVS = PickledKeyStore(ordered=True, database=db)
 
-
 class Page(Model):
-    """Metadata table"""
-    name        = CharField(primary_key=True)
-    title       = CharField(null=True, index=True)
-    tags        = CharField(null=True, index=True)
-    hash        = CharField(null=True, index=True) # plaintext hash, used for etags
+    """Page information"""
+    name        = FixedCharField(primary_key=True, max_length=128)
+    title       = FixedCharField(null=True, index=True, max_length=128)
+    tags        = FixedCharField(null=True, index=True, max_length=256)
+    hash        = FixedCharField(null=True, index=True, max_length=64) # 40-char plaintext hash, used for etags
     mtime       = DateTimeField(index=True) # UTC
     pubtime     = DateTimeField(index=True) # UTC
     idxtime     = IntegerField(index=True) # epoch
@@ -47,7 +46,7 @@ class Link(Model):
 
 
 class FTSPage(FTSModel):
-    """Full text indexing table"""
+    """Full text indexing"""
     page = ForeignKeyField(Page, index=True)
     title = TextField()
     tags = TextField()
@@ -69,21 +68,25 @@ def init_db():
         log.info(e)
 
 
-def add_wiki_link(**kwargs):
-    """Adds a wiki link"""
+def add_wiki_links(links):
+    """Adds a set of wiki links"""
     with db.atomic(): # deferring transactions gives us a nice speed boost
-        try:
-            return Link.create(**kwargs)
-        except IntegrityError as e:
-            log.debug(e) # skip duplicate links
+        for l in links:
+            try:
+                return Link.create(**l)
+            except IntegrityError as e:
+                log.debug(e) # skip duplicate links
 
 
 def delete_wiki_page(page):
+    """Deletes all the entries for a page"""
     with db.atomic():
-        page = Page.get(Page.name == page)
-        FTSPage.delete().where(FTSPage.page == page).execute()
-        Page.delete().where(Page.name == page).execute()
-        Link.delete().where(Link.page == page).execute()
+        try:
+            FTSPage.delete().where(FTSPage.page == page).execute()
+            Page.delete().where(Page.name == page).execute()
+            Link.delete().where(Link.page == page).execute()
+        except Exception as e:
+            log.warn(e)
 
 
 def index_wiki_page(**kwargs):
@@ -107,6 +110,7 @@ def index_wiki_page(**kwargs):
 
 
 def get_page_metadata(name):
+    """accessor for page metadata"""
     try:
         return Page.get(Page.name == name)._data
     except Exception as e:
@@ -115,7 +119,7 @@ def get_page_metadata(name):
 
 
 def get_links(page_name):
-    # Backlinks (links to current page)
+    """Backlinks (links to current page)"""
     try:
         query = (Page.select()
                     .join(Link, on=(Link.page == Page.name))
@@ -141,6 +145,7 @@ def get_links(page_name):
 
 
 def get_page_indexing_time(name):
+    """Check when a page was last indexed"""
     try:
         return Page.get(Page.name == name).idxtime
     except Exception as e:
@@ -148,6 +153,7 @@ def get_page_indexing_time(name):
 
 
 def get_last_update_time():
+    """Check when a page was last updated by the user"""
     query = (Page.select()
             .order_by(SQL('mtime').desc())
             .limit(1)
@@ -156,24 +162,40 @@ def get_last_update_time():
         return page["mtime"]
 
 
-def get_latest(limit=20, regexp=None):
+def get_latest(limit=20, since=None, regexp=None):
+    """Get the latest pages by modification time"""
     if regexp:
-        query = (Page.select()
-                .where(Page.name.regexp(regexp.pattern))
-                .order_by(SQL('mtime').desc())
-                .limit(limit)
-                .dicts())
+        if since:
+            query = (Page.select()
+                    .where(Page.name.regexp(regexp.pattern) and Page.mtime > since)
+                    .order_by(SQL('mtime').desc())
+                    .limit(limit)
+                    .dicts())
+        else:
+            query = (Page.select()
+                    .where(Page.name.regexp(regexp.pattern))
+                    .order_by(SQL('mtime').desc())
+                    .limit(limit)
+                    .dicts())
     else:
-        query = (Page.select()
-                .order_by(SQL('mtime').desc())
-                .limit(limit)
-                .dicts())
+        if since:
+            query = (Page.select()
+                    .where(Page.mtime > since)
+                    .order_by(SQL('mtime').desc())
+                    .limit(limit)
+                    .dicts())
+        else:
+            query = (Page.select()
+                    .order_by(SQL('mtime').desc())
+                    .limit(limit)
+                    .dicts())
 
     for page in query:
         yield page
 
 
 def get_all():
+    """Get ALL the pages"""
     query = (Page.select()
             .order_by(SQL('mtime').desc())
             .dicts())
@@ -183,6 +205,7 @@ def get_all():
 
 
 def search(qstring, limit=50):
+    """Full text search"""
     query = (FTSPage.select(Page,
                             FTSPage,
                             fn.snippet(FTSPage.as_entity()).alias('extract'),
@@ -204,49 +227,8 @@ def search(qstring, limit=50):
         }
 
 
-@db.func()
-def levenshtein(a,b):
-    """Computes the Levenshtein distance between a and b."""
-    n, m = len(a), len(b)
-    if n > m:
-        # Make sure n <= m, to use O(min(n,m)) space
-        a,b = b,a
-        n,m = m,n
-        
-    current = range(n+1)
-    for i in range(1,m+1):
-        previous, current = current, [i]+[0]*n
-        for j in range(1,n+1):
-            add, delete = previous[j]+1, current[j-1]+1
-            change = previous[j-1]
-            if a[j-1] != b[i-1]:
-                change = change + 1
-            current[j] = min(add, delete, change)
-    return current[n]
-
-
-@db.func()
-def close_match(a,b):
-    """Emulate difflib's get_close_matches"""
-    s = SequenceMatcher(a=a, b=b)
-    cutoff = 0.6
-    if s.real_quick_ratio() >= cutoff and \
-       s.quick_ratio() >= cutoff and \
-       s.ratio() >= cutoff:
-        return s.ratio()
-    return 0
-
-
-def get_closest_matches(name):
-    query = (Page.select()
-            .order_by(fn.close_match(name, Page.name).desc())
-            .dicts())
-
-    for page in query:
-        yield page
-
-
 def get_prev_by_name(name):
+    """Get the previous page by page name"""
     query = (Page.select(Page.name, Page.title)
             .where(Page.name < name)
             .order_by(Page.name.desc())
@@ -257,6 +239,7 @@ def get_prev_by_name(name):
 
 
 def get_next_by_name(name):
+    """Get the next page by page name"""
     query = (Page.select(Page.name, Page.title)
             .where(Page.name > name)
             .order_by(Page.name.asc())
@@ -267,6 +250,7 @@ def get_next_by_name(name):
 
 
 def get_prev_by_date(name, regexp):
+    """Get the previous page by page publishing date"""
     p = Page.get(Page.name == name)
     query = (Page.select(Page.name, Page.title)
             .where(Page.pubtime < p.pubtime)
@@ -277,6 +261,7 @@ def get_prev_by_date(name, regexp):
 
 
 def get_next_by_date(name, regexp):
+    """Get the next page by page publishing date"""
     p = Page.get(Page.name == name)
     query = (Page.select(Page.name, Page.title)
             .where(Page.pubtime > p.pubtime)
@@ -287,14 +272,20 @@ def get_next_by_date(name, regexp):
             
 
 def get_prev_next(name, regexp = None):
-    if regexp:
-        p, n = get_prev_by_date(name, regexp), get_next_by_date(name, regexp)
-    else:
-        p, n = get_prev_by_name(name), get_next_by_name(name)
-    return p, n
+    """Get the previous/next page depending on a pattern"""
+    try:
+        if regexp:
+            p, n = get_prev_by_date(name, regexp), get_next_by_date(name, regexp)
+        else:
+            p, n = get_prev_by_name(name), get_next_by_name(name)
+        return p, n
+    except Exception as e:
+        log.warn(e)
+        return None, None
 
 
 def get_table_stats():
+    """Database stats"""
     return {
         "pages": Page.select().count(),
         "links": Link.select().count(),

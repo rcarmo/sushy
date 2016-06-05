@@ -1,20 +1,20 @@
 (import
-    [sushy.config       [*base-filenames* *bind-address* *store-path* *timezone* *profiler*]]
     [cProfile           [Profile]]
     [datetime           [datetime timedelta]]
     [hashlib            [sha1]]
     [json               [dumps]]
     [logging            [getLogger Formatter]]
-    [sushy.models       [db add-wiki-link delete-wiki-page index-wiki-page init-db get-page-indexing-time]]
     [newrelic           [agent]]
     [os                 [environ]]
     [os.path            [basename dirname join]]
     [pstats             [Stats]]
+    [sushy.config       [*aliasing-chars* *base-filenames* *bind-address* *store-path* *timezone* *profiler*]]
+    [sushy.models       [db add-wiki-links delete-wiki-page index-wiki-page init-db get-page-indexing-time]]
     [sushy.render       [render-page]]
     [sushy.store        [is-page? gen-pages get-page]]
-    [time               [sleep time]]
     [sushy.transform    [apply-transforms count-images extract-internal-links extract-plaintext]]
-    [sushy.utils        [parse-naive-date strip-timezone utc-date]]
+    [sushy.utils        [parse-naive-date strip-timezone slug utc-date]]
+    [time               [sleep time]]
     [watchdog.observers [Observer]]
     [watchdog.events    [FileSystemEventHandler]])
 
@@ -26,7 +26,7 @@
     ; expand tags to be "tag:value", which enables us to search for tags using FTS
     (let [[tags (.split (.strip line) ",")]]
         (if (!= tags [""])
-            (.lower (.join ", " (list (map (fn [tag] (+ "tag:" (.strip tag))) tags))))
+            (.lower (.join ", " (sorted (list (set (map (fn [tag] (+ "tag:" (.strip tag))) tags))))))
             "")))
 
 
@@ -34,16 +34,27 @@
     (reduce (fn [x y] (or x y))
         (map (fn [header]
                 (if (and (in header headers)
-                         (in (.lower (get headers header)) ["off" "no"]))
+                         (in (.lower (get headers header)) ["off" "no" "false"]))
                     true
                     false))
             ["x-index" "index" "search"])
         false))
 
 
+(defn published? [headers]
+    (reduce (fn [x y] (and x y))
+        (map (fn [header]
+                (if (and (in header headers)
+                         (in (.lower (get headers header)) ["off" "no" "false"]))
+                    false
+                    true))
+            ["visible" "published"])
+        true))
+
+
 (defn gather-item-data [item]
     ; Takes a map with basic item info and builds all the required indexing data
-    (.info log (:path item))
+    (.debug log (:path item))
     (let [[pagename     (:path item)]
           [mtime        (:mtime item)]
           [mdate        (.fromtimestamp datetime (:mtime item))]
@@ -63,7 +74,7 @@
          "pubtime"  (strip-timezone (utc-date pubtime))
          "mtime"    (strip-timezone (utc-date (parse-naive-date (.get headers "last-modified") pubtime *timezone*)))
          "idxtime"  mtime
-         "readtime" (int (+ (* 12.0 image-count) (/ word-count 4.5)))
+         "readtime" (int (round (+ (* 12.0 image-count) (/ word-count 4.5))))
          "headers"  headers
          "links"    (list links)}))
 
@@ -72,13 +83,12 @@
     (try
         (let [[page    (.get item "name")]
               [headers (.get item "headers")]
-              [links   (.get item "links")]]
-
-            (for [link links]
-                (apply add-wiki-link []
-                    {"page" page
-                     "link" link}))
-            (apply index-wiki-page [] item))
+              [links   (map (fn [l] {"page" page "link" l}) (.get item "links"))]]
+            (if (published? headers)
+                (do
+                    (add-wiki-links links)
+                    (apply index-wiki-page [] item))
+                (delete-wiki-page page)))
         (catch [e Exception]
             (.warning log (% "%s:%s handling %s" (, (type e) e item))))))
 

@@ -10,10 +10,11 @@
     [itertools          [ifilter]]
     [hmac               [new :as new-hmac]]
     [logging            [getLogger]]
-    [PIL                [Image  ]]
+    [PIL                [Image ImageFilter]]  
     [pytz               [timezone]]
     [random             [sample]]
     [StringIO           [StringIO]]
+    [slugify            [slugify]]
     [time               [time]]
     [urllib             [quote :as uquote]]
     [urlparse           [urlsplit urlunparse]])
@@ -21,8 +22,6 @@
 (setv log (getLogger))
 
 (def *datetime-format* "%Y%m%dT%H:%M:%S.%f")
-
-(def *gmt-format* "%a, %d %b %Y %H:%M:%S GMT")
 
 (def *time-intervals*
     {"00:00-00:59" "late night"
@@ -104,7 +103,7 @@
     inner)
 
 
-(defn lru-cache [&optional [limit 100] [query-field nil]]
+(defn lru-cache [&optional [limit 64] [query-field nil]]
     ; LRU cache memoization decorator
     (defn inner [func]
         (setv cache (OrderedDict))
@@ -116,8 +115,8 @@
                     (setv result (.pop cache key))
                     (catch [e KeyError]
                         (setv result (apply func args kwargs))
-                (if (> (len cache) limit)
-                    (.popitem cache 0))))
+                     (if (> (len cache) limit)
+                         (.popitem cache 0))))
                 (setv (get cache key) result)
                 result))
         cached-fn)
@@ -167,13 +166,17 @@
                 (finally (if im (.close im)))))))
 
 
-(defn get-thumbnail [x y filename]
+(defn get-thumbnail [x y effect filename]
     (let [[im (.open Image filename)]
           [io (StringIO)]]
         (try
             (do
-                (.thumbnail im (, x y) (. Image *antialias*))
-                (apply .save [im io] {"format" "JPEG" "progressive" true "optimize" true "quality" (int 75)})
+                (.thumbnail im (, x y) (. Image *bicubic*))
+                (if (= effect "blur") 
+                    (setv im (.filter im (. ImageFilter GaussianBlur))))
+                (if (= effect "sharpen") 
+                    (setv im (.filter im (. ImageFilter UnsharpMask))))
+                (apply .save [im io] {"format" "JPEG" "progressive" true "optimize" true "quality" (int 80)})
                 (.getvalue io))
             (catch [e Exception]
                 (.warn log (, e x y filename))
@@ -181,15 +184,20 @@
             (finally (.close io)))))
 
 
+(defn slug (text)
+    ; create a URL slug from arbitrary text
+    (slugify text))
+    
+
 (defn sse-pack [data]
     ; pack data in SSE format
     (+ (.join "" 
               (map (fn [k] 
-                  (if (in k data)
-                      (% "%s: %s\n" (, k (get data k)))
-                      ""))
+                    (if (in k data)
+                        (% "%s: %s\n" (, k (get data k)))
+                        ""))
                   ["retry" "id" "event" "data"]))
-        "\n"))
+       "\n"))
 
 
 (defn utc-date [date &optional [tz *utc*]]
@@ -229,7 +237,7 @@
         (.get
             *time-intervals* 
             (.next (ifilter (fn [x] (let [[(, l u) (.split x "-")]] (and (<= l when) (<= when u)))) 
-                (sorted (.keys *time-intervals*))))
+                    (sorted (.keys *time-intervals*))))
             "sometime")))
 
             
