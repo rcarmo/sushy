@@ -1,11 +1,11 @@
 (import 
-    [config    [*aliasing-chars* *alias-page*]]
-    [models    [get-all]]
-    [os.path   [basename]]
-    [transform [get-mappings]]
-    [re        [compile match]]
-    [slugify   [slugify]]
-    [utils     [lru-cache memoize]])
+    [sushy.config [*aliasing-chars* *alias-page*]]
+    [sushy.models [get-all]]
+    [os.path      [basename]]
+    [transform    [get-mappings]]
+    [re           [compile match]]
+    [slugify      [slugify]]
+    [sushy.utils  [lru-cache memoize]])
 
 (def *digits-only* (compile "^([0-9]+)$"))
 

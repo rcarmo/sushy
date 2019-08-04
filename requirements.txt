@@ -1,7 +1,7 @@
 bottle>=0.12.9
 cssutils>=1.0.1
 docutils>=0.12
-hy==0.11.1
+hy>=0.17.0
 inlinestyler>=0.2.3
 ipython>=4.2.0
 lxml>=3.6.0
@@ -15,7 +15,7 @@ python-dateutil>=2.5.3
 pytz>=2016.4
 requests>=2.10.0
 smartypants>=1.8.6
-textile==2.2.2
+textile>=2.2.2
 watchdog>=0.8.3
 applicationinsights>=0.10.0
 python-slugify>=1.2.0

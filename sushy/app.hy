@@ -1,7 +1,6 @@
 (import
-    [bottle       [*debug* default-app run route view template]]
+    [bottle       [DEBUG :as *debug* default-app run route view template]]
     [sushy.config [*debug-mode* *bind-address* *http-port*]]
-    ;[gevent       [monkey]]
     [logging      [getLogger]]
     sushy.routes)
 

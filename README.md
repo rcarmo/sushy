@@ -1,5 +1,3 @@
-[![Stories in Ready](https://badge.waffle.io/rcarmo/sushy.png?label=ready&title=Ready)](https://waffle.io/rcarmo/sushy)
-
 # Sushy
 
 A wiki/blogging engine with a static file back-end. 
@@ -89,7 +87,7 @@ But there's no reason why this can't be easily modified to pre-render and save t
 
 ## Requirements
 
-Thanks to [Hy][hy], this should run just as well under Python 2 and Python 3. My target environment is 2.7.8/PyPy, though, so your mileage may vary. Check the `requirements.txt` file - I've taken pains to make sure dependencies are there _for a reason_ and not just because they're trendy.
+My target environment is 3.7.4. Check the `requirements.txt` file - I've taken pains to make sure dependencies are there _for a reason_ and not just because they're trendy.
 
 ---
 
@@ -143,7 +141,7 @@ THEME_PATH:        themes/blog
 
 ## Trying it out
 
-Make sure you have `libxml` and `libxslt` headers, as well as the JPEG library - the following is for Ubuntu 14.04:
+Make sure you have `libxml` and `libxslt` headers, as well as the JPEG library - the following is for Ubuntu 18.04:
 ```
 sudo apt-get install libxml2-dev libxslt1-dev libjpeg-dev
 # install dependencies

@@ -3,7 +3,6 @@ from bottle import hook
 import datetime
 from dateutil.relativedelta import relativedelta
 from difflib import SequenceMatcher
-from itertools import ifilter
 from peewee import *
 from playhouse.sqlite_ext import *
 from playhouse.kv import PickledKeyStore
@@ -256,7 +255,7 @@ def get_prev_by_date(name, regexp):
             .where(Page.pubtime < p.pubtime)
             .order_by(Page.pubtime.desc())
             .dicts())
-    for p in ifilter(lambda x: regexp.match(x['name']), query):
+    for p in filter(lambda x: regexp.match(x['name']), query):
         return p
 
 

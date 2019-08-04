@@ -1,5 +1,5 @@
 (import
-    [aliasing    [get-best-match]]
+    [sushy.aliasing  [get-best-match]]
     [applicationinsights [TelemetryClient]]
     [applicationinsights.exceptions [enable]]
     [bottle      [abort get :as handle-get hook http-date parse-date request redirect response static-file view :as render-view]]
