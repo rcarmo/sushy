@@ -5,7 +5,6 @@ from dateutil.relativedelta import relativedelta
 from difflib import SequenceMatcher
 from peewee import *
 from playhouse.sqlite_ext import *
-from playhouse.kv import PickledKeyStore
 from os.path import basename
 
 log = logging.getLogger(__name__)
@@ -14,8 +13,6 @@ log = logging.getLogger(__name__)
 # (handily beats Whoosh and makes for a single index file)
 
 db = SqliteExtDatabase(os.environ['DATABASE_PATH'], threadlocals=True)
-
-KVS = PickledKeyStore(ordered=True, database=db)
 
 class Page(Model):
     """Page information"""
