@@ -1,20 +1,20 @@
 ; Perform HTML transforms
 (import
     [cgi                 [escape]]
-    [config              [*alias-page* *asset-hash* *interwiki-page* *lazyload-images* *max-image-size* *min-image-size* *page-media-base* *page-route-base* *scaled-media-base* *signed-prefixes*]]
     [logging             [getLogger]]
     [lxml.etree          [ElementTree HTML fromstring tostring]]
-    [messages            [inline-message]]
     [os.path             [basename join normpath split]]
-    [plugins             [plugin-tagged plugin-quicklook plugin-rating]]
     [pygments            [highlight]]
     [pygments.lexers     [get-lexer-by-name]]
     [pygments.formatters [HtmlFormatter]]
-    [re                  [*ignorecase* sub]]
-    [store               [asset-exists? asset-path get-page page-exists? open-asset]]
-    [render              [render-page]]
-    [utils               [compute-hmac memoize get-image-size]]
-    [urlparse            [urlsplit]])
+    [re                  [IGNORECASE :as *ignorecase* sub]]
+    [urllib.parse        [urlsplit]] 
+    [sushy.config        [*alias-page* *asset-hash* *interwiki-page* *lazyload-images* *max-image-size* *min-image-size* *page-media-base* *page-route-base* *scaled-media-base* *signed-prefixes*]]
+    [sushy.messages      [inline-message]]
+    [sushy.plugins       [plugin-tagged plugin-quicklook plugin-rating]]
+    [sushy.render        [render-page]]
+    [sushy.store         [asset-exists? asset-path get-page page-exists? open-asset]] 
+    [sushy.utils         [compute-hmac memoize get-image-size]])
 
 (setv log (getLogger))
 
@@ -133,7 +133,7 @@
             (try
                 (let [[buffer (.read (open-asset pagename filename))]]
                     (setv tag.text buffer))
-                (catch [e Exception]
+                (except [e Exception]
                     (.replace (.getparent tag) tag
                         (fromstring (inline-message "error" (% "Could not open file '%s'" (basename filename)))))))))
     doc)

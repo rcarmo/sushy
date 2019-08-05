@@ -1,11 +1,11 @@
 ; Handle legacy Yaki plugin tags
 (import
-    [config     [*scaled-media-base*]]
-    [models     [search]]
-    [logging    [getLogger]]
-    [lxml.etree [fromstring tostring]]
-    [messages   [inline-message inline-table]]
-    [utils      [compute-hmac memoize get-image-size]])
+    [logging        [getLogger]]
+    [lxml.etree     [fromstring tostring]]
+    [sushy.config   [*scaled-media-base*]]
+    [sushy.messages [inline-message inline-table]]
+    [sushy.models   [search]]
+    [sushy.utils    [compute-hmac memoize get-image-size]])
 
 (setv log (getLogger))
 
@@ -18,7 +18,7 @@
                 (.replace (.getparent tag) tag
                     (fromstring (inline-table ["Page" "name" "Modified" "mtime"]
                                               (search (+ "tag:" tagname) -1))))
-                (catch [e Exception]
+                (except [e Exception]
                     (.replace (.getparent tag) tag
                         (fromstring (inline-message "error" (% "Could not list pages tagged with '%s'" tagname))))))))
     doc)

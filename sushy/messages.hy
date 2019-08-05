@@ -1,6 +1,6 @@
 (import 
-    [bottle [view :as render-template]]
-    [config [*page-route-base*]])
+    [bottle       [view :as render-template]]
+    [sushy.config [*page-route-base*]])
 
 (with-decorator (render-template "inline-message")
     (defn inline-message [level message]

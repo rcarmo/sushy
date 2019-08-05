@@ -89,7 +89,7 @@
                     (add-wiki-links links)
                     (apply index-wiki-page [] item))
                 (delete-wiki-page page)))
-        (catch [e Exception]
+        (except [e Exception]
             (.warning log (% "%s:%s handling %s" (, (type e) e item))))))
 
 
@@ -172,12 +172,12 @@
     (let [[observer (Observer)]
           [handler  (IndexingHandler)]]
         (.debug log (% "Preparing to watch %s" path))
-        (apply .schedule [observer handler path] {"recursive" true})
+        (.schedule observer #* [handler path] #** {"recursive" true})
         (.start observer)
         (try
             (while true
                 (sleep 1))
-            (catch [e KeyboardInterrupt]
+            (except [e KeyboardInterrupt]
                 (.stop observer)))
         (.join observer)))
 

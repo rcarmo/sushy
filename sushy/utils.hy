@@ -113,7 +113,7 @@
                   [key (compact-hash tag args kwargs)]]
                 (try
                     (setv result (.pop cache key))
-                    (catch [e KeyError]
+                    (except [e KeyError]
                         (setv result (apply func args kwargs))
                      (if (> (len cache) limit)
                          (.popitem cache 0))))
@@ -160,7 +160,7 @@
                     (let [[size (. im size)]]
                         (.close im)
                         size))
-                (catch [e Exception]
+                (except[e Exception]
                     (.warn log (, e filename))
                     nil)
                 (finally (if im (.close im)))))))
@@ -176,7 +176,7 @@
                     (setv im (.filter im (. ImageFilter GaussianBlur))))
                 (if (= effect "sharpen") 
                     (setv im (.filter im (. ImageFilter UnsharpMask))))
-                (apply .save [im io] {"format" "JPEG" "progressive" true "optimize" true "quality" (int 80)})
+                (.save im #* [io] #** {"format" "JPEG" "progressive" true "optimize" true "quality" (int 80)})
                 (.getvalue io))
             (catch [e Exception]
                 (.warn log (, e x y filename))

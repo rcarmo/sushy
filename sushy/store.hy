@@ -1,12 +1,12 @@
 ; Find, retrieve and parse raw page markup
 (import 
-    [codecs   [open]]
-    [config   [*base-filenames* *base-types* *ignored-folders* *store-path* *timezone*]]
-    [datetime [datetime]]
-    [logging  [getLogger]]
-    [os       [walk]]
-    [os.path  [join exists splitext getmtime]]
-    [utils    [utc-date]])
+    [codecs       [open]]
+    [datetime     [datetime]]
+    [logging      [getLogger]]
+    [os           [walk]]
+    [os.path      [join exists splitext getmtime]]
+    [sushy.config [*base-filenames* *base-types* *ignored-folders* *store-path* *timezone*]]
+    [sushy.utils  [utc-date]])
 
 (setv log (getLogger --name--))
 
@@ -45,7 +45,7 @@
                         (assoc headers "content-type" content-type))
                     {:headers headers
                      :body    body})
-                (catch [e Exception]
+                (except[e Exception]
                     (.error log (, e "Could not parse page"))
                     (throw (RuntimeError "Could not parse page")))))))
 
@@ -87,7 +87,7 @@
               [buffer       (.read handle)]]
             (.close handle)
             (parse-page buffer content-type))
-        (catch [e StopIteration]
+        (except [e StopIteration]
             (throw (IOError "page not found")))))
 
 

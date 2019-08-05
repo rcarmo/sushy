@@ -4,13 +4,13 @@
     [logging             [getLogger]]    
     [lxml.etree          [Element tostring fromstring]]
     [markdown            [Markdown]]
-    [models              [get-latest]]
     [nbformat            [reads]]
     [nbconvert           [HTMLExporter]]
     [smartypants         [smartypants]]
-    [store               [get-page]]
     [textile             [Textile]]
-    [time                [time]])
+    [time                [time]]
+    [sushy.models        [get-latest]]
+    [sushy.store         [get-page]])
 
 (setv log (getLogger))
 
