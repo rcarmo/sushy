@@ -1,17 +1,18 @@
 (import
-    [config             [*exclude-from-feeds* *feed-css* *feed-time-window* *feed-item-window*]]
     [cssutils           [log :as *cssutils-log*]]
     [datetime           [datetime]]
     [inlinestyler.utils [inline-css]]
     [logging            [getLogger Formatter *error*]]    
     [lxml.etree         [Element HTML fromstring tostring]]    
-    [models             [get-latest]]
     [os.path            [abspath]]
     [pytz               [*utc*]]
-    [render             [render-page]]
-    [store              [get-page]]
-    [transform          [apply-transforms inner-html prepend-asset-sources remove-preloads]]
-    [utils              [utc-date strip-timezone]])
+    [sushy.config       [*exclude-from-feeds* *feed-css* *feed-time-window* *feed-item-window*]]
+    [sushy.models       [get-latest]]
+    [sushy.render       [render-page]]
+    [sushy.store        [get-page]]
+    [sushy.transform    [apply-transforms inner-html prepend-asset-sources remove-preloads]]
+    [sushy.utils        [utc-date strip-timezone]])
+
 
 (setv log (getLogger --name--))
 
