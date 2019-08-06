@@ -10,7 +10,6 @@
 
 (setv log (getLogger --name--))
 
-
 (defn strip-seq [string-sequence]
     ; strip whitespace from a sequence of strings
     (map (fn [buffer] (.strip buffer)) string-sequence))
@@ -71,8 +70,8 @@
 (defn is-page? [path]
     ; test if a given path contains an index filename
     (if (len (list (filter (fn [item] (exists (join path item))) *base-filenames*)))
-        true
-        false))
+        True 
+        False))
 
 
 (defn get-page [pagename]
@@ -83,7 +82,7 @@
               [page         (.next (filter (fn [item] (exists (join path item))) *base-filenames*))]
               [filename     (join *store-path* pagename page)]
               [content-type (get *base-types* (get (splitext page) 1))]
-              [handle       (apply open [filename] {"mode" "r" "encoding" "utf-8"})]
+              [handle       (open filename #** {"mode" "r" "encoding" "utf-8"})]
               [buffer       (.read handle)]]
             (.close handle)
             (parse-page buffer content-type))

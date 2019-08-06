@@ -15,17 +15,17 @@
 (setv log (getLogger))
 
 ; instantiate markdown renderer upon module load
-(def markdown-renderer
-     (apply Markdown [] {"extensions" ["markdown.extensions.extra" 
-                                       "markdown.extensions.toc" 
-                                       "markdown.extensions.smarty" 
-                                       "markdown.extensions.codehilite" 
-                                       "markdown.extensions.meta" 
-                                       "markdown.extensions.sane_lists"]
-                         "extension_configs" {"markdown.extensions.codehilite" {"css_class" "highlight"}}}))
+(setv markdown-renderer
+     (Markdown #** {"extensions" ["markdown.extensions.extra" 
+                                  "markdown.extensions.toc" 
+                                  "markdown.extensions.smarty" 
+                                   "markdown.extensions.codehilite" 
+                                   "markdown.extensions.meta" 
+                                   "markdown.extensions.sane_lists"]
+                    "extension_configs" {"markdown.extensions.codehilite" {"css_class" "highlight"}}}))
 
-(def textile-renderer
-    (apply Textile [] {"html_type" "html5"}))
+(setv textile-renderer
+    (Textile #** {"html_type" "html5"}))
 
 
 (defn render-ipynb [raw]
@@ -55,10 +55,10 @@
                 
 
 (defn render-textile [raw]
-    (smartypants (apply textile-renderer.parse [raw] {}))) 
+    (smartypants (textile-renderer.parse raw))) 
 
 
-(def render-map 
+(setv render-map 
     {"text/plain"               render-plaintext
      "text/rst"                 render-restructured-text ; unofficial, but let's be lenient
      "text/x-rst"               render-restructured-text ; official
@@ -72,7 +72,7 @@
     
     
 (defn render-page [page]
-    (apply (get render-map (get (:headers page) "content-type")) [(:body page)] {}))
+    ((get render-map (get (:headers page) "content-type")) #* [(:body page)]))
 
 
 (defn sanitize-title [title]

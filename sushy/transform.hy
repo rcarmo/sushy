@@ -45,8 +45,8 @@
             result)))
 
 
-(def *interwiki-map* (get-mappings *interwiki-page*))
-(def *alias-map* (get-mappings *alias-page*))
+(setv *interwiki-map* (get-mappings *interwiki-page*))
+(setv *alias-map* (get-mappings *alias-page*))
 
 
 (defn expand-link-group [items]

@@ -152,4 +152,4 @@
                        "sushy.store"  {"level" "WARNING"}}
          "root"       {"level"    "DEBUG" 
                        "handlers" ["console"]}})
-    (apply basicConfig [] {"level" *info* "format" "%(asctime)s %(levelname)s:%(process)d:%(funcName)s %(message)s"}))
+    (basicConfig #** {"level" *info* "format" "%(asctime)s %(levelname)s:%(process)d:%(funcName)s %(message)s"}))
