@@ -99,7 +99,7 @@
           skipped-count 0]
         (for [item (gen-pages path)]
             (.debug log item)
-            (if (= 0 (% item-count *logging-modulo*))
+            (when (= 0 (% item-count *logging-modulo*))
                 (.info log f"indexing {item-count}"))
             (setv item-count (inc item-count))
             (.debug log (:path item))
@@ -133,37 +133,37 @@
      [on-created
         (fn [self event]
             (.debug log (% "creation of %s" event))
-            (let [[filename (basename (. event src-path))]
-                  [path     (dirname  (. event src-path))]]
-                (if (in filename *base-filenames*)
+            (let [filename (basename (. event src-path))
+                  path     (dirname  (. event src-path))]
+                (when (in filename *base-filenames*)
                     (.do-update self path))))]
 
      [on-deleted
         (fn [self event]
             (.debug log (% "deletion of %s" event))
-            (let [[filename (basename (. event src-path))]
-                  [path     (dirname  (. event src-path))]]
-                (if (in filename *base-filenames*)
+            (let [filename (basename (. event src-path))
+                  path     (dirname  (. event src-path))]
+                (when (in filename *base-filenames*)
                     (.do-delete self path))))]
 
      [on-modified
         (fn [self event]
             (.debug log (% "modification of %s" event))
-            (let [[filename (basename (. event src-path))]
-                  [path     (dirname  (. event src-path))]]
-                (if (in filename *base-filenames*)
+            (let [filename (basename (. event src-path))
+                  path     (dirname  (. event src-path))]
+                (when (in filename *base-filenames*)
                     (.do-update self path))))]
 
      [on-moved
         (fn [self event]
             (.debug log (% "renaming of %s" event))
-            (let [[srcfile (basename (. event src-path))]
-                  [srcpath (dirname  (. event src-path))]
-                  [dstfile (basename (. event dest-path))]
-                  [dstpath (dirname  (. event dest-path))]]
-                (if (in srcfile *base-filenames*)
+            (let [srcfile (basename (. event src-path))
+                  srcpath (dirname  (. event src-path))
+                  dstfile (basename (. event dest-path))
+                  dstpath (dirname  (. event dest-path))]
+                (when (in srcfile *base-filenames*)
                     (.do-delete self srcpath))
-                (if (in dstfile *base-filenames*)
+                (when (in dstfile *base-filenames*)
                     (.do-update self dstpath))))]])
 
 
@@ -194,7 +194,7 @@
           app-name (.get environ "NEW_RELIC_APP_NAME" "Sushy")]
         (setv (get environ "NEW_RELIC_APP_NAME") (+ app-name " - Indexer")) 
         (.initialize agent)
-        (if *profiler*
+        (when *profiler*
             (.enable p))
         (init-db)
         ; close database connection to remove contention
@@ -203,12 +203,10 @@
         
         (filesystem-walk *store-path*)
         (.info log "Indexing done in %fs" (- (time) start-time))
-        (if *profiler*
-            (do
-                (.disable p)
-                (.info log "dumping stats")
-                (.dump_stats (Stats p) "indexer.pstats")))
-        (if (in "watch" args)
-            (do
-                (.info log "Starting watcher...")
-                (observer *store-path*)))))
+        (when *profiler*
+            (.disable p)
+            (.info log "dumping stats")
+            (.dump_stats (Stats p) "indexer.pstats"))
+        (when (in "watch" args)
+            (.info log "Starting watcher...")
+            (observer *store-path*))))
