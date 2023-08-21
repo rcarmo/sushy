@@ -1,7 +1,7 @@
 bottle>=0.12.9
 cssutils>=1.0.1
 docutils>=0.12
-hy==0.11.1
+hy>=0.27.0
 inlinestyler>=0.2.3
 ipython>=4.2.0
 lxml>=3.6.0

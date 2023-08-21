@@ -1,22 +1,22 @@
 (import
-    [cProfile           [Profile]]
-    [datetime           [datetime timedelta]]
-    [hashlib            [sha1]]
-    [json               [dumps]]
-    [logging            [getLogger Formatter]]
-    [newrelic           [agent]]
-    [os                 [environ]]
-    [os.path            [basename dirname join]]
-    [pstats             [Stats]]
-    [sushy.config       [*aliasing-chars* *base-filenames* *bind-address* *store-path* *timezone* *profiler*]]
-    [sushy.models       [db add-wiki-links delete-wiki-page index-wiki-page init-db get-page-indexing-time]]
-    [sushy.render       [render-page]]
-    [sushy.store        [is-page? gen-pages get-page]]
-    [sushy.transform    [apply-transforms count-images extract-internal-links extract-plaintext]]
-    [sushy.utils        [parse-naive-date strip-timezone slug utc-date]]
-    [time               [sleep time]]
-    [watchdog.observers [Observer]]
-    [watchdog.events    [FileSystemEventHandler]])
+    cProfile           [Profile]
+    datetime           [datetime timedelta]
+    hashlib            [sha1]
+    json               [dumps]
+    logging            [getLogger Formatter]
+    newrelic           [agent]
+    os                 [environ]
+    os.path            [basename dirname join]
+    pstats             [Stats]
+    sushy.config       [*aliasing-chars* *base-filenames* *bind-address* *store-path* *timezone* *profiler*]
+    sushy.models       [db add-wiki-links delete-wiki-page index-wiki-page init-db get-page-indexing-time]
+    sushy.render       [render-page]
+    sushy.store        [is-page? gen-pages get-page]
+    sushy.transform    [apply-transforms count-images extract-internal-links extract-plaintext]
+    sushy.utils        [parse-naive-date strip-timezone slug utc-date]
+    time               [sleep time]
+    watchdog.observers [Observer]
+    watchdog.events    [FileSystemEventHandler])
 
 (setv log (getLogger --name--))
 
@@ -24,7 +24,7 @@
 
 (defn transform-tags [line]
     ; expand tags to be "tag:value", which enables us to search for tags using FTS
-    (let [[tags (.split (.strip line) ",")]]
+    (let [tags (.split (.strip line) ",")]
         (if (!= tags [""])
             (.lower (.join ", " (sorted (list (set (map (fn [tag] (+ "tag:" (.strip tag))) tags))))))
             "")))
@@ -55,17 +55,17 @@
 (defn gather-item-data [item]
     ; Takes a map with basic item info and builds all the required indexing data
     (.debug log (:path item))
-    (let [[pagename     (:path item)]
-          [mtime        (:mtime item)]
-          [mdate        (.fromtimestamp datetime (:mtime item))]
-          [page         (get-page pagename)]
-          [headers      (:headers page)]
-          [doc          (apply-transforms (render-page page) pagename)]
-          [plaintext    (extract-plaintext doc)]
-          [word-count   (len (.split plaintext))]
-          [image-count  (count-images doc)]
-          [links        (extract-internal-links doc)]
-          [pubtime      (parse-naive-date (.get headers "date") mdate *timezone*)]]
+    (let [pagename     (:path item)
+          mtime        (:mtime item)
+          mdate        (.fromtimestamp datetime (:mtime item))
+          page         (get-page pagename)
+          headers      (:headers page)
+          doc          (apply-transforms (render-page page) pagename)
+          plaintext    (extract-plaintext doc)
+          word-count   (len (.split plaintext))
+          image-count  (count-images doc)
+          links        (extract-internal-links doc)
+          pubtime      (parse-naive-date (.get headers "date") mdate *timezone*)]
         {"name"     pagename
          "body"     (if (hide-from-search? headers) "" plaintext)
          "hash"     (.hexdigest (sha1 (.encode plaintext "utf-8")))
@@ -81,9 +81,9 @@
 
 (defn index-one [item]
     (try
-        (let [[page    (.get item "name")]
-              [headers (.get item "headers")]
-              [links   (map (fn [l] {"page" page "link" l}) (.get item "links"))]]
+        (let [page    (.get item "name")
+              headers (.get item "headers")
+              links   (map (fn [l] {"page" page "link" l}) (.get item "links"))]
             (if (published? headers)
                 (do
                     (add-wiki-links links)
@@ -95,12 +95,12 @@
 
 (defn filesystem-walk [path &optional [suffix ""]]
     ; walk the filesystem and perform full-text and front matter indexing
-    (let [[item-count 0]
-          [skipped-count 0]]
+    (let [item-count    0
+          skipped-count 0]
         (for [item (gen-pages path)]
             (.debug log item)
             (if (= 0 (% item-count *logging-modulo*))
-                (.info log (% "indexing %d" item-count)))
+                (.info log f"indexing {item-count}"))
             (setv item-count (inc item-count))
             (.debug log (:path item))
             (setv idxtime (get-page-indexing-time (:path item)))
@@ -169,8 +169,8 @@
 
 (defn observer [path]
     ; file change observer setup
-    (let [[observer (Observer)]
-          [handler  (IndexingHandler)]]
+    (let [observer (Observer)
+          handler  (IndexingHandler)]
         (.debug log (% "Preparing to watch %s" path))
         (apply .schedule [observer handler path] {"recursive" true})
         (.start observer)
@@ -184,14 +184,14 @@
 
 (defn fast-start [n]
     ; TODO: fast start indexing by peeking at the past 3 months 
-    (let [[when (.now datetime)] [delta (apply timedelta [] {"weeks" -4})]]
+    (let [when (.now datetime) delta (apply timedelta [] {"weeks" -4})]
         (for [step (range 0 4)]
            (yield (.strftime (+ when (* step delta)) "%Y/%m")))))
 
 
 (defmain [&rest args]
-    (let [[p        (Profile)]
-          [app-name (.get environ "NEW_RELIC_APP_NAME" "Sushy")]]
+    (let [p        (Profile)
+          app-name (.get environ "NEW_RELIC_APP_NAME" "Sushy")]
         (setv (get environ "NEW_RELIC_APP_NAME") (+ app-name " - Indexer")) 
         (.initialize agent)
         (if *profiler*
