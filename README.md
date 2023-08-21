@@ -4,16 +4,17 @@
 
 A wiki/blogging engine with a static file back-end. 
 
-Demo site: <a href="http://taoofmac.com">http://taoofmac.com</a>.
+This was formerly the site engine for <a href="http://taoofmac.com">http://taoofmac.com</a>, with full-text indexing and multiple markup support. Deployable to [piku]/[Dokku-alt][da]/[Dokku][dokku]/[Heroku][heroku].
 
 ## Status
 
-Currently working out-of-the box, with full-text indexing and markup support already in place. Deployable _now_ to [piku]/[Dokku-alt][da]/[Dokku][dokku]/[Heroku][heroku].
+Currently being updated to support the 2023 version of Hylang.
 
 ### Roadmap
 
+* Fix all the various breaking syntax changes that the Hy project has gone through in the past few years
 * A little more documentation (there's never enough)
-* Blog archive
+* Blog archive and partial feature parity with the current `taoofmac.com` site engine
 * Docker deployment (currently deploying on [piku][piku] and [Dokku][dokku] using specific `Procfile`s)
 
 ### Done
