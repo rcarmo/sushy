@@ -148,20 +148,19 @@
     inner)
     
 
-(with-decorator (lru-cache)
-    (defn get-image-size [filename]
-        ; extract image size information from a given filename
-        (let [im None]
-            (try
-                (do
-                    (setv im (.open Image filename))
-                    (let [size (. im size)]
-                        (.close im)
-                        size))
-                (catch [e Exception]
-                    (.warn log (, e filename))
-                    None)
-                (finally (when im (.close im)))))))
+(defn [lru-cache] get-image-size [filename]
+    ; extract image size information from a given filename
+    (let [im None]
+        (try
+            (do
+                (setv im (.open Image filename))
+                (let [size (. im size)]
+                    (.close im)
+                    size))
+            (catch [e Exception]
+                (.warn log (, e filename))
+                None)
+            (finally (when im (.close im))))))
 
 
 (defn get-thumbnail [x y effect filename]
