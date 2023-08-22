@@ -8,7 +8,7 @@
     os.path  [join exists splitext getmtime]
     .utils   [utc-date])
 
-(setv log (getLogger --name--))
+(setv log (getLogger __name__))
 
 
 (defn strip-seq [string-sequence]
@@ -71,8 +71,8 @@
 (defn is-page? [path]
     ; test if a given path contains an index filename
     (if (len (list (filter (fn [item] (exists (join path item))) *base-filenames*)))
-        true
-        false))
+        True
+        False))
 
 
 (defn get-page [pagename]
