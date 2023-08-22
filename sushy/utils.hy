@@ -1,29 +1,27 @@
 (import
-    [collections        [OrderedDict]]
-    [base64             [urlsafe-b64encode]]
-    [bottle             [request response]]
-    [calendar           [timegm]]
-    [datetime           [datetime]]
-    [dateutil.parser    [parse :as parse-date]]
-    [functools          [wraps]]
-    [hashlib            [sha1]]
-    [itertools          [ifilter]]
-    [hmac               [new :as new-hmac]]
-    [logging            [getLogger]]
-    [PIL                [Image ImageFilter]]  
-    [pytz               [timezone]]
-    [random             [sample]]
-    [StringIO           [StringIO]]
-    [slugify            [slugify]]
-    [time               [time]]
-    [urllib             [quote :as uquote]]
-    [urlparse           [urlsplit urlunparse]])
+    collections        [OrderedDict]
+    base64             [urlsafe-b64encode]
+    bottle             [request response]
+    calendar           [timegm]
+    datetime           [datetime]
+    dateutil.parser    [parse :as parse-date]
+    functools          [wraps]
+    hashlib            [sha1]
+    hmac               [new :as new-hmac]
+    io                 [StringIO]
+    logging            [getLogger]
+    PIL                [Image ImageFilter]
+    pytz               [timezone]
+    random             [sample]
+    slugify            [slugify]
+    time               [time]
+    urllib.parse       [quote :as uquote urlsplit urlunparse])
 
 (setv log (getLogger))
 
-(def *datetime-format* "%Y%m%dT%H:%M:%S.%f")
+(setv *datetime-format* "%Y%m%dT%H:%M:%S.%f")
 
-(def *time-intervals*
+(setv *time-intervals*
     {"00:00-00:59" "late night"
      "01:00-04:59" "in the wee hours"
      "05:00-06:59" "at dawn"
@@ -38,7 +36,7 @@
      "21:30-22:29" "at night"
      "22:30-23:59" "late night"})
      
-(def *readable-intervals* 
+(setv *readable-intervals* 
     {31556926 "year"
      2592000 "month"
      604800 "week"
@@ -49,18 +47,18 @@
 (setv *utc* (timezone "UTC"))
 
 (defn base-url []
-    (let [[(, scheme netloc path query fragment) (urlsplit (. request url))]
-          [base                                  (urlunparse (, scheme netloc "" "" "" ""))]]
+    (let [#(scheme netloc path query fragment) (urlsplit (. request url))
+          base                                 (urlunparse (, scheme netloc "" "" "" ""))]
         base))
 
 ; hashing and HMAC helpers
 (defn compact-hash [&rest args]
-    (let [[hash (sha1 (str args))]]
+    (let [hash (sha1 (str args))]
         (urlsafe-b64encode (.digest hash))))
 
         
 (defn compute-hmac [key &rest args]
-    (let [[buffer (.join "" (map str args))]]
+    (let [buffer (.join "" (map str args))]
         (urlsafe-b64encode (.digest (new-hmac key buffer sha1)))))
 
 
@@ -69,8 +67,8 @@
     (defn inner [func]
         (defn trace-fn [&rest args &kwargs kwargs]
             (.debug log (, "trace ->" args kwargs))
-            (let [[result (apply func args kwargs)]]
-                (.debug log (, "trace <-" result))
+            (let [result (apply func args kwargs)]
+                (. debug log (, "trace <-" result))
                 result))
         trace-fn)
     inner)
@@ -80,8 +78,8 @@
     ; timing decorator
     (defn inner [func]
         (defn timed-fn [&rest args &kwargs kwargs]
-            (let [[start (time)]
-                  [result (apply func args kwargs)]]
+            (let [start (time)
+                  result (apply func args kwargs)]
                 (.set-header response (str "Processing-Time") (+ (str (int (* 1000 (- (time) start)))) "ms"))
                 result))
         timed-fn)
@@ -93,8 +91,8 @@
     (defn inner [func]
         (setv cache {})
         (defn memoized-fn [&rest args &kwargs kwargs]
-            (let [[result nil]
-                  [key (compact-hash args kwargs)]]
+            (let [result None
+                  key (compact-hash args kwargs)]
                 (if (in key cache)
                     (.get cache key)
                     (setv result (apply func args kwargs)))
@@ -103,19 +101,19 @@
     inner)
 
 
-(defn lru-cache [&optional [limit 64] [query-field nil]]
+(defn lru-cache [&optional [limit 64] [query-field None]]
     ; LRU cache memoization decorator
     (defn inner [func]
         (setv cache (OrderedDict))
         (defn cached-fn [&rest args &kwargs kwargs]
-            (let [[result nil]
-                  [tag (if query-field (get (. request query) query-field))]
-                  [key (compact-hash tag args kwargs)]]
+            (let [result None
+                  tag (when query-field (get (. request query) query-field))
+                  key (compact-hash tag args kwargs)]
                 (try
                     (setv result (.pop cache key))
                     (catch [e KeyError]
                         (setv result (apply func args kwargs))
-                     (if (> (len cache) limit)
+                    (when (> (len cache) limit)
                          (.popitem cache 0))))
                 (setv (get cache key) result)
                 result))
@@ -123,27 +121,27 @@
     inner)
 
 
-(defn ttl-cache [&optional [ttl 30] [query-field nil]]
+(defn ttl-cache [&optional [ttl 30] [query-field None]]
     ; memoization decorator with time-to-live
     (defn inner [func]
         (setv cache {})
         (defn cached-fn [&rest args &kwargs kwargs]
-            (let [[now      (time)]
-                  [tag      (if query-field (get (. request query) query-field))]
-                  [key      (compact-hash tag args kwargs)]
-                  [to-check (sample (.keys cache) (int (/ (len cache) 4)))]]
+            (let [now      (time)
+                  tag      (when query-field (get (. request query) query-field))
+                  key      (compact-hash tag args kwargs)
+                  to-check (sample (.keys cache) (int (/ (len cache) 4)))]
                 ; check current arguments and 25% of remaining keys 
                 (.append to-check key)
 
                 (for [k to-check]
-                    (let [[(, good-until value) (.get cache k (, now nil))]]
-                        (if (< good-until now)
+                    (let [#(good-until value) (get cache k #(now None))]
+                        (when (< good-until now)
                             (del (get cache k)))))
 
                 (if (in key cache)
-                    (let [[(, good-until value) (get cache key)]]
+                    (let [#(good-until value) (get cache key)]
                         value)
-                    (let [[value (apply func args kwargs)]]
+                    (let [value (apply func args kwargs)]
                         (assoc cache key (, (+ now ttl) value))
                         value))))
         cached-fn)
@@ -153,28 +151,28 @@
 (with-decorator (lru-cache)
     (defn get-image-size [filename]
         ; extract image size information from a given filename
-        (let [[im nil]]
+        (let [im None]
             (try
                 (do
                     (setv im (.open Image filename))
-                    (let [[size (. im size)]]
+                    (let [size (. im size)]
                         (.close im)
                         size))
                 (catch [e Exception]
                     (.warn log (, e filename))
-                    nil)
-                (finally (if im (.close im)))))))
+                    None)
+                (finally (when im (.close im)))))))
 
 
 (defn get-thumbnail [x y effect filename]
-    (let [[im (.open Image filename)]
-          [io (StringIO)]]
+    (let [im (.open Image filename)
+          io (StringIO)]
         (try
             (do
                 (.thumbnail im (, x y) (. Image *bicubic*))
-                (if (= effect "blur") 
+                (when (= effect "blur") 
                     (setv im (.filter im (. ImageFilter GaussianBlur))))
-                (if (= effect "sharpen") 
+                (when (= effect "sharpen") 
                     (setv im (.filter im (. ImageFilter UnsharpMask))))
                 (apply .save [im io] {"format" "JPEG" "progressive" true "optimize" true "quality" (int 80)})
                 (.getvalue io))
@@ -184,7 +182,7 @@
             (finally (.close io)))))
 
 
-(defn slug (text)
+(defn slug [text]
     ; create a URL slug from arbitrary text
     (slugify text))
     
@@ -208,17 +206,17 @@
 
 
 (defn strip-timezone [date]
-    (apply .replace [date] {"tzinfo" nil}))
+    (apply .replace [date] {"tzinfo" None}))
 
 
 (defn parse-naive-date [string fallback &optional [tz *utc*]]
     ; parse a date string and return a UTC date
     (if string
-        (let [[date (try
-                        (parse-date string)
-                        (catch [e Exception]
-                            (.warning log (% "Could not parse %s" string))
-                            fallback))]]
+        (let [date (try
+                       (parse-date string)
+                       (catch [e Exception]
+                           (.warning log (% "Could not parse %s" string))
+                           fallback))]
             (utc-date date tz))
         fallback))
 
@@ -233,41 +231,41 @@
 
 (defn fuzzy-time [date]
     ; describes a date as a time of day
-    (let [[when (.strftime date "%H:%M")]]
+    (let [when (.strftime date "%H:%M")]
         (.get
             *time-intervals* 
-            (.next (ifilter (fn [x] (let [[(, l u) (.split x "-")]] (and (<= l when) (<= when u)))) 
+            (.next (filter (fn [x] (let [#(l u) (.split x "-")] (and (<= l when) (<= when u)))) 
                     (sorted (.keys *time-intervals*))))
             "sometime")))
 
             
-(defn time-chunks [begin-interval &optional [end-interval nil]]
+(defn time-chunks [begin-interval &optional [end-interval None]]
     ; breaks down a time interval into a sequence of time chunks 
-    (let [[chunks   (apply sorted [(.keys *readable-intervals*)] {"reverse" true})]
-          [the-end  (if end-interval end-interval (datetime.now))]
-          [interval (- (timegm (.timetuple the-end)) (timegm (.timetuple begin-interval)))]
-          [values []]]
+    (let [chunks   (apply sorted [(.keys *readable-intervals*)] {"reverse" true})
+          the-end  (if end-interval end-interval (datetime.now))
+          interval (- (timegm (.timetuple the-end)) (timegm (.timetuple begin-interval)))
+          values []]
         (for [i chunks]
-            (setv (, d r) (divmod interval i))
+            (setv #(d r) (divmod interval i))
             (.append values (, (int d) (.get *readable-intervals* i)))
             (setv interval r))
         (filter (fn [x] (pos? (get x 0))) values)))
 
 
 (defn string-plurals [chunk]
-    (let [[(, v s) chunk]]
+    (let [#(v s) chunk]
         (.join " " (map str (, v (if (> v 1) (+ s "s") s))))))
 
 
-(defn time-since [begin-interval &optional [end-interval nil]]
-    (let [[chunks (list (map string-plurals (time-chunks begin-interval end-interval)))]]
+(defn time-since [begin-interval &optional [end-interval None]]
+    (let [chunks (list (map string-plurals (time-chunks begin-interval end-interval)))]
         (if (not (len (list chunks)))
             "sometime"
             (.join ", " (take 2 chunks)))))
         
 
 (defmacro timeit [block iterations]
-    `(let [[t (time)]]
+    `(let [t (time)]
         (for [i (range ~iterations)]
             ~block)
         (print ~iterations (- (time) t))))

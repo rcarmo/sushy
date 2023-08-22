@@ -3,10 +3,8 @@ from bottle import hook
 import datetime
 from dateutil.relativedelta import relativedelta
 from difflib import SequenceMatcher
-from itertools import ifilter
 from peewee import *
 from playhouse.sqlite_ext import *
-from playhouse.kv import PickledKeyStore
 from os.path import basename
 
 log = logging.getLogger(__name__)
@@ -15,8 +13,6 @@ log = logging.getLogger(__name__)
 # (handily beats Whoosh and makes for a single index file)
 
 db = SqliteExtDatabase(os.environ['DATABASE_PATH'], threadlocals=True)
-
-KVS = PickledKeyStore(ordered=True, database=db)
 
 class Page(Model):
     """Page information"""
@@ -256,7 +252,7 @@ def get_prev_by_date(name, regexp):
             .where(Page.pubtime < p.pubtime)
             .order_by(Page.pubtime.desc())
             .dicts())
-    for p in ifilter(lambda x: regexp.match(x['name']), query):
+    for p in filter(lambda x: regexp.match(x['name']), query):
         return p
 
 
@@ -267,7 +263,7 @@ def get_next_by_date(name, regexp):
             .where(Page.pubtime > p.pubtime)
             .order_by(Page.pubtime.asc())
             .dicts())
-    for p in ifilter(lambda x: regexp.match(x['name']), query):
+    for p in filter(lambda x: regexp.match(x['name']), query):
         return p
             
 

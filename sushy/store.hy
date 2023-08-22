@@ -1,12 +1,12 @@
 ; Find, retrieve and parse raw page markup
 (import 
-    [codecs   [open]]
-    [config   [*base-filenames* *base-types* *ignored-folders* *store-path* *timezone*]]
-    [datetime [datetime]]
-    [logging  [getLogger]]
-    [os       [walk]]
-    [os.path  [join exists splitext getmtime]]
-    [utils    [utc-date]])
+    codecs   [open]
+    .config  [*base-filenames* *base-types* *ignored-folders* *store-path* *timezone*]
+    datetime [datetime]
+    logging  [getLogger]
+    os       [walk]
+    os.path  [join exists splitext getmtime]
+    .utils   [utc-date])
 
 (setv log (getLogger --name--))
 
@@ -20,7 +20,7 @@
     ; parse a header line from front matter
     (if (.startswith "---" string) ; handle Jekyll-style front matter delimiters
        ["jekyll" "true"]
-       (let [[parts (list (strip-seq (.split string ":" 1)))]]
+       (let [parts (list (strip-seq (.split string ":" 1)))]
           [(.lower (get parts 0)) (get parts 1)])))
             
 
@@ -32,16 +32,16 @@
                    "title" "Untitled Notebook"
                    "content-type" content-type}
          :body    buffer}
-        (let [[unix-buffer (.replace buffer "\r\n" "\n")]]
+        (let [unix-buffer (.replace buffer "\r\n" "\n")]
             (try 
-                (let [[delimiter    "\n\n"]
-                      [parts        (.split unix-buffer delimiter 1)]
-                      [header-lines (.splitlines (get parts 0))]
-                      [headers      (dict (map split-header-line header-lines))]
-                      [body         (.strip (get parts 1))]]
-                    (if (not (in "from" headers))
+                (let [delimiter    "\n\n"
+                      parts        (.split unix-buffer delimiter 1)
+                      header-lines (.splitlines (get parts 0))
+                      headers      (dict (map split-header-line header-lines))
+                      body         (.strip (get parts 1))]
+                    (when (not (in "from" headers))
                         (assoc headers "from" "Unknown Author"))
-                    (if (not (in "content-type" headers))
+                    (when (not (in "content-type" headers))
                         (assoc headers "content-type" content-type))
                     {:headers headers
                      :body    body})
@@ -60,7 +60,7 @@
 
 (defn open-asset [pagename asset]
     ; open a page asset/attachment
-    (let [[filename (asset-path pagename asset)]]
+    (let [filename (asset-path pagename asset)]
         (open filename "rb")))
 
 
@@ -79,12 +79,12 @@
     ; return the raw data for a page 
     (.debug log (join *store-path* pagename))
     (try
-        (let [[path         (join *store-path* pagename)]
-              [page         (.next (filter (fn [item] (exists (join path item))) *base-filenames*))]
-              [filename     (join *store-path* pagename page)]
-              [content-type (get *base-types* (get (splitext page) 1))]
-              [handle       (apply open [filename] {"mode" "r" "encoding" "utf-8"})]
-              [buffer       (.read handle)]]
+        (let [path         (join *store-path* pagename)
+              page         (.next (filter (fn [item] (exists (join path item))) *base-filenames*))
+              filename     (join *store-path* pagename page)
+              content-type (get *base-types* (get (splitext page) 1))
+              handle       (apply open [filename] {"mode" "r" "encoding" "utf-8"})
+              buffer       (.read handle)]
             (.close handle)
             (parse-page buffer content-type))
         (catch [e StopIteration]
@@ -98,7 +98,7 @@
 
 (defn scan-pages [root-path]
     ; gather all existing pages
-    (let [[pages {}]]
+    (let [pages {}]
         (reduce
             (fn [item]
                 (assoc pages (:path item) item))
@@ -108,7 +108,7 @@
 
 (defn walk-folders [root-path]
     ; generate a sequence of folder data
-    (for [(, folder subfolders files) (walk root-path)]
+    (for [#(folder subfolders files) (walk root-path)]
         ; setting this helps guide os.walk()
         (setv subfolders (filtered-names subfolders))        
         (yield {:path folder
@@ -119,7 +119,7 @@
     ; takes a sequence of folders and returns page info
     (for [folder folder-seq]
         (for [base *base-filenames*]
-            (if (in base (:files folder))
+            (when (in base (:files folder))
                 (yield
                     {:path     (slice (:path folder) (+ 1 (len root-path)))
                      :filename base

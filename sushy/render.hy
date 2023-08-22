@@ -1,16 +1,17 @@
 (import
-    [docutils.core       [publish-parts]]
-    [json                [loads]]
-    [logging             [getLogger]]    
-    [lxml.etree          [Element tostring fromstring]]
-    [markdown            [Markdown]]
-    [models              [get-latest]]
-    [nbformat            [reads]]
-    [nbconvert           [HTMLExporter]]
-    [smartypants         [smartypants]]
-    [store               [get-page]]
-    [textile             [Textile]]
-    [time                [time]])
+ ; docutils.core       [publish-parts]
+    .models             [get-latest]
+    .store              [get-page]
+    json                [loads]
+    logging             [getLogger]
+    lxml.etree          [Element tostring fromstring]
+    markdown            [Markdown]
+    nbformat            [reads]
+    nbconvert           [HTMLExporter]
+    re                  [sub]
+    smartypants         [smartypants]
+    textile             [Textile]
+    time                [time])
 
 (setv log (getLogger))
 
@@ -29,13 +30,13 @@
 
 
 (defn render-ipynb [raw]
-    (let [[exporter (HTMLExporter)]]
+    (let [exporter (HTMLExporter)]
         (setv (. exporter template-file) "basic")
         (get (.from-notebook-node exporter (reads raw 4)) 0)))
 
 
 (defn render-html [raw]
-    (let [[res (.strip raw)]]
+    (let [res (.strip raw)]
         (if (len res)
             res 
             "<body></body>")))
@@ -45,8 +46,8 @@
     (% "<pre>\n%s</pre>" raw))
 
     
-(defn render-restructured-text [raw]
-    (get (apply publish-parts [raw] {"writer_name" "html"}) "html_body"))
+;(defn render-restructured-text [raw]
+;    (get (apply publish-parts [raw] {"writer_name" "html"}) "html_body"))
     
 
 (defn render-markdown [raw]
@@ -76,4 +77,4 @@
 
 
 (defn sanitize-title [title]
-    (re.sub "[\W+]" "-" (.lower title)))
+    (sub "[\\W+]" "-" (.lower title)))
