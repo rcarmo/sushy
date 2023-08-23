@@ -1,5 +1,6 @@
-import os, re, sys, logging
+import re, sys, logging
 from bottle import hook
+from os import environ
 import datetime
 from dateutil.relativedelta import relativedelta
 from difflib import SequenceMatcher
@@ -12,7 +13,7 @@ log = logging.getLogger(__name__)
 # Database models for metadata caching and full text indexing using SQLite3 
 # (handily beats Whoosh and makes for a single index file)
 
-db = SqliteExtDatabase(os.environ['DATABASE_PATH'], threadlocals=True)
+db = SqliteExtDatabase(environ['DATABASE_PATH'])
 
 class Page(Model):
     """Page information"""

@@ -114,48 +114,41 @@
 
 (defclass IndexingHandler [FileSystemEventHandler]
     ; handle file notifications
-    [[__init__
-        (fn [self]
-            (.debug log "preparing to listen for filesystem events"))]
+    (defn __init__ [self]
+            (.debug log "preparing to listen for filesystem events"))
 
-     [do-update
-        (fn [self path]
+     (defn do-update [self path]
             (.info log (% "updating %s" path))
             (index-one (gather-item-data
                         {:path  (slice path (+ 1 (len *store-path*)))
-                         :mtime (int (time))})))]
+                         :mtime (int (time))})))
 
-     [do-delete
-        (fn [self path]
+     (defn do-delete [self path]
             (.debug log (% "deleting %s" path))
-            (delete-wiki-page (slice path (+ 1 (len *store-path*)))))]
+            (delete-wiki-page (slice path (+ 1 (len *store-path*)))))
 
-     [on-created
-        (fn [self event]
+     (defn on-created [self event]
             (.debug log (% "creation of %s" event))
             (let [filename (basename (. event src-path))
                   path     (dirname  (. event src-path))]
                 (when (in filename *base-filenames*)
-                    (.do-update self path))))]
+                    (.do-update self path))))
 
-     [on-deleted
-        (fn [self event]
+     (defn on-deleted [self event]
             (.debug log (% "deletion of %s" event))
             (let [filename (basename (. event src-path))
                   path     (dirname  (. event src-path))]
                 (when (in filename *base-filenames*)
-                    (.do-delete self path))))]
+                    (.do-delete self path))))
 
-     [on-modified
-        (fn [self event]
+     (defn on-modified [self event]
             (.debug log (% "modification of %s" event))
             (let [filename (basename (. event src-path))
                   path     (dirname  (. event src-path))]
                 (when (in filename *base-filenames*)
-                    (.do-update self path))))]
+                    (.do-update self path))))
 
-     [on-moved
-        (fn [self event]
+     (defn on-moved [self event]
             (.debug log (% "renaming of %s" event))
             (let [srcfile (basename (. event src-path))
                   srcpath (dirname  (. event src-path))
@@ -164,7 +157,7 @@
                 (when (in srcfile *base-filenames*)
                     (.do-delete self srcpath))
                 (when (in dstfile *base-filenames*)
-                    (.do-update self dstpath))))]])
+                    (.do-update self dstpath)))))
 
 
 (defn observer [path]
@@ -172,7 +165,7 @@
     (let [observer (Observer)
           handler  (IndexingHandler)]
         (.debug log (% "Preparing to watch %s" path))
-        (apply .schedule [observer handler path] {"recursive" true})
+        (.schedule [observer handler path] :recursive True)
         (.start observer)
         (try
             (while true
