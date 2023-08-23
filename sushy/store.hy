@@ -1,4 +1,5 @@
 ; Find, retrieve and parse raw page markup
+
 (import 
     codecs   [open]
     .config  [*base-filenames* *base-types* *ignored-folders* *store-path* *timezone*]
@@ -7,6 +8,10 @@
     os       [walk]
     os.path  [join exists splitext getmtime]
     .utils   [utc-date])
+
+(require hyrule.argmove [->])
+(require hyrule.collections [assoc])
+
 
 (setv log (getLogger __name__))
 
@@ -24,7 +29,7 @@
           [(.lower (get parts 0)) (get parts 1)])))
             
 
-(defn parse-page [buffer &optional [content-type "text/plain"]]
+(defn parse-page [buffer [content-type "text/plain"]]
     ; parse a page and return a header map and the raw markup
     (.debug log buffer)
     (if (= content-type "application/x-ipynb+json")
@@ -111,8 +116,8 @@
     (for [#(folder subfolders files) (walk root-path)]
         ; setting this helps guide os.walk()
         (setv subfolders (filtered-names subfolders))        
-        (yield {:path folder
-                :files files})))
+        (yield {"path" folder
+                "files" files})))
 
 
 (defn with-index [folder-seq root-path]
@@ -121,9 +126,9 @@
         (for [base *base-filenames*]
             (when (in base (:files folder))
                 (yield
-                    {:path     (slice (:path folder) (+ 1 (len root-path)))
-                     :filename base
-                     :mtime    (int (getmtime (join (:path folder) base)))})))))
+                    {"path"     (slice (:path folder) (+ 1 (len root-path)))
+                     "filename" base
+                     "mtime"    (int (getmtime (join (:path folder) base)))})))))
 
 
 (defn gen-pages [root-path]

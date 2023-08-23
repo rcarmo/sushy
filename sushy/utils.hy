@@ -101,7 +101,7 @@
     inner)
 
 
-(defn lru-cache [&optional [limit 64] [query-field None]]
+(defn lru-cache [[limit 64] [query-field None]]
     ; LRU cache memoization decorator
     (defn inner [func]
         (setv cache (OrderedDict))
@@ -121,7 +121,7 @@
     inner)
 
 
-(defn ttl-cache [&optional [ttl 30] [query-field None]]
+(defn ttl-cache [[ttl 30] [query-field None]]
     ; memoization decorator with time-to-live
     (defn inner [func]
         (setv cache {})
@@ -197,7 +197,7 @@
        "\n"))
 
 
-(defn utc-date [date &optional [tz *utc*]]
+(defn utc-date [date [tz *utc*]]
     ; convert naive (or not) dates into UTC
     (if (. date tzinfo)
         (.astimezone date *utc*)
@@ -208,7 +208,7 @@
     (apply .replace [date] {"tzinfo" None}))
 
 
-(defn parse-naive-date [string fallback &optional [tz *utc*]]
+(defn parse-naive-date [string fallback [tz *utc*]]
     ; parse a date string and return a UTC date
     (if string
         (let [date (try
@@ -238,7 +238,7 @@
             "sometime")))
 
             
-(defn time-chunks [begin-interval &optional [end-interval None]]
+(defn time-chunks [begin-interval [end-interval None]]
     ; breaks down a time interval into a sequence of time chunks 
     (let [chunks   (apply sorted [(.keys *readable-intervals*)] {"reverse" true})
           the-end  (if end-interval end-interval (datetime.now))
@@ -256,7 +256,7 @@
         (.join " " (map str (, v (if (> v 1) (+ s "s") s))))))
 
 
-(defn time-since [begin-interval &optional [end-interval None]]
+(defn time-since [begin-interval [end-interval None]]
     (let [chunks (list (map string-plurals (time-chunks begin-interval end-interval)))]
         (if (not (len (list chunks)))
             "sometime"

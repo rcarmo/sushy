@@ -27,7 +27,7 @@
         (filter (fn [x] (not (.match *exclude-from-feeds* (.get x "name")))) (apply get-latest [] {"since" time-window "limit" *feed-item-window*}))))
 
 
-(defn render-feed-items [&optional [prefix ""]]
+(defn render-feed-items [[prefix ""]]
     ; go through each item and replace inline styles
     (let [[items []]]
         (for [item (filtered-latest)]

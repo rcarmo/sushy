@@ -93,7 +93,7 @@
             (.warning log (% "%s:%s handling %s" (, (type e) e item))))))
 
 
-(defn filesystem-walk [path &optional [suffix ""]]
+(defn filesystem-walk [path [suffix ""]]
     ; walk the filesystem and perform full-text and front matter indexing
     (let [item-count    0
           skipped-count 0]
@@ -101,14 +101,14 @@
             (.debug log item)
             (when (= 0 (% item-count *logging-modulo*))
                 (.info log f"indexing {item-count}"))
-            (setv item-count (inc item-count))
+            (setv item-count (+ 1 item-count))
             (.debug log (:path item))
             (setv idxtime (get-page-indexing-time (:path item)))
             (if (not idxtime)
                 (index-one (gather-item-data item))
                 (if (> (:mtime item) idxtime)
                     (index-one (gather-item-data item))
-                    (setv skipped-count (inc skipped-count)))))
+                    (setv skipped-count (+ 1 skipped-count)))))
         (.info log (% "exiting filesystem walker: %d indexed, %d skipped" (, item-count skipped-count)))))
 
 
@@ -120,8 +120,8 @@
      (defn do-update [self path]
             (.info log (% "updating %s" path))
             (index-one (gather-item-data
-                        {:path  (slice path (+ 1 (len *store-path*)))
-                         :mtime (int (time))})))
+                        {"path"  (slice path (+ 1 (len *store-path*)))
+                         "mtime" (int (time))})))
 
      (defn do-delete [self path]
             (.debug log (% "deleting %s" path))

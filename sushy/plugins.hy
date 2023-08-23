@@ -36,7 +36,7 @@
 
 (defn plugin-quicklook
     ; searches for `plugin` tags named `quicklook` and generates a rendering request for a 2x image
-    [doc pagename &optional [x 320] [y 240]]
+    [doc pagename [x 320] [y 240]]
     (for [tag (.xpath doc "//plugin[contains(@name,'quicklook')]")]
         (let [src  (get tag.attrib "src")
               path (.join "/" [pagename src])]
