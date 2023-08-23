@@ -28,10 +28,10 @@
     ; parse a page and return a header map and the raw markup
     (.debug log buffer)
     (if (= content-type "application/x-ipynb+json")
-        {:headers {"from" "Unknown Author"
+        {"headers" {"from" "Unknown Author"
                    "title" "Untitled Notebook"
                    "content-type" content-type}
-         :body    buffer}
+         "body"   buffer}
         (let [unix-buffer (.replace buffer "\r\n" "\n")]
             (try 
                 (let [delimiter    "\n\n"
@@ -43,11 +43,11 @@
                         (assoc headers "from" "Unknown Author"))
                     (when (not (in "content-type" headers))
                         (assoc headers "content-type" content-type))
-                    {:headers headers
-                     :body    body})
-                (catch [e Exception]
+                    {"headers" headers
+                     "body"    body})
+                (except [e Exception]
                     (.error log (, e "Could not parse page"))
-                    (throw (RuntimeError "Could not parse page")))))))
+                    (raise (RuntimeError "Could not parse page")))))))
 
 
 (defn asset-path [pagename asset]
@@ -80,15 +80,15 @@
     (.debug log (join *store-path* pagename))
     (try
         (let [path         (join *store-path* pagename)
-              page         (.next (filter (fn [item] (exists (join path item))) *base-filenames*))
+              page         (next (filter (fn [item] (exists (join path item))) *base-filenames*))
               filename     (join *store-path* pagename page)
               content-type (get *base-types* (get (splitext page) 1))
-              handle       (apply open [filename] {"mode" "r" "encoding" "utf-8"})
+              handle       (open filename :mode "r" :encoding "utf-8")
               buffer       (.read handle)]
             (.close handle)
             (parse-page buffer content-type))
-        (catch [e StopIteration]
-            (throw (IOError "page not found")))))
+        (except [e StopIteration]
+            (raise (IOError "page not found")))))
 
 
 (defn filtered-names [folder-list]

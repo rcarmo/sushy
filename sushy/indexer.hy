@@ -18,9 +18,9 @@
     watchdog.observers [Observer]
     watchdog.events    [FileSystemEventHandler])
 
-(setv log (getLogger --name--))
+(setv log (getLogger __name__))
 
-(def *logging-modulo* 100)
+(setv *logging-modulo* 100)
 
 (defn transform-tags [line]
     ; expand tags to be "tag:value", which enables us to search for tags using FTS
@@ -114,7 +114,7 @@
 
 (defclass IndexingHandler [FileSystemEventHandler]
     ; handle file notifications
-    [[--init--
+    [[__init__
         (fn [self]
             (.debug log "preparing to listen for filesystem events"))]
 

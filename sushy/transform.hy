@@ -30,7 +30,7 @@
                       pairs (map (fn [x] (.split x)) lines)]
                     (for [pair pairs]
                         (when (= 2 (len pair))
-                            (assoc mappings (.lower (get pair 0)) (get pair 1))))))
+                            (setv (get mappings (.lower (get pair 0))) (get pair 1))))))
             mappings)))
 
 
@@ -80,7 +80,7 @@
                 (let [key (.get tag.attrib "id" "_")
                       lines (.splitlines tag.text)
                       items (map (fn [x] (.split x)) lines)]
-                    (assoc mappings key (expand-link-group items))))                                
+                    (setv (get mappings key) (expand-link-group items))))                                
          mappings)))
 
 
@@ -92,11 +92,11 @@
         (let [href (get a.attrib "href")
               schema (get (.split href ":" 1) 0)]
             (when (= (get href 0) "#")
-                (assoc a.attrib "href" (+ (join *page-route-base* pagename) href))
+                (setv (get a.attrib "href") (+ (join *page-route-base* pagename) href))
                 (if (= href schema)
-                    (assoc a.attrib "href" (join *page-route-base* href))
+                    (setv (get a.attrib "href") (join *page-route-base* href))
                     (when (= "cid" schema)
-                        (assoc a.attrib "href" (join *page-media-base* pagename (.replace href (+ schema ":") ""))))))))
+                        (setv (get a.attrib "href") (join *page-media-base* pagename (.replace href (+ schema ":") ""))))))))
     doc)
 
 
@@ -109,8 +109,8 @@
               schema (.lower (get parts 0))]
             (when (and (in schema *interwiki-map*) (> (len parts) 1))
                 (if (in "%s" (get *interwiki-map* schema))
-                    (assoc a.attrib "href" (% (get *interwiki-map* schema) (get parts 1)))
-                    (assoc a.attrib "href" (sub (+ schema ":") (get *interwiki-map* schema) href 1 *ignorecase*))))))
+                    (setv (get a.attrib "href") (% (get *interwiki-map* schema) (get parts 1)))
+                    (setv (get a.attrib "href") (sub (+ schema ":") (get *interwiki-map* schema) href 1 *ignorecase*))))))
     doc)    
 
 
@@ -121,7 +121,7 @@
          (let [href (.lower (get a.attrib "href"))]
              (while (in href *alias-map*)
                  (setv href (get *alias-map* href))
-                 (assoc a.attrib "href" href))))
+                 (setv (get a.attrib "href") href))))
     doc)
 
 
@@ -162,7 +162,7 @@
     ; prepend a prefix to image 'src' attributes, for feed generation
     [doc prefix]
     (for [tag (.xpath doc "//img[@src]")]
-        (assoc (. tag attrib) "src" (+ prefix (get (. tag attrib) "src"))))
+        (setv (get (. tag attrib) "src") (+ prefix (get (. tag attrib) "src"))))
     doc)
 
 
@@ -170,9 +170,9 @@
     ; Serve best possible preloaded assets to feed readers
     [doc]
     (for [tag (.xpath doc "//img[@data-src]")]
-        (assoc (. tag attrib) "src" (get (. tag attrib) "data-src")))
+        (setv (get (. tag attrib) "src") (get (. tag attrib) "data-src")))
     (for [tag (.xpath doc "//img[@data-src-retina]")]
-        (assoc (. tag attrib) "src" (get (. tag attrib) "data-src-retina")))
+        (setv (get (. tag attrib) "src") (get (. tag attrib) "data-src-retina")))
     doc)
 
 
@@ -192,14 +192,14 @@
                         (let [size (get-image-size (asset-path pagename src))]
                             (if size
                                 (do
-                                    (assoc (. tag attrib) "width" (str (get size 0)))
-                                    (assoc (. tag attrib) "height" (str (get size 1))))
+                                    (setv (get (. tag attrib) "width") (str (get size 0)))
+                                    (setv (get (. tag attrib) "height") (str (get size 1))))
                                 (.replace (.getparent tag) tag
                                     (fromstring (inline-message "error" (% "Could not read size from '%s'" src)))))))
                     (.replace (.getparent tag) tag
                         (fromstring (inline-message "error" (% "Could not find image '%s'" src))))))
             (when (not (= "data" schema)) 
-                (assoc (. tag attrib) "src" (join *page-media-base* pagename src)))))
+                (setv (get (. tag attrib) "src") (join *page-media-base* pagename src)))))
     doc)
 
 
@@ -226,13 +226,20 @@
                               new-src         (% "%s/%d,%d,blur%s" (, *scaled-media-base* min-width min-height base-src))
                               data-src        (% "%s/%d,%d%s" (, *scaled-media-base* new-width new-height base-src))
                               data-src-retina (if-not retina src retina)]
-                            (assoc (. tag attrib) "height" (str new-height) "width" (str new-width) "class" new-cls "src" new-src "data-src" data-src "data-src-retina" data-src-retina))
+                            (setv (get (. tag attrib) "height") (str new-height))
+                            (setv (get (. tag attrib) "width") (str new-width))
+                            (setv (get (. tag attrib) "class") new-cls)
+                            (setv (get (. tag attrib) "src") new-src)
+                            (setv (get (. tag attrib) "data-src") data-src)
+                            (setv (get (. tag attrib) "data-src-retina") data-src-retina))
                         (let [min-width       (max *min-image-size* (/ width 4))
                               min-height      (max *min-image-size* (/ height 4))
                               new-cls         (if-not (in "lazyload" cls) (+ cls " lazyload") cls)
                               new-src         (% "%s/%d,%d,blur%s" (, *scaled-media-base* min-width min-height base-src))
                               data-src        src]
-                            (assoc (. tag attrib) "class" new-cls "src" new-src "data-src" data-src)))))))
+                            (setv (get (. tag attrib) "class") new-cls)
+                            (setv (get (. tag attrib) "src") new-src)
+                            (setv (get (. tag attrib) "data-src") data-src)))))))
     doc)
 
 
@@ -273,7 +280,7 @@
     (for [tag (.xpath doc ".//p")]
         (when (len (.strip (tostring tag :method "text" :encoding "unicode")))
             (do
-                (assoc (. tag attrib) "class" "lead")
+                (setv (get (. tag attrib) "class") "lead")
                 (break))))
     doc)
 
@@ -303,14 +310,14 @@
                       schema           (get (urlsplit src) 0)]
                     (when (not (= "data" schema))
                         (when (in prefix *signed-prefixes*)
-                            (assoc tag.attrib attrib-name (+ prefix "/" (compute-hmac *asset-hash* prefix path) path)))))
+                            (setv (get tag.attrib attrib-name) (+ prefix "/" (compute-hmac *asset-hash* prefix path) path)))))
                 (except [e ValueError]))))
     (for [tag (.xpath doc "//a[@href]")]
         (try
             (let [href             (get (. tag attrib) "href")
                   #(_ prefix path) (map (fn [p] (+ "/" p)) (.split href "/" 2))]
                 (when (in prefix *signed-prefixes*)
-                    (assoc tag.attrib "href" (+ prefix "/" (compute-hmac *asset-hash* prefix path) path))))
+                    (setv (get tag.attrib "href") (+ prefix "/" (compute-hmac *asset-hash* prefix path) path))))
             (except [e ValueError])))
     doc)
 

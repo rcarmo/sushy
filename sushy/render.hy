@@ -56,7 +56,7 @@
                 
 
 (defn render-textile [raw]
-    (smartypants (apply textile-renderer.parse [raw] {}))) 
+    (smartypants (textile-renderer.parse raw))) 
 
 
 (setv render-map 
@@ -73,7 +73,8 @@
     
     
 (defn render-page [page]
-    (apply (get render-map (get (:headers page) "content-type")) [(:body page)] {}))
+    (.warn log (:headers page))
+    ((get render-map (get (:headers page) "content-type")) (:body page)))
 
 
 (defn sanitize-title [title]
