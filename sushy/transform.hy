@@ -16,6 +16,8 @@
     re                  [IGNORECASE :as *ignorecase* sub]
     urllib.parse        [urlsplit])
 
+(require hyrule.argmove [->])
+
 (setv log (getLogger))
 
 (defn get-mappings

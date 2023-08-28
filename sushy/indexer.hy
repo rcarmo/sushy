@@ -120,12 +120,12 @@
      (defn do-update [self path]
             (.info log (% "updating %s" path))
             (index-one (gather-item-data
-                        {"path"  (slice path (+ 1 (len *store-path*)))
+                        {"path"  (get path (slice (+ 1 (len *store-path*)) None))
                          "mtime" (int (time))})))
 
      (defn do-delete [self path]
             (.debug log (% "deleting %s" path))
-            (delete-wiki-page (slice path (+ 1 (len *store-path*)))))
+            (delete-wiki-page (get path (slice (+ 1 (len *store-path*) None)))))
 
      (defn on-created [self event]
             (.debug log (% "creation of %s" event))

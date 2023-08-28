@@ -93,7 +93,7 @@
             (.close handle)
             (parse-page buffer content-type))
         (except [e StopIteration]
-            (raise (IOError "page not found")))))
+            (raise (IOError f"page not found {pagename}")))))
 
 
 (defn filtered-names [folder-list]
@@ -126,7 +126,7 @@
         (for [base *base-filenames*]
             (when (in base (:files folder))
                 (yield
-                    {"path"     (slice (:path folder) (+ 1 (len root-path)))
+                    {"path"     (get (:path folder) (slice (+ 1 (len root-path)) None))
                      "filename" base
                      "mtime"    (int (getmtime (join (:path folder) base)))})))))
 
