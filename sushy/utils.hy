@@ -52,12 +52,12 @@
         base))
 
 ; hashing and HMAC helpers
-(defn compact-hash [&rest args]
-    (let [hash (sha1 (str args))]
+(defn compact-hash [#* args]
+    (let [hash (sha1 (.encode (str args) "utf-8"))]
         (urlsafe-b64encode (.digest hash))))
 
         
-(defn compute-hmac [key &rest args]
+(defn compute-hmac [key #* args]
     (let [buffer (.join "" (map str args))]
         (urlsafe-b64encode (.digest (new-hmac key buffer sha1)))))
 
@@ -65,9 +65,10 @@
 (defn trace-flow []
     ; dump arguments and data to the debug log
     (defn inner [func]
-        (defn trace-fn [&rest args &kwargs kwargs]
+        (defn trace-fn [#* args #** kwargs]
             (.debug log (, "trace ->" args kwargs))
-            (let [result (apply func args kwargs)]
+            ; TODO: decide how to replace this apply
+            (let [result (func args kwargs)]
                 (. debug log (, "trace <-" result))
                 result))
         trace-fn)
@@ -77,9 +78,10 @@
 (defn report-processing-time []
     ; timing decorator
     (defn inner [func]
-        (defn timed-fn [&rest args &kwargs kwargs]
+        (defn timed-fn [#* args #** kwargs]
             (let [start (time)
-                  result (apply func args kwargs)]
+                  ; TODO: decide how to replace this apply
+                  result (func args kwargs)]
                 (.set-header response (str "Processing-Time") (+ (str (int (* 1000 (- (time) start)))) "ms"))
                 result))
         timed-fn)
@@ -90,12 +92,12 @@
     ; memoization decorator
     (defn inner [func]
         (setv cache {})
-        (defn memoized-fn [&rest args &kwargs kwargs]
+        (defn memoized-fn [#* args #** kwargs]
             (let [result None
                   key (compact-hash args kwargs)]
                 (if (in key cache)
                     (.get cache key)
-                    (setv result (apply func args kwargs)))
+                    (setv result (func args kwargs)))
                 (.setdefault cache key result)))
        memoized-fn)
     inner)
@@ -105,14 +107,14 @@
     ; LRU cache memoization decorator
     (defn inner [func]
         (setv cache (OrderedDict))
-        (defn cached-fn [&rest args &kwargs kwargs]
+        (defn cached-fn [#* args #** kwargs]
             (let [result None
                   tag (when query-field (get (. request query) query-field))
                   key (compact-hash tag args kwargs)]
                 (try
                     (setv result (.pop cache key))
                     (except [e KeyError]
-                        (setv result (apply func args kwargs))
+                        (setv result (func args kwargs))
                     (when (> (len cache) limit)
                          (.popitem cache 0))))
                 (setv (get cache key) result)
@@ -125,7 +127,7 @@
     ; memoization decorator with time-to-live
     (defn inner [func]
         (setv cache {})
-        (defn cached-fn [&rest args &kwargs kwargs]
+        (defn cached-fn [#* args #** kwargs]
             (let [now      (time)
                   tag      (when query-field (get (. request query) query-field))
                   key      (compact-hash tag args kwargs)
@@ -141,14 +143,14 @@
                 (if (in key cache)
                     (let [#(good-until value) (get cache key)]
                         value)
-                    (let [value (apply func args kwargs)]
+                    (let [value (func args kwargs)]
                         (assoc cache key (, (+ now ttl) value))
                         value))))
         cached-fn)
     inner)
     
 
-(defn [lru-cache] get-image-size [filename]
+(defn [(lru-cache)] get-image-size [filename]
     ; extract image size information from a given filename
     (let [im None]
         (try
@@ -205,7 +207,7 @@
 
 
 (defn strip-timezone [date]
-    (apply .replace [date] {"tzinfo" None}))
+    (.replace date :tzinfo None))
 
 
 (defn parse-naive-date [string fallback [tz *utc*]]
@@ -240,7 +242,7 @@
             
 (defn time-chunks [begin-interval [end-interval None]]
     ; breaks down a time interval into a sequence of time chunks 
-    (let [chunks   (apply sorted [(.keys *readable-intervals*)] {"reverse" true})
+    (let [chunks   (sorted (.keys *readable-intervals*) :reverse True)
           the-end  (if end-interval end-interval (datetime.now))
           interval (- (timegm (.timetuple the-end)) (timegm (.timetuple begin-interval)))
           values []]

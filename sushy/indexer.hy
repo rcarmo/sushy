@@ -88,10 +88,10 @@
             (if (published? headers)
                 (do
                     (add-wiki-links links)
-                    (apply index-wiki-page [] item))
+                    (index-wiki-page item))
                 (delete-wiki-page page)))
         (except [e Exception]
-            (.warning log (% "%s:%s handling %s" (, (type e) e item))))))
+            (.warning log f"{(type e)}:{e} handling {item}"))))
 
 
 (defn filesystem-walk [path [suffix ""]]
@@ -178,7 +178,7 @@
 
 (defn fast-start [n]
     ; TODO: fast start indexing by peeking at the past 3 months 
-    (let [when (.now datetime) delta (apply timedelta [] {"weeks" -4})]
+    (let [when (.now datetime) delta (timedelta :weeks -4)]
         (for [step (range 0 4)]
            (yield (.strftime (+ when (* step delta)) "%Y/%m")))))
 

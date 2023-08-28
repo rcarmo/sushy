@@ -191,9 +191,12 @@
                     ; ...but nobody bothered to specify the size
                     (when (not (in "width" (. tag attrib)))
                         ; ...get it from the image file
-                        (let [size (get-image-size (asset-path pagename src))]
+                        (let [size (get-image-size (asset-path pagename src))
+                              accessor (. tag attrib)]
                             (if size
                                 (do
+                                    (.warn log size)
+                                    (.warn log accessor)
                                     (setv (get (. tag attrib) "width") (str (get size 0)))
                                     (setv (get (. tag attrib) "height") (str (get size 1))))
                                 (.replace (.getparent tag) tag
