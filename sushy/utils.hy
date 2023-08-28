@@ -103,11 +103,11 @@
     inner)
 
 
-(defn lru-cache [[limit 64] [query-field None]]
+(defn lru-cache [func [limit 64] [query-field None]]
     ; LRU cache memoization decorator
-    (defn inner [func]
-        (setv cache (OrderedDict))
-        (defn cached-fn [#* args #** kwargs]
+    (setv cache (OrderedDict))
+    ((wraps func)
+         (fn [#* args #** kwargs]
             (let [result None
                   tag (when query-field (get (. request query) query-field))
                   key (compact-hash tag args kwargs)]
@@ -118,9 +118,7 @@
                     (when (> (len cache) limit)
                          (.popitem cache 0))))
                 (setv (get cache key) result)
-                result))
-        cached-fn)
-    inner)
+                result))))
 
 
 (defn ttl-cache [[ttl 30] [query-field None]]
@@ -150,7 +148,7 @@
     inner)
     
 
-(defn [(lru-cache)] get-image-size [filename]
+(defn [lru-cache] get-image-size [filename]
     ; extract image size information from a given filename
     (let [im None]
         (try
