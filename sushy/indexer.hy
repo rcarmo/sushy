@@ -1,6 +1,7 @@
 (import
     cProfile           [Profile]
     datetime           [datetime timedelta]
+    functools          [reduce]
     hashlib            [sha1]
     json               [dumps]
     logging            [getLogger Formatter]
@@ -35,10 +36,10 @@
         (map (fn [header]
                 (if (and (in header headers)
                          (in (.lower (get headers header)) ["off" "no" "false"]))
-                    true
-                    false))
+                    True
+                    False))
             ["x-index" "index" "search"])
-        false))
+        False))
 
 
 (defn published? [headers]
@@ -46,10 +47,10 @@
         (map (fn [header]
                 (if (and (in header headers)
                          (in (.lower (get headers header)) ["off" "no" "false"]))
-                    false
-                    true))
+                    False
+                    True))
             ["visible" "published"])
-        true))
+        True))
 
 
 (defn gather-item-data [item]
@@ -89,7 +90,7 @@
                     (add-wiki-links links)
                     (apply index-wiki-page [] item))
                 (delete-wiki-page page)))
-        (catch [e Exception]
+        (except [e Exception]
             (.warning log (% "%s:%s handling %s" (, (type e) e item))))))
 
 

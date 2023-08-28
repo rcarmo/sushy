@@ -111,7 +111,7 @@
                   key (compact-hash tag args kwargs)]
                 (try
                     (setv result (.pop cache key))
-                    (catch [e KeyError]
+                    (except [e KeyError]
                         (setv result (apply func args kwargs))
                     (when (> (len cache) limit)
                          (.popitem cache 0))))
@@ -157,7 +157,7 @@
                 (let [size (. im size)]
                     (.close im)
                     size))
-            (catch [e Exception]
+            (except [e Exception]
                 (.warn log (, e filename))
                 None)
             (finally (when im (.close im))))))
@@ -175,7 +175,7 @@
                     (setv im (.filter im (. ImageFilter UnsharpMask))))
                 (apply .save [im io] {"format" "JPEG" "progressive" true "optimize" true "quality" (int 80)})
                 (.getvalue io))
-            (catch [e Exception]
+            (except [e Exception]
                 (.warn log (, e x y filename))
                 "")
             (finally (.close io)))))
@@ -213,7 +213,7 @@
     (if string
         (let [date (try
                        (parse-date string)
-                       (catch [e Exception]
+                       (except [e Exception]
                            (.warning log (% "Could not parse %s" string))
                            fallback))]
             (utc-date date tz))
