@@ -12,38 +12,36 @@ Currently being updated to support the 2023 version of Hylang.
 
 ### Roadmap
 
-* Fix all the various breaking syntax changes that the Hy project has gone through in the past few years
-* A little more documentation (there's never enough)
-* Blog archive and partial feature parity with the current `taoofmac.com` site engine
-* Docker deployment (currently deploying on [piku][piku] and [Dokku][dokku] using specific `Procfile`s)
-
-### Done
-
-* Page aliasing (i.e., multiple URLs for a page)
-* Image thumbnailing
-* Friendlier search results
-* More CSS tweaks
-* Atom feeds
-* [piku][piku] deployment
-* Blog homepage/prev-next navigation
-* Preliminary support for rendering IPython notebooks
-* <strike>Closest-match URLs (i.e., fix typos)</strike> (removed for performance concerns on large sites)
-* HTTP caching (`Etag`, `Last-Modified`, `HEAD` support, etc.)
-* Sitemap
-* OpenSearch support (search directly from the omnibar on some browsers)
-* CSS inlining for Atom feeds
-* `multiprocessing`-based indexer (in `feature/multiprocessing`, disabled for ease of profiling)
-* SSE (Server-Sent Events) support (in `feature/server-events`) for notifying visitors a page has changed 
-* [New Relic][nr] Support
-* Internal link tracking (`SeeAlso` functionality, as seen on [Yaki][y])
-* Multiple theme support (only the one theme for now)
-* Automatic insertion of image sizes in `img` tags
-* Deployable under [Dokku-alt][da]
-* Run under [uWSGI][uwsgi] using `gevent` workers
-* Full-text indexing and search
-* Syntax highlighting for inline code samples
-* [Ink][ink]-based site layout and templates (replaced by a new layout in the `feature/blog` branch)
-* Baseline markup rendering (Textile, Markdown and ReST)
+* [ ] Fix all the various breaking syntax changes that the Hy project has gone through in the past few years
+* [ ] A little more documentation (there's never enough)
+* [ ] Blog archive and partial feature parity with the current `taoofmac.com` site engine
+* [ ] Working decorators and HTTP serving with the 2023 versions of Hy
+* [x] Working indexing with the 2023 versions of Hy
+* [x] Page aliasing (i.e., multiple URLs for a page)
+* [x] Image thumbnailing
+* [x] Friendlier search results
+* [x] More CSS tweaks
+* [x] Atom feeds
+* [x] [piku][piku] deployment
+* [x] Blog homepage/prev-next navigation
+* [x] Preliminary support for rendering IPython notebooks
+* [x] <strike>Closest-match URLs (i.e., fix typos)</strike> (removed for performance concerns on large sites)
+* [x] HTTP caching (`Etag`, `Last-Modified`, `HEAD` support, etc.)
+* [x] Sitemap
+* [x] OpenSearch support (search directly from the omnibar on some browsers)
+* [x] CSS inlining for Atom feeds
+* [x] `multiprocessing`-based indexer (in `feature/multiprocessing`, disabled for ease of profiling)
+* [x] SSE (Server-Sent Events) support (in `feature/server-events`) for notifying visitors a page has changed 
+* [x] [New Relic][nr] Support
+* [x] Internal link tracking (`SeeAlso` functionality, as seen on [Yaki][y])
+* [x] Multiple theme support (only the one theme for now)
+* [x] Automatic insertion of image sizes in `img` tags
+* [x] Deployable under [Dokku-alt][da]
+* [x] Run under [uWSGI][uwsgi] using `gevent` workers
+* [x] Full-text indexing and search
+* [x] Syntax highlighting for inline code samples
+* [x] [Ink][ink]-based site layout and templates (replaced by a new layout in the `feature/blog` branch)
+* [x] Baseline markup rendering (Textile, Markdown and ReST)
 
 ### Stuff that will never happen:
 
@@ -62,7 +60,7 @@ Currently being updated to support the 2023 version of Hylang.
 
 ### Markup Support
 
-Sushy supports plaintext, HTML and Textile for legacy reasons, and Markdown as its preferred format. ReStructured Text is also supported, but since I don't use it for anything (and find it rather a pain to read, let alone write), I can't make any guarantees as to its reliability. Work is ongoing for supporting Jupyter notebooks (which have no metadata/frontmatter conventions).
+Sushy supports plaintext, HTML and Textile for legacy reasons, and Markdown as its preferred format. <strike>ReStructured Text is also supported, but since I don't use it for anything (and find it rather a pain to read, let alone write), I can't make any guarantees as to its reliability. Work is ongoing for supporting Jupyter notebooks (which have no metadata/frontmatter conventions).</strike>
 
 All markup formats MUST be preceded by "front matter" handled like RFC2822 headers (see the `pages` folder for examples and test cases). Sushy uses the file extension to determine a suitable renderer, but that can be overriden if you specify a `Content-Type` header (see `config.hy` for the mappings).
 
