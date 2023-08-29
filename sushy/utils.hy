@@ -158,7 +158,7 @@
                     (.close im)
                     size))
             (except [e Exception]
-                (.warn log (, e filename))
+                (.warn log f"{e} {filename}")
                 None)
             (finally (when im (.close im))))))
 

@@ -63,7 +63,7 @@
     {"text/plain"               render-plaintext
 ;     "text/rst"                 render-restructured-text ; unofficial, but let's be lenient
 ;     "text/x-rst"               render-restructured-text ; official
-     "application/x-ipynb+json" render-ipynb
+;     "application/x-ipynb+json" render-ipynb
      "text/x-web-markdown"      render-markdown
      "text/x-markdown"          render-markdown
      "text/markdown"            render-markdown

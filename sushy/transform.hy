@@ -135,7 +135,7 @@
             (try
                 (let [buffer (.read (open-asset pagename filename))]
                     (setv tag.text buffer))
-                (catch [e Exception]
+                (except [e Exception]
                     (.replace (.getparent tag) tag
                         (fromstring (inline-message "error" (% "Could not open file '%s'" (basename filename)))))))))
     doc)
