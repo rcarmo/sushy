@@ -19,6 +19,8 @@
     watchdog.observers [Observer]
     watchdog.events    [FileSystemEventHandler])
 
+(require hyrule [defmain])
+
 (setv log (getLogger __name__))
 
 (setv *logging-modulo* 100)
@@ -110,47 +112,47 @@
                 (if (> (:mtime item) idxtime)
                     (index-one (gather-item-data item))
                     (setv skipped-count (+ 1 skipped-count)))))
-        (.info log (% "exiting filesystem walker: %d indexed, %d skipped" (, item-count skipped-count)))))
+        (.info log f"exiting filesystem walker: {item-count} indexed, {skipped-count} skipped")))
 
 
 (defclass IndexingHandler [FileSystemEventHandler]
     ; handle file notifications
-    (defn __init__ [self]
+     (defn __init__ [self]
             (.debug log "preparing to listen for filesystem events"))
 
      (defn do-update [self path]
-            (.info log (% "updating %s" path))
+            (.info log f"updating {path}")
             (index-one (gather-item-data
                         {"path"  (get path (slice (+ 1 (len *store-path*)) None))
                          "mtime" (int (time))})))
 
      (defn do-delete [self path]
-            (.debug log (% "deleting %s" path))
+            (.debug log  f"deleting {path}")
             (delete-wiki-page (get path (slice (+ 1 (len *store-path*) None)))))
 
      (defn on-created [self event]
-            (.debug log (% "creation of %s" event))
+            (.debug log f"creation of {event}")
             (let [filename (basename (. event src-path))
                   path     (dirname  (. event src-path))]
                 (when (in filename *base-filenames*)
                     (.do-update self path))))
 
      (defn on-deleted [self event]
-            (.debug log (% "deletion of %s" event))
+            (.debug log f"deletion of {event}")
             (let [filename (basename (. event src-path))
                   path     (dirname  (. event src-path))]
                 (when (in filename *base-filenames*)
                     (.do-delete self path))))
 
      (defn on-modified [self event]
-            (.debug log (% "modification of %s" event))
+            (.debug log f"modification of {event}")
             (let [filename (basename (. event src-path))
                   path     (dirname  (. event src-path))]
                 (when (in filename *base-filenames*)
                     (.do-update self path))))
 
      (defn on-moved [self event]
-            (.debug log (% "renaming of %s" event))
+            (.debug log f"renaming of {event}")
             (let [srcfile (basename (. event src-path))
                   srcpath (dirname  (. event src-path))
                   dstfile (basename (. event dest-path))
@@ -165,7 +167,7 @@
     ; file change observer setup
     (let [observer (Observer)
           handler  (IndexingHandler)]
-        (.debug log (% "Preparing to watch %s" path))
+        (.debug log f"Preparing to watch {path}")
         (.schedule [observer handler path] :recursive True)
         (.start observer)
         (try
@@ -183,7 +185,7 @@
            (yield (.strftime (+ when (* step delta)) "%Y/%m")))))
 
 
-(defmain [&rest args]
+(defmain [#* args]
     (let [p        (Profile)
           app-name (.get environ "NEW_RELIC_APP_NAME" "Sushy")]
         (setv (get environ "NEW_RELIC_APP_NAME") (+ app-name " - Indexer")) 
@@ -196,7 +198,7 @@
         (setv start-time (time))
         
         (filesystem-walk *store-path*)
-        (.info log "Indexing done in %fs" (- (time) start-time))
+        (.info log f"Indexing done in {(- (time) start-time)}s")
         (when *profiler*
             (.disable p)
             (.info log "dumping stats")

@@ -146,7 +146,7 @@
     [doc]
     (for [tag (.xpath doc "//pre[@syntax]")]
         (let [syntax (get tag.attrib "syntax")
-              lexer  (apply get-lexer-by-name [syntax] {"stripall" true})
+              lexer  (get-lexer-by-name syntax :stripall True)
               formatter (HtmlFormatter :cssclass "highlight")]
             (when tag.text
                 (.replace (.getparent tag) tag
