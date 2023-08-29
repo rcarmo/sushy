@@ -5,7 +5,7 @@
     calendar           [timegm]
     datetime           [datetime]
     dateutil.parser    [parse :as parse-date]
-    functools          [wraps]
+    functools          [wraps cache lru-cache]
     hashlib            [sha1]
     hmac               [new :as new-hmac]
     io                 [StringIO]
@@ -58,8 +58,8 @@
 
         
 (defn compute-hmac [key #* args]
-    (let [buffer (.join "" (map str args))]
-        (urlsafe-b64encode (.digest (new-hmac key buffer sha1)))))
+    (let [buffer (.encode (.join "" (map str args)) "utf-8")]
+        (str (urlsafe-b64encode (.digest (new-hmac (bytes (.encode key "utf-8")) buffer sha1))))))
 
 
 (defn trace-flow []
@@ -103,7 +103,7 @@
     inner)
 
 
-(defn lru-cache [func [limit 64] [query-field None]]
+(defn my-lru-cache [func [limit 64] [query-field None]]
     ; LRU cache memoization decorator
     (setv cache (OrderedDict))
     ((wraps func)

@@ -275,7 +275,7 @@
     [doc]
     (list (set (map
                 (fn [tag]
-                    (slice (get tag.attrib "href") (+ 1 (len *page-route-base*))))
+                    (get (get tag.attrib "href") (slice (+ 1 (len *page-route-base*)) None)))
                 (.xpath doc (+ "//a[starts-with(@href,'" *page-route-base* "')]"))))))
 
 
