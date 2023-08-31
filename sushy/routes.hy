@@ -1,27 +1,24 @@
 (import
-    [aliasing    [get-best-match]]
-    [applicationinsights [TelemetryClient]]
-    [applicationinsights.exceptions [enable]]
-    [bottle      [abort get :as handle-get hook http-date parse-date request redirect response static-file view :as render-view]]
-    [config      [*asset-hash* *banned-agents-page* *debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *instrumentation-key* *page-media-base* *page-route-base* *placeholder-image* *site-copyright* *site-description* *site-name* *static-path* *links-page* *stats-address* *stats-port* *store-path* *scaled-media-base* *thumbnail-sizes* *timezone* *root-junk* *redirect-page*]]
-    [datetime    [datetime]]
-    [dateutil.relativedelta  [relativedelta]]
-    [feeds       [render-feed-items]]
-    [json        [dumps]]
-    [logging     [getLogger]]
-    [models      [search get-links get-all get-page-metadata get-latest get-last-update-time get-table-stats]]
-    [os          [environ]]
-    [os.path     [join split]]
-    [pytz        [*utc*]]
-    [render      [render-page]]
-    [store       [asset-exists? asset-path get-page]]
-    [socket      [socket *af-inet* *sock-dgram*]]
-    [time        [gmtime time]]
-    [transform   [apply-transforms inner-html get-link-groups get-mappings get-plaintext-lines]]
-    [utils       [base-url compact-hash compute-hmac get-thumbnail lru-cache ttl-cache report-processing-time trace-flow utc-date]])
+    aliasing    [get-best-match]
+    bottle      [abort get :as handle-get hook http-date parse-date request redirect response static-file view :as render-view]
+    config      [*asset-hash* *banned-agents-page* *debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *instrumentation-key* *page-media-base* *page-route-base* *placeholder-image* *site-copyright* *site-description* *site-name* *static-path* *links-page* *stats-address* *stats-port* *store-path* *scaled-media-base* *thumbnail-sizes* *timezone* *root-junk* *redirect-page*]
+    datetime    [datetime]
+    dateutil.relativedelta  [relativedelta]
+    feeds       [render-feed-items]
+    json        [dumps]
+    logging     [getLogger]
+    models      [search get-links get-all get-page-metadata get-latest get-last-update-time get-table-stats]
+    os          [environ]
+    os.path     [join split]
+    pytz        [*utc*]
+    render      [render-page]
+    store       [asset-exists? asset-path get-page]
+    socket      [socket *af-inet* *sock-dgram*]
+    time        [gmtime time]
+    transform   [apply-transforms inner-html get-link-groups get-mappings get-plaintext-lines]
+    utils       [base-url compact-hash compute-hmac get-thumbnail lru-cache ttl-cache report-processing-time trace-flow utc-date])
 
-
-(setv log (getLogger --name--))
+(setv log (getLogger __name__))
 
 (setv sock (socket *af-inet* *sock-dgram*))
 
