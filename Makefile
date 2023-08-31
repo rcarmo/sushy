@@ -7,8 +7,6 @@ export CONTENT_PATH?=pages
 export THEME_PATH?=themes/blog
 export DATABASE_PATH?=/tmp/sushy.db
 export SITE_NAME?=Sushy
-export NEW_RELIC_APP_NAME?=$(SITE_NAME)
-export NEW_RELIC_LICENSE_KEY?=''
 export PYTHONIOENCODING=UTF_8:replace
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
@@ -62,10 +60,7 @@ serve:
 
 # Run with uwsgi
 uwsgi: build
-ifneq ($(NEW_RELIC_LICENSE_KEY),'')
-	newrelic-admin run-program uwsgi --http :$(PORT) --python-path . --wsgi sushy.app --callable app --gevent 2000 -p 1 
-endif
-	uwsgi --http :$(PORT) --python-path . --wsgi sushy.app --callable app --gevent 2000 -p 1 
+	uwsgi --http :$(PORT) --python-path . --wsgi sushy.app --callable app -p 1
 
 # Run with uwsgi
 uwsgi-ini: build
@@ -77,9 +72,6 @@ index:
 
 # Run indexer and watch for changes
 index-watch:
-ifneq ($(NEW_RELIC_LICENSE_KEY),'')
-	newrelic-admin run-python -m sushy.indexer watch
-endif
 	hy -m sushy.indexer watch
 
 # Render pstats profiler files into nice PNGs (requires dot)

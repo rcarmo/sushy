@@ -5,7 +5,6 @@
     hashlib            [sha1]
     json               [dumps]
     logging            [getLogger Formatter]
-    newrelic           [agent]
     os                 [environ]
     os.path            [basename dirname join]
     pstats             [Stats]
@@ -186,10 +185,7 @@
 
 
 (defmain [#* args]
-    (let [p        (Profile)
-          app-name (.get environ "NEW_RELIC_APP_NAME" "Sushy")]
-        (setv (get environ "NEW_RELIC_APP_NAME") (+ app-name " - Indexer")) 
-        (.initialize agent)
+    (let [p  (Profile)]
         (when *profiler*
             (.enable p))
         (init-db)

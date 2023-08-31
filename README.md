@@ -109,7 +109,6 @@ In accordance with the [12 Factor][12] approach, runtime configuration is taken 
 and templates/views are stored
 * `BIND_ADDRESS` - IP address to bind the development server to
 * `PORT` - TCP port to bind the server to
-* `NEW_RELIC_LICENSE_KEY` - If set, the New Relic agent is enabled
 
 These are set in the `Makefile` (which I use for a variety of purposes).
 
