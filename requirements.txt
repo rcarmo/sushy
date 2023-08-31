@@ -11,7 +11,7 @@ peewee==3.16.3
 pillow==10.0.0
 pygments==2.16.1
 python-dateutil==2.8.2
-pytz==2016.4
+pytz>=2023.3
 requests==2.31.0
 smartypants==2.0.1
 textile==4.0.2
