@@ -28,58 +28,39 @@
 
 (setv *footer-links* (get-link-groups *links-page*))
 
-; enable trace capture with AppInsights
-(if *instrumentation-key* (enable *instrumentation-key*))
-
 ; redirect if trailing slashes
 ; ban some user agents
-(with-decorator
-    (hook "before_request")
-    (defn before-request []
-        (let [[path (get (. request environ) "PATH_INFO")]
-              [ua   (.get (. request headers) "User-Agent" "")]]
-            (if (in ua *banned-agents*)
-                (abort (int 401) "Banned."))
-            (if (and (!= path "/") (= "/" (slice path -1)))
-                (redirect (slice path 0 -1) (int 301))))))
+(defn [(hook "before_request")] before-request []
+    (let [[path (get (. request environ) "PATH_INFO")]
+          [ua   (.get (. request headers) "User-Agent" "")]]
+        (if (in ua *banned-agents*)
+            (abort (int 401) "Banned."))
+        (if (and (!= path "/") (= "/" (slice path -1)))
+            (redirect (slice path 0 -1) (int 301))))
 
 
 ; grab page metadata or generate a minimal shim based on the last update
-(with-decorator
-    (ttl-cache 30)
-    (defn get-minimal-metadata [pagename]
-        (try
-            (if pagename
-                (get-page-metadata pagename)
-                (let [[last (get-last-update-time)]]
-                    {"hash"  (str last)
-                     "mtime" last}))
-            (except [e Exception]
-                (.error log e)))))
+(defn [(ttl-cache 30)] get-minimal-metadata [pagename]
+    (try
+        (if pagename
+            (get-page-metadata pagename)
+            (let [[last (get-last-update-time)]]
+                {"hash"  (str last)
+                  "mtime" last}))
+        (except [e Exception]
+            (.error log e))))
 
 
 (defn instrumented-processing-time [event]
     ; timing decorator with AppInsights reporting
-    (setv client 
-        (if *instrumentation-key*
-            (TelemetryClient *instrumentation-key*)
-            nil))
     (defn inner [func]
-        (defn timed-fn [&rest args &kwargs kwargs]
+        (defn timed-fn [#* args #** kwargs]
+            ; TODO: extended tracking
             (let [[start (time)]
-                  [result (apply func args kwargs)]
+                  [result (apply func #* args #** kwargs)]
                   [elapsed (int (* 1000 (- (time) start)))]
                   [ua (.get (. request headers) "User-Agent" "")]
                   [ff (.get (. request headers) "X-Forwarded-For" "")]]
-                (if client
-                    (do
-                         (.track_metric client "Processing Time" elapsed)
-                         (.track_event client 
-                             event {"Url" request.url
-                                     "User-Agent" ua
-                                     "X-Forwarded-For" ff} 
-                                   {"Processing Time" elapsed})
-                         (.flush client)))
                 (.set-header response (str "Processing-Time") (+ (str elapsed) "ms"))
                 result))
         timed-fn)
@@ -89,15 +70,15 @@
 ; HTTP enrichment decorator - note that bottle automatically maps HEAD to GET, so no special handling is required for that.
 (defn http-caching [page-key content-type seconds]
     (defn inner [func]
-        (defn wrap-fn [&rest args &kwargs kwargs]
+        (defn wrap-fn [#* args #** kwargs]
             (.set-header response (str "Content-Type") content-type)
             (if *debug-mode*
                 (apply func args kwargs)
-                (let [[pagename    (if page-key (.get kwargs page-key nil) nil)]
+                (let [[pagename    (if page-key (.get kwargs page-key None) None)]
                       [etag-seed   (if page-key *asset-hash* (. request url))]
                       [metadata    (get-minimal-metadata pagename)]
                       [req-headers (. request headers)]
-                      [none-match  (.get req-headers "If-None-Match" nil)]
+                      [none-match  (.get req-headers "If-None-Match" None)]
                       [mod-since   (parse-date (.get req-headers "If-Modified-Since" ""))]]
                     (if metadata
                         (let [[pragma (if seconds "public" "no-cache, must-revalidate")]
@@ -129,7 +110,7 @@
 (with-decorator
     (handle-get "/env")
     (report-processing-time)
-    (http-caching nil "text/html" 0)
+    (http-caching None "text/html" 0)
     (render-view "debug")
     (defn debug-dump []
         (if *debug-mode*
@@ -146,7 +127,7 @@
 (with-decorator
     (handle-get "/stats")
     (report-processing-time)
-    (http-caching nil "text/html" 0)
+    (http-caching None "text/html" 0)
     (render-view "debug")
     (defn debug-dump []
         (if *debug-mode*
@@ -165,7 +146,7 @@
     (handle-get "/feed")
     (handle-get "/rss")
     (instrumented-processing-time "feed")
-    (http-caching nil "application/atom+xml" *feed-ttl*)
+    (http-caching None "application/atom+xml" *feed-ttl*)
     (ttl-cache (/ *feed-ttl* 4))
     (render-view "atom")
     (defn serve-feed []
@@ -184,7 +165,7 @@
 (with-decorator
     (handle-get "/sitemap.xml")
     (instrumented-processing-time "sitemap")
-    (http-caching nil "text/xml" *feed-ttl*)
+    (http-caching None "text/xml" *feed-ttl*)
     (ttl-cache *feed-ttl*)
     (render-view "sitemap")
     (defn serve-sitemap []
@@ -205,7 +186,7 @@
 (with-decorator
     (handle-get "/robots.txt")
     (report-processing-time)
-    (http-caching nil "text/plain" 3600)
+    (http-caching None "text/plain" 3600)
     (ttl-cache 3600)
     (render-view "robots")
     (defn serve-robots []
@@ -217,7 +198,7 @@
 (with-decorator
     (handle-get "/opensearch.xml")
     (report-processing-time)
-    (http-caching nil "text/xml" 3600)
+    (http-caching None "text/xml" 3600)
     (ttl-cache 3600)
     (render-view "opensearch")
     (defn handle-opensearch []
@@ -230,7 +211,7 @@
 (with-decorator
     (handle-get "/search")
     (instrumented-processing-time "search")
-    (http-caching nil "text/html" 30)
+    (http-caching None "text/html" 30)
     (ttl-cache 30 "q")
     (render-view "search")
     (defn handle-search []
@@ -323,7 +304,7 @@
 (with-decorator
     (handle-get (+ *scaled-media-base* "/<hash>/<x:int>,<y:int><effect:re:(\,(blur|sharpen)|)>/<filename:path>"))
     (report-processing-time)
-    (http-caching nil "image/jpeg" 3600)
+    (http-caching None "image/jpeg" 3600)
     (defn thumbnail-image [hash x y effect filename]
         (let [[size (, (long x) (long y))]
               [eff  (if (len effect) (slice effect 1) "")]
