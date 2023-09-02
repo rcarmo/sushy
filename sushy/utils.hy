@@ -19,9 +19,9 @@
 
 (setv log (getLogger))
 
-(setv *datetime-format* "%Y%m%dT%H:%M:%S.%f")
+(setv DATETIME_FORMAT "%Y%m%dT%H:%M:%S.%f")
 
-(setv *time-intervals*
+(setv TIME_INTERVALS
     {"00:00-00:59" "late night"
      "01:00-04:59" "in the wee hours"
      "05:00-06:59" "at dawn"
@@ -36,7 +36,7 @@
      "21:30-22:29" "at night"
      "22:30-23:59" "late night"})
      
-(setv *readable-intervals* 
+(setv READABLE_INTERVALS 
     {31556926 "year"
      2592000 "month"
      604800 "week"
@@ -44,7 +44,7 @@
      3600 "hour"
      60 "minute"})
 
-(setv *utc* (timezone "UTC"))
+(setv UTC (timezone "UTC"))
 
 (defn base-url []
     (let [#(scheme netloc path query fragment) (urlsplit (. request url))
@@ -197,18 +197,18 @@
        "\n"))
 
 
-(defn utc-date [date [tz *utc*]]
+(defn utc-date [date [tz UTC]]
     ; convert naive (or not) dates into UTC
     (if (. date tzinfo)
-        (.astimezone date *utc*)
-        (.astimezone (.localize tz date) *utc*)))
+        (.astimezone date UTC)
+        (.astimezone (.localize tz date) UTC)))
 
 
 (defn strip-timezone [date]
     (.replace date :tzinfo None))
 
 
-(defn parse-naive-date [string fallback [tz *utc*]]
+(defn parse-naive-date [string fallback [tz UTC]]
     ; parse a date string and return a UTC date
     (if string
         (let [date (try
@@ -232,21 +232,21 @@
     ; describes a date as a time of day
     (let [when (.strftime date "%H:%M")]
         (.get
-            *time-intervals* 
+            TIME_INTERVALS 
             (.next (filter (fn [x] (let [#(l u) (.split x "-")] (and (<= l when) (<= when u)))) 
-                    (sorted (.keys *time-intervals*))))
+                    (sorted (.keys TIME_INTERVALS))))
             "sometime")))
 
             
 (defn time-chunks [begin-interval [end-interval None]]
     ; breaks down a time interval into a sequence of time chunks 
-    (let [chunks   (sorted (.keys *readable-intervals*) :reverse True)
+    (let [chunks   (sorted (.keys READABLE_INTERVALS) :reverse True)
           the-end  (if end-interval end-interval (datetime.now))
           interval (- (timegm (.timetuple the-end)) (timegm (.timetuple begin-interval)))
           values []]
         (for [i chunks]
             (setv #(d r) (divmod interval i))
-            (.append values (, (int d) (.get *readable-intervals* i)))
+            (.append values (, (int d) (.get READABLE_INTERVALS i)))
             (setv interval r))
         (filter (fn [x] (pos? (get x 0))) values)))
 

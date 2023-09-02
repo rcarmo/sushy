@@ -1,39 +1,39 @@
 (import
-    aliasing    [get-best-match]
+    .aliasing    [get-best-match]
+    .config      [ASSET_HASH BANNED_AGENTS_PAGE DEBUG_MODE EXCLUDE_FROM_FEEDS FEED_CSS FEED_TTL PAGE_MEDIA_BASE PAGE_ROUTE_BASE PLACEHOLDER_IMAGE SITE_COPYRIGHT SITE_DESCRIPTION SITE_NAME STATIC_PATH LINKS_PAGE STATS_ADDRESS STATS_PORT STORE_PATH SCALED_MEDIA_BASE THUMBNAIL_SIZES TIMEZONE ROOT_JUNK REDIRECT_PAGE]
+    .feeds       [render-feed-items]
+    .store       [asset-exists? asset-path get-page]
+    .transform   [apply-transforms inner-html get-link-groups get-mappings get-plaintext-lines]
+    .utils       [base-url compact-hash compute-hmac get-thumbnail lru-cache ttl-cache report-processing-time trace-flow utc-date]
     bottle      [abort get :as handle-get hook http-date parse-date request redirect response static-file view :as render-view]
-    config      [*asset-hash* *banned-agents-page* *debug-mode* *exclude-from-feeds* *feed-css* *feed-ttl* *instrumentation-key* *page-media-base* *page-route-base* *placeholder-image* *site-copyright* *site-description* *site-name* *static-path* *links-page* *stats-address* *stats-port* *store-path* *scaled-media-base* *thumbnail-sizes* *timezone* *root-junk* *redirect-page*]
     datetime    [datetime]
     dateutil.relativedelta  [relativedelta]
-    feeds       [render-feed-items]
     json        [dumps]
     logging     [getLogger]
     models      [search get-links get-all get-page-metadata get-latest get-last-update-time get-table-stats]
     os          [environ]
     os.path     [join split]
-    pytz        [*utc*]
+    pytz        [UTC]
     render      [render-page]
-    store       [asset-exists? asset-path get-page]
-    socket      [socket *af-inet* *sock-dgram*]
-    time        [gmtime time]
-    transform   [apply-transforms inner-html get-link-groups get-mappings get-plaintext-lines]
-    utils       [base-url compact-hash compute-hmac get-thumbnail lru-cache ttl-cache report-processing-time trace-flow utc-date])
+    socket      [socket AF_INET SOCK_DGRAM]
+    time        [gmtime time])
 
 (setv log (getLogger __name__))
 
-(setv sock (socket *af-inet* *sock-dgram*))
+(setv sock (socket AF_INET SOCK_DGRAM))
 
-(setv *redirects* (get-mappings *redirect-page*))
+(setv REDIRECTS (get-mappings REDIRECT_PAGE))
 
-(setv *banned-agents* (get-plaintext-lines *banned-agents-page*))
+(setv BANNED_AGENTS (get-plaintext-lines BANNED_AGENTS_PAGE))
 
-(setv *footer-links* (get-link-groups *links-page*))
+(setv FOOTER_LINKS (get-link-groups LINKS_PAGE))
 
 ; redirect if trailing slashes
 ; ban some user agents
 (defn [(hook "before_request")] before-request []
     (let [path (get (. request environ) "PATH_INFO")
           ua   (.get (. request headers) "User-Agent" "")]
-        (when (in ua *banned-agents*)
+        (when (in ua BANNED_AGENTS)
             (abort 401 "Banned."))
         (when (and (!= path "/") (= "/" (slice path -1)))
             (redirect (slice path 0 -1) 301)))
@@ -72,10 +72,10 @@
     (defn inner [func]
         (defn wrap-fn [#* args #** kwargs]
             (.set-header response (str "Content-Type") content-type)
-            (if *debug-mode*
+            (if DEBUG_MODE
                 (func #* args #** kwargs)
                 (let [pagename    (if page-key (.get kwargs page-key None) None)
-                      etag-seed   (if page-key *asset-hash* (. request url))
+                      etag-seed   (if page-key ASSET_HASH (. request url))
                       metadata    (get-minimal-metadata pagename)
                       req-headers (. request headers)
                       none-match  (.get req-headers "If-None-Match" None)
@@ -101,7 +101,7 @@
 
 ; root to /space
 (defn [(handle-get "/")] home-page []
-    (redirect *page-route-base* 301)))
+    (redirect PAGE_ROUTE_BASE 301)))
 
 
 ; environment dump
@@ -110,13 +110,13 @@
        (http-caching None "text/html" 0)
        (render-view "debug")]
     debug-dump []
-        (if *debug-mode*
+        (if DEBUG_MODE
             {"base_url"         (base-url)
              "environ"          (dict environ)
              "headers"          {"title" "Environment dump"}
-             "page_route_base"  *page-route-base*
-             "site_description" *site-description*
-             "site_name"        *site-name*}
+             "page_route_base"  PAGE_ROUTE_BASE
+             "site_description" SITE_DESCRIPTION
+             "site_name"        SITE_NAME}
             (abort 404 "Page Not Found")))
 
 
@@ -126,13 +126,13 @@
        (http-caching None "text/html" 0)
        (render-view "debug")]
      debug-dump []
-        (if *debug-mode*
+        (if DEBUG_MODE
             {"base_url"         (base-url)
              "environ"          (get-table-stats)
              "headers"          {"title" "Database Statistics"}
-             "page_route_base"  *page-route-base*
-             "site_description" *site-description*
-             "site_name"        *site-name*}
+             "page_route_base"  PAGE_ROUTE_BASE
+             "site_description" SITE_DESCRIPTION
+             "site_name"        SITE_NAME}
             (abort 404 "Page Not Found")))
 
 
@@ -141,38 +141,38 @@
        (handle-get "/feed")
        (handle-get "/rss")
        (instrumented-processing-time "feed")
-       (http-caching None "application/atom+xml" *feed-ttl*)
-       (ttl-cache (/ *feed-ttl* 4))
+       (http-caching None "application/atom+xml" FEED_TTL)
+       (ttl-cache (/ FEED_TTL 4))
        (render-view "atom")]
     serve-feed []
         (.set-header response (str "Content-Type") "application/atom+xml")
         {"base_url"         (base-url)
-         "feed_ttl"         *feed-ttl*
+         "feed_ttl"         FEED_TTL
          "items"            (render-feed-items (base-url))
-         "page_route_base"  *page-route-base*
+         "page_route_base"  PAGE_ROUTE_BASE
          "pubdate"          (utc-date (get-last-update-time))
-         "site_copyright"   *site-copyright*
-         "site_description" *site-description*
-         "site_name"        *site-name*})
+         "site_copyright"   SITE_COPYRIGHT
+         "site_description" SITE_DESCRIPTION
+         "site_name"        SITE_NAME})
 
 
 ; Sitemap
 (defn [(handle-get "/sitemap.xml")
        (instrumented-processing-time "sitemap")
-       (http-caching None "text/xml" *feed-ttl*)
-       (ttl-cache *feed-ttl*)
+       (http-caching None "text/xml" FEED_TTL)
+       (ttl-cache FEED_TTL)
        (render-view "sitemap")]
     serve-sitemap []
         (setv (. response content-type) "text/xml")
         {"base_url"         (base-url)
          "items"            (get-all)
-         "page_route_base"  *page-route-base*})
+         "page_route_base"  PAGE_ROUTE_BASE})
 
 
 ; junk that needs to be at root level
-(defn [(handle-get (% "/<filename:re:(%s)>" *root-junk*))]
+(defn [(handle-get (% "/<filename:re:(%s)>" ROOT_JUNK))]
      static-root [filename]
-        (static-file filename :root (join *static-path* "root")))
+        (static-file filename :root (join STATIC_PATH "root")))
 
 
 ; robots.txt
@@ -183,7 +183,7 @@
        (render-view "robots")]
     serve-robots []
         {"base_url"         (base-url)
-         "page_route_base"  *page-route-base*})
+         "page_route_base"  PAGE_ROUTE_BASE})
 
 
 ; OpenSearch metadata
@@ -194,8 +194,8 @@
        (render-view "opensearch")]
     handle-opensearch []
         {"base_url"         (base-url)
-         "site_description" *site-description*
-         "site_name"        *site-name*})
+         "site_description" SITE_DESCRIPTION
+         "site_name"        SITE_NAME})
 
          
 ; search
@@ -208,36 +208,36 @@
         (if (in "q" (.keys (. request query)))
             {"base_url"         (base-url)
              "headers"          {}
-             "page_route_base"  *page-route-base*
+             "page_route_base"  PAGE_ROUTE_BASE
              "query"            (. request query q)
              "results"          (search (. request query q))
-             "site_description" *site-description*
-             "site_name"        *site-name*
-             "footer_links"     *footer-links*}
+             "site_description" SITE_DESCRIPTION
+             "site_name"        SITE_NAME
+             "footer_links"     FOOTER_LINKS}
             {"base_url"         (base-url)
              "headers"          {}
-             "page_route_base"  *page-route-base*
-             "site_description" *site-description*
-             "site_name"        *site-name*
-             "footer_links"     *footer-links*}))
+             "page_route_base"  PAGE_ROUTE_BASE
+             "site_description" SITE_DESCRIPTION
+             "site_name"        SITE_NAME
+             "footer_links"     FOOTER_LINKS}))
 
             
 ; static files
 (defn [(handle-get "/static/<filename:path>")]
     static-files [filename]
-        (static-file filename :root *static-path*))
+        (static-file filename :root STATIC_PATH))
 
         
 ; page media
-(defn [(handle-get (+ *page-media-base* "/<hash>/<filename:path>"))]
+(defn [(handle-get (+ PAGE_MEDIA_BASE "/<hash>/<filename:path>"))]
     page-media [hash filename]
-        (if (= hash (compute-hmac *asset-hash* *page-media-base* (+ "/" filename)))
-            (static-file filename :root *store-path*)
-            (redirect *placeholder-image*)))
+        (if (= hash (compute-hmac ASSET_HASH PAGE_MEDIA_BASE (+ "/" filename)))
+            (static-file filename :root STORE_PATH)
+            (redirect PLACEHOLDER_IMAGE)))
 
 
 ; blog index
-(defn [(handle-get *page-route-base*)
+(defn [(handle-get PAGE_ROUTE_BASE)
        (report-processing-time)
        (http-caching "route-base" "text/html" 3600)
        (ttl-cache 60)
@@ -246,54 +246,54 @@
        {"base_url"         (base-url)
         "body"             ""
         "headers"          {"title" "Home Page"}
-        "pagename"         *site-name*
-        "page_route_base"  *page-route-base*                 
-        "site_description" *site-description*
-        "site_name"        *site-name*
-        "footer_links"     *footer-links*}) 
+        "pagename"         SITE_NAME
+        "page_route_base"  PAGE_ROUTE_BASE                 
+        "site_description" SITE_DESCRIPTION
+        "site_name"        SITE_NAME
+        "footer_links"     FOOTER_LINKS}) 
 
 
 ; page content
-(defn [(handle-get (+ *page-route-base* "/<pagename:path>"))
+(defn [(handle-get (+ PAGE_ROUTE_BASE "/<pagename:path>"))
        (report-processing-time)
        (http-caching "pagename" "text/html" 3600)
        (ttl-cache 30)
        (render-view "wiki")]
     wiki-page [pagename] 
-        (if (in (.lower pagename) *redirects*)
-            (let [target (get *redirects* (.lower pagename))]
+        (if (in (.lower pagename) REDIRECTS)
+            (let [target (get REDIRECTS (.lower pagename))]
                 (if (or (= "/" (get target 0)) (in "http" target))
                     (redirect target 301)
-                    (redirect f"{*page-route-base*}/{target}" 301)))
+                    (redirect f"{PAGE_ROUTE_BASE}/{target}" 301)))
             (try
                 (let [page  (get-page pagename)
                       event (dict (. request headers))]
                     (assoc event "url" (. request url))
-                    (when *stats-port*
-                        (.sendto sock (dumps event) #(*stats-address* *stats-port*)))
+                    (when STATS_PORT
+                        (.sendto sock (dumps event) #(STATS_ADDRESS STATS_PORT)))
                     {"base_url"         (base-url)
                      "body"             (inner-html (apply-transforms (render-page page) pagename))            
                      "headers"          (:headers page)
                      "pagename"         pagename
-                     "page_route_base"  *page-route-base*                 
+                     "page_route_base"  PAGE_ROUTE_BASE                 
                      "seealso"          (list (get-links pagename))
-                     "site_description" *site-description*
-                     "site_name"        *site-name*
-                     "footer_links"     *footer-links*})
+                     "site_description" SITE_DESCRIPTION
+                     "site_name"        SITE_NAME
+                     "footer_links"     FOOTER_LINKS})
                 (except [e IOError]
                     (let [match (get-best-match pagename)]
                         (if (!= match pagename)
-                            (redirect f"{*page-route-base*}/{match}" 301)
+                            (redirect f"{PAGE_ROUTE_BASE}/{match}" 301)
                             (redirect f"/search?q={pagename}")))))))
 
 ; thumbnails
-(defn [(handle-get (+ *scaled-media-base* "/<hash>/<x:int>,<y:int><effect:re:(\,(blur|sharpen)|)>/<filename:path>"))
+(defn [(handle-get (+ SCALED_MEDIA_BASE "/<hash>/<x:int>,<y:int><effect:re:(\\,(blur|sharpen)|)>/<filename:path>"))
        (report-processing-time)
        (http-caching None "image/jpeg" 3600)]
     thumbnail-image [hash x y effect filename]
         (let [size #((long x) (long y))
               eff  (if (len effect) (slice effect 1) "")
-              hmac (compute-hmac *asset-hash* *scaled-media-base* f"/{x},{y}{effect}/{filename}")]
+              hmac (compute-hmac ASSET_HASH SCALED_MEDIA_BASE f"/{x},{y},{effect}/{filename}")]
             (.debug log (, size hmac hash effect eff filename))
             (if (!= hash hmac)
                 (abort 403 "Invalid Image Request")

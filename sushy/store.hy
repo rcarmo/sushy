@@ -2,7 +2,7 @@
 
 (import 
     codecs   [open]
-    .config  [*base-filenames* *base-types* *ignored-folders* *store-path* *timezone*]
+    .config  [BASE_FILENAMES BASE_TYPES IGNORED_FOLDERS STORE_PATH TIMEZONE]
     datetime [datetime]
     logging  [getLogger]
     os       [walk]
@@ -11,7 +11,6 @@
 
 (require hyrule.argmove [->])
 (require hyrule.collections [assoc])
-
 
 (setv log (getLogger __name__))
 
@@ -56,7 +55,7 @@
 
 
 (defn asset-path [pagename asset]
-    (join *store-path* pagename asset))
+    (join STORE_PATH pagename asset))
 
 
 (defn asset-exists? [pagename asset]
@@ -70,24 +69,24 @@
 
 
 (defn page-exists? [pagename]
-    (is-page? (join *store-path* pagename)))
+    (is-page? (join STORE_PATH pagename)))
 
 
 (defn is-page? [path]
     ; test if a given path contains an index filename
-    (if (len (list (filter (fn [item] (exists (join path item))) *base-filenames*)))
+    (if (len (list (filter (fn [item] (exists (join path item))) BASE_FILENAMES)))
         True
         False))
 
 
 (defn get-page [pagename]
     ; return the raw data for a page 
-    (.debug log (join *store-path* pagename))
+    (.debug log (join STORE_PATH pagename))
     (try
-        (let [path         (join *store-path* pagename)
-              page         (next (filter (fn [item] (exists (join path item))) *base-filenames*))
-              filename     (join *store-path* pagename page)
-              content-type (get *base-types* (get (splitext page) 1))
+        (let [path         (join STORE_PATH pagename)
+              page         (next (filter (fn [item] (exists (join path item))) BASE_FILENAMES))
+              filename     (join STORE_PATH pagename page)
+              content-type (get BASE_TYPES (get (splitext page) 1))
               handle       (open filename :mode "r" :encoding "utf-8")
               buffer       (.read handle)]
             (.close handle)
@@ -98,7 +97,7 @@
 
 (defn filtered-names [folder-list]
     ; remove ignored folders from a list
-    (filter (fn [folder-name] (not (in folder-name *ignored-folders*))) folder-list))
+    (filter (fn [folder-name] (not (in folder-name IGNORED_FOLDERS))) folder-list))
 
 
 (defn scan-pages [root-path]
@@ -123,7 +122,7 @@
 (defn with-index [folder-seq root-path]
     ; takes a sequence of folders and returns page info
     (for [folder folder-seq]
-        (for [base *base-filenames*]
+        (for [base BASE_FILENAMES]
             (when (in base (:files folder))
                 (yield
                     {"path"     (get (:path folder) (slice (+ 1 (len root-path)) None))

@@ -1,4 +1,10 @@
 (import
+    .config            [BASE_FILENAMES STORE_PATH TIMEZONE PROFILER]
+    .models            [db add-wiki-links delete-wiki-page index-wiki-page init-db get-page-indexing-time]
+    .render            [render-page]
+    .store             [is-page? gen-pages get-page]
+    .transform         [apply-transforms count-images extract-internal-links extract-plaintext]
+    .utils             [parse-naive-date strip-timezone slug utc-date]
     cProfile           [Profile]
     datetime           [datetime timedelta]
     functools          [reduce]
@@ -8,12 +14,6 @@
     os                 [environ]
     os.path            [basename dirname join]
     pstats             [Stats]
-    sushy.config       [*aliasing-chars* *base-filenames* *bind-address* *store-path* *timezone* *profiler*]
-    sushy.models       [db add-wiki-links delete-wiki-page index-wiki-page init-db get-page-indexing-time]
-    sushy.render       [render-page]
-    sushy.store        [is-page? gen-pages get-page]
-    sushy.transform    [apply-transforms count-images extract-internal-links extract-plaintext]
-    sushy.utils        [parse-naive-date strip-timezone slug utc-date]
     time               [sleep time]
     watchdog.observers [Observer]
     watchdog.events    [FileSystemEventHandler])
@@ -22,7 +22,7 @@
 
 (setv log (getLogger __name__))
 
-(setv *logging-modulo* 100)
+(setv LOGGING_MODULO 100)
 
 (defn transform-tags [line]
     ; expand tags to be "tag:value", which enables us to search for tags using FTS
@@ -67,14 +67,14 @@
           word-count   (len (.split plaintext))
           image-count  (count-images doc)
           links        (extract-internal-links doc)
-          pubtime      (parse-naive-date (.get headers "date") mdate *timezone*)]
+          pubtime      (parse-naive-date (.get headers "date") mdate TIMEZONE)]
         {"name"     pagename
          "body"     (if (hide-from-search? headers) "" plaintext)
          "hash"     (.hexdigest (sha1 (.encode plaintext "utf-8")))
          "title"    (.get headers "title" "Untitled")
          "tags"     (transform-tags (.get headers "tags" ""))
          "pubtime"  (strip-timezone (utc-date pubtime))
-         "mtime"    (strip-timezone (utc-date (parse-naive-date (.get headers "last-modified") pubtime *timezone*)))
+         "mtime"    (strip-timezone (utc-date (parse-naive-date (.get headers "last-modified") pubtime TIMEZONE)))
          "idxtime"  mtime
          "readtime" (int (round (+ (* 12.0 image-count) (/ word-count 4.5))))
          "headers"  headers
@@ -101,7 +101,7 @@
           skipped-count 0]
         (for [item (gen-pages path)]
             (.debug log item)
-            (when (= 0 (% item-count *logging-modulo*))
+            (when (= 0 (% item-count LOGGING_MODULO))
                 (.info log f"indexing {item-count}"))
             (setv item-count (+ 1 item-count))
             (.debug log (:path item))
@@ -122,32 +122,32 @@
      (defn do-update [self path]
             (.info log f"updating {path}")
             (index-one (gather-item-data
-                        {"path"  (get path (slice (+ 1 (len *store-path*)) None))
+                        {"path"  (get path (slice (+ 1 (len STORE_PATH)) None))
                          "mtime" (int (time))})))
 
      (defn do-delete [self path]
             (.debug log  f"deleting {path}")
-            (delete-wiki-page (get path (slice (+ 1 (len *store-path*) None)))))
+            (delete-wiki-page (get path (slice (+ 1 (len STORE_PATH) None)))))
 
      (defn on-created [self event]
             (.debug log f"creation of {event}")
             (let [filename (basename (. event src-path))
                   path     (dirname  (. event src-path))]
-                (when (in filename *base-filenames*)
+                (when (in filename BASE_FILENAMES)
                     (.do-update self path))))
 
      (defn on-deleted [self event]
             (.debug log f"deletion of {event}")
             (let [filename (basename (. event src-path))
                   path     (dirname  (. event src-path))]
-                (when (in filename *base-filenames*)
+                (when (in filename BASE_FILENAMES)
                     (.do-delete self path))))
 
      (defn on-modified [self event]
             (.debug log f"modification of {event}")
             (let [filename (basename (. event src-path))
                   path     (dirname  (. event src-path))]
-                (when (in filename *base-filenames*)
+                (when (in filename BASE_FILENAMES)
                     (.do-update self path))))
 
      (defn on-moved [self event]
@@ -156,9 +156,9 @@
                   srcpath (dirname  (. event src-path))
                   dstfile (basename (. event dest-path))
                   dstpath (dirname  (. event dest-path))]
-                (when (in srcfile *base-filenames*)
+                (when (in srcfile BASE_FILENAMES)
                     (.do-delete self srcpath))
-                (when (in dstfile *base-filenames*)
+                (when (in dstfile BASE_FILENAMES)
                     (.do-update self dstpath)))))
 
 
@@ -186,19 +186,19 @@
 
 (defmain [#* args]
     (let [p  (Profile)]
-        (when *profiler*
+        (when PROFILER
             (.enable p))
         (init-db)
         ; close database connection to remove contention
         (.close db)
         (setv start-time (time))
         
-        (filesystem-walk *store-path*)
+        (filesystem-walk STORE_PATH)
         (.info log f"Indexing done in {(- (time) start-time)}s")
-        (when *profiler*
+        (when PROFILER
             (.disable p)
             (.info log "dumping stats")
             (.dump_stats (Stats p) "indexer.pstats"))
         (when (in "watch" args)
             (.info log "Starting watcher...")
-            (observer *store-path*))))
+            (observer STORE_PATH))))
