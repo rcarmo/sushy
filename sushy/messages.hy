@@ -1,5 +1,5 @@
 (import 
-    .config [*page-route-base*]
+    .config [PAGE_ROUTE_BASE]
     bottle  [view])
 
 ; render a little error message
@@ -13,4 +13,4 @@
      inline-table [headers rows]
         {"headers"   headers
          "rows"      rows
-         "page_base" *page-route-base*})
+         "page_base" PAGE_ROUTE_BASE})

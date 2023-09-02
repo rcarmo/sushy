@@ -1,6 +1,6 @@
 ; Perform HTML transforms
 (import
-    .config             [*alias-page* *asset-hash* *interwiki-page* *lazyload-images* *max-image-size* *min-image-size* *page-media-base* *page-route-base* *scaled-media-base* *signed-prefixes*]
+    .config             [ALIAS_PAGE ASSET_HASH INTERWIKI_PAGE LAZYLOAD_IMAGES MAX_IMAGE_SIZE MIN_IMAGE_SIZE PAGE_MEDIA_BASE PAGE_ROUTE_BASE SCALED_MEDIA_BASE SIGNED_PREFIXES]
     .messages           [inline-message]
     .plugins            [plugin-tagged plugin-quicklook plugin-rating]
     .store              [asset-exists? asset-path get-page page-exists? open-asset]
@@ -13,7 +13,7 @@
     pygments            [highlight]
     pygments.lexers     [get-lexer-by-name]
     pygments.formatters [HtmlFormatter]
-    re                  [IGNORECASE :as *ignorecase* sub]
+    re                  [IGNORECASE sub]
     urllib.parse        [urlsplit])
 
 (require hyrule.argmove [->])
@@ -47,8 +47,8 @@
             result)))
 
 
-(setv *interwiki-map* (get-mappings *interwiki-page*))
-(setv *alias-map* (get-mappings *alias-page*))
+(setv INTERWIKI_MAP (get-mappings INTERWIKI_PAGE))
+(setv ALIAS_MAP (get-mappings ALIAS_PAGE))
 
 
 (defn expand-link-group [items]
@@ -60,11 +60,11 @@
                       label (.join " " (slice item 1))]
                     (when (not (len schema))
                         (when (!= (get url 0) "/")
-                            (setv url (join *page-route-base* url))))
-                    (when (in schema *interwiki-map*)
-                        (if (in "%s" (get *interwiki-map* schema))
-                            (setv url (% (get *interwiki-map* schema) url))
-                            (setv url (sub (+ schema ":") (get *interwiki-map* schema) url 1 *ignorecase*))))
+                            (setv url (join PAGE_ROUTE_BASE url))))
+                    (when (in schema INTERWIKI_MAP)
+                        (if (in "%s" (get INTERWIKI_MAP schema))
+                            (setv url (% (get INTERWIKI_MAP schema) url))
+                            (setv url (sub (+ schema ":") (get INTERWIKI_MAP schema) url 1 IGNORECASE))))
                     (.append group #(url label)))))
      group))
      
@@ -94,11 +94,11 @@
         (let [href (get a.attrib "href")
               schema (get (.split href ":" 1) 0)]
             (when (= (get href 0) "#")
-                (setv (get a.attrib "href") (+ (join *page-route-base* pagename) href))
+                (setv (get a.attrib "href") (+ (join PAGE_ROUTE_BASE pagename) href))
                 (if (= href schema)
-                    (setv (get a.attrib "href") (join *page-route-base* href))
+                    (setv (get a.attrib "href") (join PAGE_ROUTE_BASE href))
                     (when (= "cid" schema)
-                        (setv (get a.attrib "href") (join *page-media-base* pagename (.replace href (+ schema ":") ""))))))))
+                        (setv (get a.attrib "href") (join PAGE_MEDIA_BASE pagename (.replace href (+ schema ":") ""))))))))
     doc)
 
 
@@ -109,10 +109,10 @@
         (let [href   (get a.attrib "href")
               parts  (.split href ":" 1)
               schema (.lower (get parts 0))]
-            (when (and (in schema *interwiki-map*) (> (len parts) 1))
-                (if (in "%s" (get *interwiki-map* schema))
-                    (setv (get a.attrib "href") (% (get *interwiki-map* schema) (get parts 1)))
-                    (setv (get a.attrib "href") (sub (+ schema ":") (get *interwiki-map* schema) href 1 *ignorecase*))))))
+            (when (and (in schema INTERWIKI_MAP) (> (len parts) 1))
+                (if (in "%s" (get INTERWIKI_MAP schema))
+                    (setv (get a.attrib "href") (% (get INTERWIKI_MAP schema) (get parts 1)))
+                    (setv (get a.attrib "href") (sub (+ schema ":") (get INTERWIKI_MAP schema) href 1 IGNORECASE))))))
     doc)    
 
 
@@ -121,8 +121,8 @@
     [doc]
     (for [a (.xpath doc "//a[@href]")]
          (let [href (.lower (get a.attrib "href"))]
-             (while (in href *alias-map*)
-                 (setv href (get *alias-map* href))
+             (while (in href ALIAS_MAP)
+                 (setv href (get ALIAS_MAP href))
                  (setv (get a.attrib "href") href))))
     doc)
 
@@ -204,17 +204,17 @@
                     (.replace (.getparent tag) tag
                         (fromstring (inline-message "error" (% "Could not find image '%s'" src))))))
             (when (not (= "data" schema)) 
-                (setv (get (. tag attrib) "src") (join *page-media-base* pagename src)))))
+                (setv (get (. tag attrib) "src") (join PAGE_MEDIA_BASE pagename src)))))
     doc)
 
 
 (defn image-lazyload
     ; goes through image tags and decides whether to generate lazy-loading and retina downsampling
     [doc]
-    (when *lazyload-images*
+    (when LAZYLOAD_IMAGES
         (for [tag (.xpath doc "//img[@src]")]
             (let [src      (get (. tag attrib) "src")
-                  base-src (sub (+ "^" *page-media-base*) "" src)
+                  base-src (sub (+ "^" PAGE_MEDIA_BASE) "" src)
                   width    (int (.get (. tag attrib) "width" 0))
                   height   (int (.get (. tag attrib) "height" 0))
                   cls      (get (. tag attrib) "class" "")
@@ -222,14 +222,14 @@
                   schema   (get (urlsplit src) 0)]
                 ; if it's a local image of known size
                 (when (and width height (= "" schema) (!= "data" schema))
-                    (if (and (> height *max-image-size*) (> width *max-image-size*))
-                        (let [new-width       *max-image-size*
-                              new-height      (int (/ (* height *max-image-size*) width))
-                              min-width       (max *min-image-size* (/ new-width 4))
-                              min-height      (max *min-image-size* (/ new-height 4))
+                    (if (and (> height MAX_IMAGE_SIZE) (> width MAX_IMAGE_SIZE))
+                        (let [new-width       MAX_IMAGE_SIZE
+                              new-height      (int (/ (* height MAX_IMAGE_SIZE) width))
+                              min-width       (max MIN_IMAGE_SIZE (/ new-width 4))
+                              min-height      (max MIN_IMAGE_SIZE (/ new-height 4))
                               new-cls         (if-not (in "lazyload" cls) (+ cls " lazyload") cls)
-                              new-src         (% "%s/%d,%d,blur%s" (, *scaled-media-base* min-width min-height base-src))
-                              data-src        (% "%s/%d,%d%s" (, *scaled-media-base* new-width new-height base-src))
+                              new-src         (% "%s/%d,%d,blur%s" (, SCALED_MEDIA_BASE min-width min-height base-src))
+                              data-src        (% "%s/%d,%d%s" (, SCALED_MEDIA_BASE new-width new-height base-src))
                               data-src-retina (if-not retina src retina)]
                             (setv (get (. tag attrib) "height") (str new-height))
                             (setv (get (. tag attrib) "width") (str new-width))
@@ -237,10 +237,10 @@
                             (setv (get (. tag attrib) "src") new-src)
                             (setv (get (. tag attrib) "data-src") data-src)
                             (setv (get (. tag attrib) "data-src-retina") data-src-retina))
-                        (let [min-width       (max *min-image-size* (/ width 4))
-                              min-height      (max *min-image-size* (/ height 4))
+                        (let [min-width       (max MIN_IMAGE_SIZE (/ width 4))
+                              min-height      (max MIN_IMAGE_SIZE (/ height 4))
                               new-cls         (if-not (in "lazyload" cls) (+ cls " lazyload") cls)
-                              new-src         (% "%s/%d,%d,blur%s" (, *scaled-media-base* min-width min-height base-src))
+                              new-src         (% "%s/%d,%d,blur%s" (, SCALED_MEDIA_BASE min-width min-height base-src))
                               data-src        src]
                             (setv (get (. tag attrib) "class") new-cls)
                             (setv (get (. tag attrib) "src") new-src)
@@ -275,8 +275,8 @@
     [doc]
     (list (set (map
                 (fn [tag]
-                    (get (get tag.attrib "href") (slice (+ 1 (len *page-route-base*)) None)))
-                (.xpath doc (+ "//a[starts-with(@href,'" *page-route-base* "')]"))))))
+                    (get (get tag.attrib "href") (slice (+ 1 (len PAGE_ROUTE_BASE)) None)))
+                (.xpath doc (+ "//a[starts-with(@href,'" PAGE_ROUTE_BASE "')]"))))))
 
 
 (defn mark-lead-paragraph
@@ -314,15 +314,15 @@
                       #(_ prefix path) (map (fn [p] (+ "/" p)) (.split src "/" 2))
                       schema           (get (urlsplit src) 0)]
                     (when (not (= "data" schema))
-                        (when (in prefix *signed-prefixes*)
-                            (setv (get tag.attrib attrib-name) (+ prefix "/" (compute-hmac *asset-hash* prefix path) path)))))
+                        (when (in prefix SIGNED_PREFIXES)
+                            (setv (get tag.attrib attrib-name) (+ prefix "/" (compute-hmac ASSET_HASH prefix path) path)))))
                 (except [e ValueError]))))
     (for [tag (.xpath doc "//a[@href]")]
         (try
             (let [href             (get (. tag attrib) "href")
                   #(_ prefix path) (map (fn [p] (+ "/" p)) (.split href "/" 2))]
-                (when (in prefix *signed-prefixes*)
-                    (setv (get tag.attrib "href") (+ prefix "/" (compute-hmac *asset-hash* prefix path) path))))
+                (when (in prefix SIGNED_PREFIXES)
+                    (setv (get tag.attrib "href") (+ prefix "/" (compute-hmac ASSET_HASH prefix path) path))))
             (except [e ValueError])))
     doc)
 

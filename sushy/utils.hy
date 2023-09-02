@@ -148,7 +148,7 @@
     inner)
     
 
-(defn [lru-cache] get-image-size [filename]
+(defn [(lru-cache)] get-image-size [filename]
     ; extract image size information from a given filename
     (let [im None]
         (try

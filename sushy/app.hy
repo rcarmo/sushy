@@ -4,13 +4,13 @@
     logging      [getLogger]
     sushy.routes)
 
+(require hyrule [defmain])
+
 (setv DEBUG DEBUG_MODE)
+(setv app (default-app))
 
-(def app (default-app))
-
-(defmain [&rest args]
-    (apply run []
-        {"app"      app
-         "host"     BIND_ADDRESS
-         "port"     HTTP_PORT
-         "debug"    DEBUG_MODE}))
+(defmain [args]
+    (run :app   app
+         :host  BIND_ADDRESS
+         :port  HTTP_PORT
+         :debug DEBUG_MODE))

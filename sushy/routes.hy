@@ -1,20 +1,21 @@
 (import
-    .aliasing    [get-best-match]
-    .config      [ASSET_HASH BANNED_AGENTS_PAGE DEBUG_MODE EXCLUDE_FROM_FEEDS FEED_CSS FEED_TTL PAGE_MEDIA_BASE PAGE_ROUTE_BASE PLACEHOLDER_IMAGE SITE_COPYRIGHT SITE_DESCRIPTION SITE_NAME STATIC_PATH LINKS_PAGE STATS_ADDRESS STATS_PORT STORE_PATH SCALED_MEDIA_BASE THUMBNAIL_SIZES TIMEZONE ROOT_JUNK REDIRECT_PAGE]
-    .feeds       [render-feed-items]
-    .store       [asset-exists? asset-path get-page]
-    .transform   [apply-transforms inner-html get-link-groups get-mappings get-plaintext-lines]
-    .utils       [base-url compact-hash compute-hmac get-thumbnail lru-cache ttl-cache report-processing-time trace-flow utc-date]
+    .aliasing   [get-best-match]
+    .config     [ASSET_HASH BANNED_AGENTS_PAGE DEBUG_MODE EXCLUDE_FROM_FEEDS FEED_CSS FEED_TTL PAGE_MEDIA_BASE PAGE_ROUTE_BASE PLACEHOLDER_IMAGE SITE_COPYRIGHT SITE_DESCRIPTION SITE_NAME STATIC_PATH LINKS_PAGE STATS_ADDRESS STATS_PORT STORE_PATH SCALED_MEDIA_BASE THUMBNAIL_SIZES TIMEZONE ROOT_JUNK REDIRECT_PAGE]
+    .feeds      [render-feed-items]
+    .models     [search get-links get-all get-page-metadata get-latest get-last-update-time get-table-stats]
+    .render     [render-page]
+    .store      [asset-exists? asset-path get-page]
+    .transform  [apply-transforms inner-html get-link-groups get-mappings get-plaintext-lines]
+    .utils      [base-url compact-hash compute-hmac get-thumbnail ttl-cache report-processing-time trace-flow utc-date]
     bottle      [abort get :as handle-get hook http-date parse-date request redirect response static-file view :as render-view]
     datetime    [datetime]
     dateutil.relativedelta  [relativedelta]
+    functools   [lru-cache]
     json        [dumps]
     logging     [getLogger]
-    models      [search get-links get-all get-page-metadata get-latest get-last-update-time get-table-stats]
     os          [environ]
     os.path     [join split]
     pytz        [UTC]
-    render      [render-page]
     socket      [socket AF_INET SOCK_DGRAM]
     time        [gmtime time])
 
@@ -36,7 +37,7 @@
         (when (in ua BANNED_AGENTS)
             (abort 401 "Banned."))
         (when (and (!= path "/") (= "/" (slice path -1)))
-            (redirect (slice path 0 -1) 301)))
+            (redirect (slice path 0 -1) 301))))
 
 
 ; grab page metadata or generate a minimal shim based on the last update
@@ -101,7 +102,7 @@
 
 ; root to /space
 (defn [(handle-get "/")] home-page []
-    (redirect PAGE_ROUTE_BASE 301)))
+    (redirect PAGE_ROUTE_BASE 301))
 
 
 ; environment dump

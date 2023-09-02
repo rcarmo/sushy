@@ -1,5 +1,5 @@
 (import
- ; docutils.core       [publish-parts]
+    ; docutils.core       [publish-parts]
     .models             [get-latest]
     .store              [get-page]
     json                [loads]
@@ -43,7 +43,7 @@
     
 
 (defn render-plaintext [raw]
-    (% "<pre>\n%s</pre>" raw))
+    f"<pre>\n{raw}</pre>")
 
     
 ;(defn render-restructured-text [raw]

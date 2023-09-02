@@ -1,13 +1,13 @@
 ; Handle legacy Yaki plugin tags
 (import
-    .config    [*scaled-media-base*]
+    .config    [SCALED_MEDIA_BASE]
     .messages  [inline-message inline-table]
     .models    [search]
     .utils     [compute-hmac memoize get-image-size]
     logging    [getLogger]
     lxml.etree [fromstring tostring])
 
-(setv log (getLogger))
+(setv log (getLogger __name__))
 
 (defn plugin-tagged
     ; searches for `plugin` tags named `tagged`
@@ -41,5 +41,5 @@
         (let [src  (get tag.attrib "src")
               path (.join "/" [pagename src])]
             (.replace (.getparent tag) tag
-                (fromstring (% "<img class=\"quicklook lazyload\" width=\"%d\" height=\"%d\" src=\"%s/40,30,blur/%s\" data-src=\"%s/%d,%d/%s\" data-src-retina=\"%s/%d,%d/%s\"/>" (, x y *scaled-media-base* path *scaled-media-base* x y path *scaled-media-base* (* 2 x) (* 2 y) path))))))
+                (fromstring (% "<img class=\"quicklook lazyload\" width=\"%d\" height=\"%d\" src=\"%s/40,30,blur/%s\" data-src=\"%s/%d,%d/%s\" data-src-retina=\"%s/%d,%d/%s\"/>" (, x y SCALED_MEDIA_BASE path SCALED_MEDIA_BASE x y path SCALED_MEDIA_BASE (* 2 x) (* 2 y) path))))))
     doc)

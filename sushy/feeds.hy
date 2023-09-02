@@ -1,5 +1,5 @@
 (import
-    .config            [*exclude-from-feeds* *feed-css* *feed-time-window* *feed-item-window*]
+    .config            [EXCLUDE_FROM_FEEDS FEED_CSS FEED_TIME_WINDOW FEED_ITEM_WINDOW]
     .models            [get-latest]
     .render            [render-page]
     .store             [get-page]
@@ -19,15 +19,15 @@
 (setv log (getLogger __name__))
 
 ; disable logging for cssutils, since it is incredibly whiny
-(.setLevel *cssutils-log* ERROR)
+(.setLevel cssutils-log ERROR)
 
-(setv *inline-css* (.read (open (abspath *feed-css*) "r")))
+(setv INLINE_CSS (.read (open (abspath FEED_CSS) "r")))
 
 
 (defn filtered-latest []
     ; get the latest (eligible) updates 
-    (let [time-window (strip-timezone (utc-date (+ (.now datetime) *feed-time-window*)))]
-        (filter (fn [x] (not (.match *exclude-from-feeds* (.get x "name")))) (get-latest :since time-window :limit *feed-item-window*))))
+    (let [time-window (strip-timezone (utc-date (+ (.now datetime) FEED_TIME_WINDOW)))]
+        (filter (fn [x] (not (.match EXCLUDE_FROM_FEEDS (.get x "name")))) (get-latest :since time-window :limit FEED_ITEM_WINDOW))))
 
 
 (defn render-feed-items [[prefix ""]]
@@ -40,7 +40,7 @@
                   doc      (prepend-asset-sources (remove-preloads (apply-transforms (render-page page) pagename)) prefix)
                   head     (Element "head")
                   style    (Element "style")]
-                (setv style.text *inline-css*)
+                (setv style.text INLINE_CSS)
                 (.append head style)
                 (.append doc head)
                 (assoc item
