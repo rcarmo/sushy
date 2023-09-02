@@ -1,28 +1,29 @@
-[![Stories in Ready](https://badge.waffle.io/rcarmo/sushy.png?label=ready&title=Ready)](https://waffle.io/rcarmo/sushy)
-
 # Sushy
 
-A wiki/blogging engine with a static file back-end. 
+A wiki/blogging engine with a static file back-end, full-text indexing and multiple markup support.
 
-This was formerly the site engine for <a href="http://taoofmac.com">http://taoofmac.com</a>, with full-text indexing and multiple markup support. Deployable to [piku]/[Dokku-alt][da]/[Dokku][dokku]/[Heroku][heroku].
+This was formerly the site engine for [`taoofmac.com`](https://taoofmac.com) [circa 2015](https://taoofmac.com/space/blog/2015/02/01/1930) until I decided to [switch back](https://taoofmac.com/space/blog/2018/07/08/1330) to pure Python for maintainability. 
 
 ## Status
 
-Currently being updated to support the 2023 version of Hylang.
+Many years later, I've decided to at least clean up the legacy codebase and bring it up to date. Once done, it should again be deployable to [`piku`][piku]/[Dokku-alt][da]/[Dokku][dokku]/[Heroku][heroku].
+
+The goal is to make it run on the 2023 version of Hylang.
 
 ### Roadmap
 
-* [ ] Fix all the various breaking syntax changes that the Hy project has gone through in the past few years
+* [ ] Fix all the various breaking syntax changes that the `Hy` project has gone through in the past few years
 * [ ] A little more documentation (there's never enough)
 * [ ] Blog archive and partial feature parity with the current `taoofmac.com` site engine
-* [ ] Working decorators and HTTP serving with the 2023 versions of Hy
-* [x] Working indexing with the 2023 versions of Hy
+* [ ] Working decorators and HTTP serving with the 2023 versions of `Hy`
+* [x] Removed `*earmuffs*` in favor of standard Python constants, because `Hy` now handles those differently 
+* [x] (Mostly) working indexing with the 2023 versions of `Hy`
 * [x] Page aliasing (i.e., multiple URLs for a page)
 * [x] Image thumbnailing
 * [x] Friendlier search results
 * [x] More CSS tweaks
 * [x] Atom feeds
-* [x] [piku][piku] deployment
+* [x] [`piku`][piku] deployment
 * [x] Blog homepage/prev-next navigation
 * [x] Preliminary support for rendering IPython notebooks
 * [x] <strike>Closest-match URLs (i.e., fix typos)</strike> (removed for performance concerns on large sites)
