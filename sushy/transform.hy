@@ -256,7 +256,7 @@
     (let [body (get (.xpath doc "//body") 0)
           children []]
         (for [child (.iterchildren body)]
-            (.append children (tostring child)))
+            (.append children (tostring child :encoding "unicode")))
         (.join "" children)))
 
 
@@ -295,7 +295,7 @@
     [page pagename]
     (let [doc            (apply-transforms (render-page page) pagename)
           lead-paragraph (get (.xpath doc ".//p[@class='lead']") 0)]
-        (tostring lead-paragraph)))
+        (tostring lead-paragraph :encoding "unicode")))
 
 
 (defn fix-footnotes

@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 # Database models for metadata caching and full text indexing using SQLite3 
 # (handily beats Whoosh and makes for a single index file)
 
-db = SqliteExtDatabase(environ['DATABASE_PATH'])
+db = SqliteExtDatabase(environ['DATABASE_PATH'],regexp_function=True,rank_functions=True)
 
 class Page(Model):
     """Page information"""

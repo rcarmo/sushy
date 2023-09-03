@@ -269,7 +269,7 @@
             (try
                 (let [page  (get-page pagename)
                       event (dict (. request headers))]
-                    (assoc event "url" (. request url))
+                    (setv (get event "url") (. request url))
                     (when STATS_PORT
                         (.sendto sock (dumps event) #(STATS_ADDRESS STATS_PORT)))
                     {"base_url"         (base-url)

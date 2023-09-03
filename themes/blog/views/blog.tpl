@@ -32,7 +32,7 @@ for post in latest:
             first = False
             body = inner_html(apply_transforms(render_page(page),pagename))
         else:
-            body = extract_lead_paragraph(page, pagename) + """<p class="read-more"><a href="%(page_route_base)s/%(pagename)s">Read More...</a></p>""" % locals()
+            body = extract_lead_paragraph(page, pagename) + f"""<p class="read-more"><a href="{page_route_base}/{pagename}">Read More...</a></p>"""
         end            
     else:
         body = inner_html(apply_transforms(render_page(page),pagename))
