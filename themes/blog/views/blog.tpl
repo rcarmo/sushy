@@ -7,11 +7,6 @@ from sushy.store import get_page
 from sushy.transform import apply_transforms, inner_html, extract_lead_paragraph
 from logging import getLogger
 from re import match
-from hy import HyKeyword
-
-def k(s):
-    return unicode(HyKeyword(':' + s))
-end
 
 log = getLogger()
 
@@ -30,7 +25,7 @@ first = True
 for post in latest:
     pagename = post['name']
     page = get_page(pagename)
-    headers = page[k('headers')]
+    headers = page['headers']
     namespace = pagename.split("/")[0].lower()
     if "blog" == namespace:
         if first:

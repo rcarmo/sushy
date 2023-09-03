@@ -89,7 +89,7 @@
             (if (published? headers)
                 (do
                     (add-wiki-links links)
-                    (index-wiki-page item))
+                    (index-wiki-page #** item))
                 (delete-wiki-page page)))
         (except [e Exception]
             (.warning log f"{(type e)}:{e} handling {item}"))))

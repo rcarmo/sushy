@@ -48,7 +48,7 @@
 
 (defn base-url []
     (let [#(scheme netloc path query fragment) (urlsplit (. request url))
-          base                                 (urlunparse (, scheme netloc "" "" "" ""))]
+          base                                 (urlunparse #(scheme netloc "" "" "" ""))]
         base))
 
 ; hashing and HMAC helpers
@@ -59,17 +59,16 @@
         
 (defn compute-hmac [key #* args]
     (let [buffer (.encode (.join "" (map str args)) "utf-8")]
-        (str (urlsafe-b64encode (.digest (new-hmac (bytes (.encode key "utf-8")) buffer sha1))))))
+        (urlsafe-b64encode (.digest (new-hmac (bytes (.encode key "utf-8")) buffer sha1)))))
 
 
 (defn trace-flow []
     ; dump arguments and data to the debug log
     (defn inner [func]
         (defn trace-fn [#* args #** kwargs]
-            (.debug log (, "trace ->" args kwargs))
-            ; TODO: decide how to replace this apply
-            (let [result (func args kwargs)]
-                (. debug log (, "trace <-" result))
+            (.debug log f"trace -> {args} {kwargs}")
+            (let [result (func #* args #** kwargs)]
+                (.debug log f"trace <- {result}")
                 result))
         trace-fn)
     inner)
@@ -79,10 +78,11 @@
     ; timing decorator
     (defn inner [func]
         (defn timed-fn [#* args #** kwargs]
-            (let [start (time)
-                  ; TODO: decide how to replace this apply
-                  result (func args kwargs)]
-                (.set-header response (str "Processing-Time") (+ (str (int (* 1000 (- (time) start)))) "ms"))
+            (let [start    (time)
+                  result   (func #* args #** kwargs)
+                  interval (int (* 1000 (- (time) start)))]
+                (.debug log f"{interval}ms")
+                (.set-header response "Processing-Time" f"{interval}ms")
                 result))
         timed-fn)
     inner)
@@ -97,28 +97,10 @@
                   key (compact-hash args kwargs)]
                 (if (in key cache)
                     (.get cache key)
-                    (setv result (func args kwargs)))
+                    (setv result (func #* args #** kwargs)))
                 (.setdefault cache key result)))
        memoized-fn)
     inner)
-
-
-(defn my-lru-cache [func [limit 64] [query-field None]]
-    ; LRU cache memoization decorator
-    (setv cache (OrderedDict))
-    ((wraps func)
-         (fn [#* args #** kwargs]
-            (let [result None
-                  tag (when query-field (get (. request query) query-field))
-                  key (compact-hash tag args kwargs)]
-                (try
-                    (setv result (.pop cache key))
-                    (except [e KeyError]
-                        (setv result (func args kwargs))
-                    (when (> (len cache) limit)
-                         (.popitem cache 0))))
-                (setv (get cache key) result)
-                result))))
 
 
 (defn ttl-cache [[ttl 30] [query-field None]]
@@ -127,22 +109,22 @@
         (setv cache {})
         (defn cached-fn [#* args #** kwargs]
             (let [now      (time)
-                  tag      (when query-field (get (. request query) query-field))
+                  tag      (when query-field (get (.request query) query-field))
                   key      (compact-hash tag args kwargs)
                   to-check (sample (.keys cache) (int (/ (len cache) 4)))]
                 ; check current arguments and 25% of remaining keys 
                 (.append to-check key)
 
                 (for [k to-check]
-                    (let [#(good-until value) (get cache k #(now None))]
+                    (let [#(good-until value) (.get cache k #(now None))]
                         (when (< good-until now)
                             (del (get cache k)))))
 
                 (if (in key cache)
-                    (let [#(good-until value) (get cache key)]
+                    (let [#(good-until value) (.get cache key)]
                         value)
-                    (let [value (func args kwargs)]
-                        (assoc cache key (, (+ now ttl) value))
+                    (let [value (func #* args #** kwargs)]
+                        (setv (get cache key) #((+ now ttl) value))
                         value))))
         cached-fn)
     inner)
@@ -154,7 +136,7 @@
         (try
             (do
                 (setv im (.open Image filename))
-                (let [size (. im size)]
+                (let [size (.im size)]
                     (.close im)
                     size))
             (except [e Exception]
@@ -168,11 +150,11 @@
           io (StringIO)]
         (try
             (do
-                (.thumbnail im (, x y) (. Image *bicubic*))
+                (.thumbnail im #(x y) (.Image BICUBIC))
                 (when (= effect "blur") 
-                    (setv im (.filter im (. ImageFilter GaussianBlur))))
+                    (setv im (.filter im (.ImageFilter GaussianBlur))))
                 (when (= effect "sharpen") 
-                    (setv im (.filter im (. ImageFilter UnsharpMask))))
+                    (setv im (.filter im (.ImageFilter UnsharpMask))))
                 (apply .save [im io] {"format" "JPEG" "progressive" true "optimize" true "quality" (int 80)})
                 (.getvalue io))
             (except [e Exception]
