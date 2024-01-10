@@ -54,12 +54,12 @@
 ; hashing and HMAC helpers
 (defn compact-hash [#* args]
     (let [hash (sha1 (.encode (str args) "utf-8"))]
-        (urlsafe-b64encode (.digest hash))))
+        (str (urlsafe-b64encode (.digest hash)))))
 
         
 (defn compute-hmac [key #* args]
     (let [buffer (.encode (.join "" (map str args)) "utf-8")]
-        (urlsafe-b64encode (.digest (new-hmac (bytes (.encode key "utf-8")) buffer sha1)))))
+        (str (urlsafe-b64encode (.digest (new-hmac (bytes (.encode key "utf-8")) buffer sha1))))))
 
 
 (defn trace-flow []
