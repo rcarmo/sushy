@@ -30,6 +30,9 @@ repl:
 deps:
 	pip install -U -r requirements-dev.txt
 
+deps-upgrade:
+	pip-upgrader requirements.txt
+
 notebook:
 	jupyter notebook
 
