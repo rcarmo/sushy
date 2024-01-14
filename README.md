@@ -15,6 +15,7 @@ The goal is to make it run on the 2023 version of Hylang.
 * [ ] Fix all the various breaking syntax changes that the `Hy` project has gone through in the past few years
 * [ ] A little more documentation (there's never enough)
 * [ ] Blog archive and partial feature parity with the current `taoofmac.com` site engine
+* [ ] End-to-end syntax and linting checks
 * [ ] Fix link and image handling, which require some tweaks
 * [x] Working decorators and HTTP serving with the 2023 versions of `Hy`
 * [x] Removed `*earmuffs*` in favor of standard Python constants, because `Hy` now handles those differently 
