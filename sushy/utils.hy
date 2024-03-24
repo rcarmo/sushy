@@ -111,7 +111,7 @@
             (let [now      (time)
                   tag      (when query-field (get (.request query) query-field))
                   key      (compact-hash tag args kwargs)
-                  to-check (sample (.keys cache) (int (/ (len cache) 4)))]
+                  to-check (sample (sorted (.keys cache)) (int (/ (len cache) 4)))]
                 ; check current arguments and 25% of remaining keys 
                 (.append to-check key)
 
