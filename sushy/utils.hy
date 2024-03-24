@@ -109,7 +109,7 @@
         (setv cache {})
         (defn cached-fn [#* args #** kwargs]
             (let [now      (time)
-                  tag      (when query-field (get (.request query) query-field))
+                  tag      (when query-field (get (. request query) query-field))
                   key      (compact-hash tag args kwargs)
                   to-check (sample (sorted (.keys cache)) (int (/ (len cache) 4)))]
                 ; check current arguments and 25% of remaining keys 
@@ -226,23 +226,24 @@
           the-end  (if end-interval end-interval (datetime.now))
           interval (- (timegm (.timetuple the-end)) (timegm (.timetuple begin-interval)))
           values []]
+        (print chunks)
         (for [i chunks]
             (setv #(d r) (divmod interval i))
-            (.append values (, (int d) (.get READABLE_INTERVALS i)))
+            (.append values #((int d) (.get READABLE_INTERVALS i)))
             (setv interval r))
-        (filter (fn [x] (pos? (get x 0))) values)))
+        (filter (fn [x] (>= 0 (get x 0))) values)))
 
 
 (defn string-plurals [chunk]
     (let [#(v s) chunk]
-        (.join " " (map str (, v (if (> v 1) (+ s "s") s))))))
+        (.join " " (map str #(v (if (> v 1) (+ s "s") s))))))
 
 
 (defn time-since [begin-interval [end-interval None]]
     (let [chunks (list (map string-plurals (time-chunks begin-interval end-interval)))]
         (if (not (len (list chunks)))
             "sometime"
-            (.join ", " (take 2 chunks)))))
+            (.join ", " (get chunks (slice 0 2))))))
         
 
 (defmacro timeit [block iterations]
