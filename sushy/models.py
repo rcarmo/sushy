@@ -205,7 +205,7 @@ def search(qstring, limit=50):
     """Full text search"""
     query = (FTSPage.select(Page,
                             FTSPage,
-                            fn.snippet(FTSPage.as_entity()).alias('extract'),
+                            fn.snippet(FTSPage._meta.entity).alias('extract'),
                             FTSPage.bm25().alias('score'))
                     .join(Page)
                     .where(FTSPage.match(qstring))
