@@ -1,5 +1,5 @@
 -r requirements.txt
-jupyter
-hy-kernel
+#jupyter
+#hy-kernel
 pip-upgrader
 css-html-js-minify

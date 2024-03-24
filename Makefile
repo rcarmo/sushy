@@ -33,9 +33,6 @@ deps:
 deps-upgrade:
 	pip-upgrader requirements.txt
 
-notebook:
-	jupyter notebook
-
 clean:
 	rm -f *.zip
 	rm -f $(BYTECODE)
