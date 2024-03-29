@@ -42,8 +42,7 @@
             <div class="masthead">
                 <div class="container">
                     <h3 class="masthead-title">
-                        <a href="/" title="">
-                        <img class="logo" src="/apple-touch-icon.png" width="36" height="36">{{!site_name}}</a>
+                        <a href="/" title="">{{!site_name}}</a>
                     </h3>
                 </div>
             </div>

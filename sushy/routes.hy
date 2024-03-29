@@ -295,7 +295,7 @@
         (let [size #((long x) (long y))
               eff  (if (len effect) (slice effect 1) "")
               hmac (compute-hmac ASSET_HASH SCALED_MEDIA_BASE f"/{x},{y},{effect}/{filename}")]
-            (.debug log (, size hmac hash effect eff filename))
+            (.debug log f"{size} {hmac} {hash} {effect} {eff} {filename}")
             (if (!= hash hmac)
                 (abort 403 "Invalid Image Request")
                 (let [#(pagename asset) (split filename)]

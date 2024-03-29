@@ -226,8 +226,8 @@
                               min-width       (max MIN_IMAGE_SIZE (/ new-width 4))
                               min-height      (max MIN_IMAGE_SIZE (/ new-height 4))
                               new-cls         (if-not (in "lazyload" cls) (+ cls " lazyload") cls)
-                              new-src         (% "%s/%d,%d,blur%s" (, SCALED_MEDIA_BASE min-width min-height base-src))
-                              data-src        (% "%s/%d,%d%s" (, SCALED_MEDIA_BASE new-width new-height base-src))
+                              new-src         f"{SCALED_MEDIA_BASE}/{min-width},{min-height},blur{base-src}"
+                              data-src        f"{SCALED_MEDIA_BASE}/{new-width},{new-height}{base-src}"
                               data-src-retina (if-not retina src retina)]
                             (setv (get (. tag attrib) "height") (str new-height))
                             (setv (get (. tag attrib) "width") (str new-width))
@@ -238,7 +238,7 @@
                         (let [min-width       (max MIN_IMAGE_SIZE (/ width 4))
                               min-height      (max MIN_IMAGE_SIZE (/ height 4))
                               new-cls         (if-not (in "lazyload" cls) (+ cls " lazyload") cls)
-                              new-src         (% "%s/%d,%d,blur%s" (, SCALED_MEDIA_BASE min-width min-height base-src))
+                              new-src         f"{SCALED_MEDIA_BASE}/{min-width},{min-height},blur{base-src}"
                               data-src        src]
                             (setv (get (. tag attrib) "class") new-cls)
                             (setv (get (. tag attrib) "src") new-src)

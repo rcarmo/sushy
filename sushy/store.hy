@@ -44,7 +44,7 @@
                 {"headers" headers
                   "body"    body})
             (except [e Exception]
-                (.error log (, e "Could not parse page"))
+                (.error log f"{e} Could not parse page"))
                 (raise (RuntimeError "Could not parse page"))))))
 
 
