@@ -226,12 +226,11 @@
           the-end  (if end-interval end-interval (datetime.now))
           interval (- (timegm (.timetuple the-end)) (timegm (.timetuple begin-interval)))
           values []]
-        (print chunks)
         (for [i chunks]
             (setv #(d r) (divmod interval i))
             (.append values #((int d) (.get READABLE_INTERVALS i)))
             (setv interval r))
-        (filter (fn [x] (>= 0 (get x 0))) values)))
+        (filter (fn [x] (< 0 (get x 0))) values)))
 
 
 (defn string-plurals [chunk]
