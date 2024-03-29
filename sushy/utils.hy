@@ -158,7 +158,7 @@
                 (.save im io :format "JPEG" :progressive true :optimize true :quality (int 80))
                 (.getvalue io))
             (except [e Exception]
-                (.warn log f"{e} {x} {y} {filename}"))
+                (.warn log f"{e} {x} {y} {filename}")
                 "")
             (finally (.close io)))))
 
