@@ -92,7 +92,7 @@
                             (.set-header response "X-sushy-http-caching" "True")
                             (.set-header response "ETag" etag)
                             (.set-header response "Last-Modified" (http-date (get metadata "mtime")))
-                            (.set-header response "Expires" (http-date (+ (.now datetime) (apply relativedelta [] {"seconds" seconds}))))
+                            (.set-header response "Expires" (http-date (+ (.now datetime) (relativedelta :seconds seconds))))
                             (.set-header response "Cache-Control" (.format "{}, max-age={}, s-maxage={}" pragma seconds (* 2 seconds)))
                             (.set-header response "Pragma" pragma)))
                     (func #* args #** kwargs))))
