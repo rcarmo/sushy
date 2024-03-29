@@ -136,7 +136,7 @@
         (try
             (do
                 (setv im (.open Image filename))
-                (let [size (.im size)]
+                (let [size im.size]
                     (.close im)
                     size))
             (except [e Exception]
@@ -173,7 +173,7 @@
     (+ (.join "" 
               (map (fn [k] 
                     (if (in k data)
-                        (% "%s: %s\n" (, k (get data k)))
+                        (% "%s: %s\n" #(k (get data k)))
                         ""))
                   ["retry" "id" "event" "data"]))
        "\n"))

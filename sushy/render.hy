@@ -73,7 +73,7 @@
     
     
 (defn render-page [page]
-    (.warn log (:headers page))
+    (.info log (:headers page))
     ((get render-map (get (:headers page) "content-type")) (:body page)))
 
 

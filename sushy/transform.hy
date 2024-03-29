@@ -195,8 +195,6 @@
                               accessor (. tag attrib)]
                             (if size
                                 (do
-                                    (.warn log size)
-                                    (.warn log accessor)
                                     (setv (get (. tag attrib) "width") (str (get size 0)))
                                     (setv (get (. tag attrib) "height") (str (get size 1))))
                                 (.replace (.getparent tag) tag
