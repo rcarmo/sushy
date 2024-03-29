@@ -30,28 +30,22 @@
 
 (defn parse-page [buffer [content-type "text/plain"]]
     ; parse a page and return a header map and the raw markup
-    (.debug log buffer)
-    (if (= content-type "application/x-ipynb+json")
-        {"headers" {"from" "Unknown Author"
-                   "title" "Untitled Notebook"
-                   "content-type" content-type}
-         "body"   buffer}
-        (let [unix-buffer (.replace buffer "\r\n" "\n")]
-            (try 
-                (let [delimiter    "\n\n"
-                      parts        (.split unix-buffer delimiter 1)
-                      header-lines (.splitlines (get parts 0))
-                      headers      (dict (map split-header-line header-lines))
-                      body         (.strip (get parts 1))]
-                    (when (not (in "from" headers))
-                        (assoc headers "from" "Unknown Author"))
-                    (when (not (in "content-type" headers))
-                        (assoc headers "content-type" content-type))
-                    {"headers" headers
-                     "body"    body})
-                (except [e Exception]
-                    (.error log (, e "Could not parse page"))
-                    (raise (RuntimeError "Could not parse page")))))))
+    (let [unix-buffer (.replace buffer "\r\n" "\n")]
+        (try 
+            (let [delimiter    "\n\n"
+                  parts        (.split unix-buffer delimiter 1)
+                  header-lines (.splitlines (get parts 0))
+                  headers      (dict (map split-header-line header-lines))
+                  body         (.strip (get parts 1))]
+                (when (not (in "from" headers))
+                    (assoc headers "from" "Unknown Author"))
+                (when (not (in "content-type" headers))
+                    (assoc headers "content-type" content-type))
+                {"headers" headers
+                  "body"    body})
+            (except [e Exception]
+                (.error log (, e "Could not parse page"))
+                (raise (RuntimeError "Could not parse page"))))))
 
 
 (defn asset-path [pagename asset]

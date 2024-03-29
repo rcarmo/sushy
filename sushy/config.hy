@@ -81,10 +81,8 @@
 ; markup file extensions
 (setv BASE_TYPES
     {".txt"      "text/x-textile"; TODO: this should be reverted to text/plain after legacy content is cleared out
-;     ".ipynb"    "application/x-ipynb+json"
      ".htm"      "text/html"
      ".html"     "text/html"
-;     ".rst"      "text/x-rst"
      ".md"       "text/x-markdown"
      ".mkd"      "text/x-markdown"
      ".mkdn"     "text/x-markdown"
