@@ -155,7 +155,7 @@
                     (setv im (.filter im (.ImageFilter GaussianBlur))))
                 (when (= effect "sharpen") 
                     (setv im (.filter im (.ImageFilter UnsharpMask))))
-                (apply .save [im io] {"format" "JPEG" "progressive" true "optimize" true "quality" (int 80)})
+                (.save im io :format "JPEG" :progressive true :optimize true :quality (int 80)})
                 (.getvalue io))
             (except [e Exception]
                 (.warn log (, e x y filename))
