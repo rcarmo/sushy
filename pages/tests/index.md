@@ -1,14 +1,11 @@
+---
 From: Rui Carmo
 Title: Tests
-Content-Type: text/x-markdown
+---
 
 ## To Do:
 
 * [Aliases](tests/aliases)
-
-## Ongoing:
-
-* [IPython Notebook](tests/ipynb)
 
 ## Passed:
 
