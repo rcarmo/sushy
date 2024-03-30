@@ -44,7 +44,6 @@
           existing (list (list-blobs))]
         (when (not (in f"favicon:{hostname}" existing))
             (let [res (.get fetcher (urljoin url "favicon.ico") :allow-redirects True :timeout 2)]
-                ; TODO - fallback to extracting from HTML
                 (if (= 200 res.status_code)
                     (save-favicon hostname res.content)
                     (let [href (parse-favicon url)]
