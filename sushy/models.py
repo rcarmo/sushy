@@ -54,6 +54,15 @@ class FTSPage(FTSModel):
         extension_options = {'tokenize': 'porter'}
 
 
+class Blobs(Model):
+    name = FixedCharField(null=False, index=True, max_length=128)
+    mimetype = FixedCharField(null=False, max_length=32)
+    data = BlobField()
+
+    class Meta:
+        database = db
+
+
 def init_db():
     """Initialize the database"""
     db.execute_sql('PRAGMA journal_mode=WAL')
@@ -61,6 +70,7 @@ def init_db():
         Page.create_table()
         Link.create_table()
         FTSPage.create_table()
+        Blobs.create_table()
     except OperationalError as e:
         log.info(e)
 
@@ -200,6 +210,34 @@ def get_all():
     for page in query:
         yield page
 
+
+def list_blobs():
+    """Get ALL the pages"""
+    query = (Blob.select(Blob.name)
+            .dicts())
+
+    for blob in query:
+        yield blob["name"]
+
+
+def get_blob(str: name) -> dict:
+    """Simple blob retrieval"""
+    return Blobs.get(Blobs.name == name)._data
+
+
+def put_blob(str: k, str: mimetype, bytes: data) -> None:
+    """Simple blob storage"""
+    Blobs.replace(Blobs.name = name
+                  Blobs.mimetype = mimetype, 
+                  Blobs.data = data)
+
+def delete_blob(str: name) -> None:
+    """Simple blob removal"""
+    with db.atomic():   
+        try:
+            Blobs.delete().where(Blobs.name == name).execute()
+        except Exception as e:
+            log.warn(e)
 
 def search(qstring, limit=50):
     """Full text search"""
