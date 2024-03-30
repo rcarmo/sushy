@@ -35,6 +35,7 @@ deps-upgrade:
 
 clean:
 	rm -f *.zip
+	rm -rf sushy/__pycache__
 	rm -f $(BYTECODE)
 	rm -f $(PYTHONCODE)
 	rm -f $(DATABASE_PATH)*

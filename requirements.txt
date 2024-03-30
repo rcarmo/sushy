@@ -17,3 +17,4 @@ smartypants==2.0.1
 textile==4.0.2
 watchdog==4.0.0
 python-slugify==8.0.4
+#aiohttp[speedups]

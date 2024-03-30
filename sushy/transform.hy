@@ -1,6 +1,7 @@
 ; Perform HTML transforms
 (import
     .config             [ALIAS_PAGE ASSET_HASH INTERWIKI_PAGE LAZYLOAD_IMAGES MAX_IMAGE_SIZE MIN_IMAGE_SIZE PAGE_MEDIA_BASE PAGE_ROUTE_BASE SCALED_MEDIA_BASE SIGNED_PREFIXES]
+    .favicons           [download-favicon]
     .messages           [inline-message]
     .plugins            [plugin-tagged plugin-quicklook plugin-rating]
     .store              [asset-exists? asset-path get-page page-exists? open-asset]
@@ -124,6 +125,18 @@
              (while (in href ALIAS_MAP)
                  (setv href (get ALIAS_MAP href))
                  (setv (get a.attrib "href") href))))
+    doc)
+
+
+(defn capture-favicons
+    ; ensures we preload favicons from external sites. We purposely ignore port numbers and the like
+    [doc]
+    (for [a (.xpath doc "//a[starts-with(@href,'http')]")]
+        (let [href (get a.attrib "href")
+              parts (urlsplit href)
+              schema (get parts 0)
+              netloc (get parts 1)]
+         (download-favicon f"{schema}://{netloc}")))
     doc)
 
 
@@ -342,4 +355,5 @@
         (plugin-tagged)
         (plugin-rating)
         (plugin-quicklook pagename)
+        (capture-favicons)
         (sign-assets)))

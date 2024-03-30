@@ -54,7 +54,7 @@ class FTSPage(FTSModel):
         extension_options = {'tokenize': 'porter'}
 
 
-class Blobs(Model):
+class Blob(Model):
     name = FixedCharField(null=False, index=True, max_length=128)
     mimetype = FixedCharField(null=False, max_length=32)
     data = BlobField()
@@ -67,10 +67,11 @@ def init_db():
     """Initialize the database"""
     db.execute_sql('PRAGMA journal_mode=WAL')
     try:
+        Blob.create_table()
         Page.create_table()
         Link.create_table()
         FTSPage.create_table()
-        Blobs.create_table()
+        log.debug("tables created")
     except OperationalError as e:
         log.info(e)
 
@@ -220,24 +221,33 @@ def list_blobs():
         yield blob["name"]
 
 
-def get_blob(str: name) -> dict:
+def get_blob(name: str) -> dict:
     """Simple blob retrieval"""
     return Blobs.get(Blobs.name == name)._data
 
 
-def put_blob(str: k, str: mimetype, bytes: data) -> None:
+def put_blob(**kwargs) -> Blob:
     """Simple blob storage"""
-    Blobs.replace(Blobs.name = name
-                  Blobs.mimetype = mimetype, 
-                  Blobs.data = data)
+    with db.atomic():
+        values = {}
+        for k in [u"name", u"mimetype", u"data"]:
+            values[k] = kwargs[k]
+        try:
+            blob = Blob.create(**values)
+        except IntegrityError:
+            blob = Blob.get(Blob.name == values['name'])
+            blob.update(**values)
+        return blob
 
-def delete_blob(str: name) -> None:
+
+def delete_blob(name: str) -> None:
     """Simple blob removal"""
     with db.atomic():   
         try:
             Blobs.delete().where(Blobs.name == name).execute()
         except Exception as e:
             log.warn(e)
+
 
 def search(qstring, limit=50):
     """Full text search"""
