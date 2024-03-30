@@ -2,7 +2,7 @@
     .models      [list-blobs put-blob get-blob]
     io           [BytesIO]
     PIL          [Image]
-    requests     [Session]
+    requests     [Session ConnectionTimeout]
     logging      [getLogger]
     urllib.parse [urlsplit urljoin]
     lxml.html    [fromstring]
@@ -11,6 +11,23 @@
 (setv log (getLogger))
 (setv fetcher (Session))
 (setv fetcher.headers {"User-Agent" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Safari/605.1.15"})
+
+(defn [cache] download-favicon [url]
+    ; try to obtain a favicon from a (base) URL
+    (let [hostname (get (urlsplit url) 1)
+          existing (list (list-blobs))]
+        (when (not (in f"favicon:{hostname}" existing))
+            (try
+                (let [res (.get fetcher (urljoin url "favicon.ico") :allow-redirects True :timeout 2)]
+                    (if (= 200 res.status_code)
+                        (save-favicon hostname res.content)
+                        (let [href (parse-favicon url)]
+                            (when href 
+                              (let [res (.get fetcher href :allow-redirects True :timeout 2)]
+                                  (when (= 200 res.status_code)
+                                      (save-favicon hostname res.content)))))))
+                (except [e Exception]
+                    (.warn log f"{e} {url}"))))))
 
 (defn parse-favicon [url]
     ; get first usable icon candidate (or none) from HTML page
@@ -29,6 +46,7 @@
                       (urljoin url href)))))))
 
 (defn save-favicon [hostname data]
+    ; try to resize and save the favicon (we don't care about SVGs, so this always assumes we got bitmap data of some sort)
     (try
         (let [im (.open Image (BytesIO data))
               buffer (BytesIO)
@@ -37,21 +55,6 @@
         (except [e Exception]
             (.warn log f"{e} {hostname}"))))
 
-
-(defn [cache] download-favicon [url]
-    (.info log url)
-    (let [hostname (get (urlsplit url) 1)
-          existing (list (list-blobs))]
-        (when (not (in f"favicon:{hostname}" existing))
-            (let [res (.get fetcher (urljoin url "favicon.ico") :allow-redirects True :timeout 2)]
-                (if (= 200 res.status_code)
-                    (save-favicon hostname res.content)
-                    (let [href (parse-favicon url)]
-                        (when href 
-                           (let [res (.get fetcher href :allow-redirects True :timeout 2)]
-                               (when (= 200 res.status_code)
-                                   (save-favicon hostname res.content))))))))))
-
-
-(defn [cache] get-favicon [hostname]
-      (get-blob f"favicon:{hostname}"))
+(defn [(lru-cache 20)] get-favicon [hostname]
+    ; retrieve a stored favicon. We assume they're always tiny PNGs
+    (get (get-blob f"favicon:{hostname}") "data"))
