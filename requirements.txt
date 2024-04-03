@@ -8,7 +8,7 @@ lxml==5.1.0
 Markdown==3.6
 nbconvert==7.16.3
 peewee==3.17.1
-pillow==10.2.0
+pillow==10.3.0
 pygments==2.17.2
 python-dateutil==2.9.0
 pytz>=2023.3
