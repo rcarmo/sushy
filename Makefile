@@ -12,6 +12,8 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export CURRENT_GIT_BRANCH?=`git symbolic-ref --short HEAD`
 
+.DEFAULT_GOAL := help
+
 # Experimental zip bundle
 BUNDLE=sushy.zip
 export PYTHONPATH=$(BUNDLE)
@@ -24,74 +26,67 @@ PYTHONCODE=$(HYFILES:.hy=.py)
 PROFILES=$(wildcard *.pstats)
 CALL_DIAGRAMS=$(PROFILES:.pstats=.png)
 
-repl:
+repl: ## Start a Hy REPL
 	hy -i "(import sushy.app)"
 
-deps:
-	pip install -U -r requirements-dev.txt
+deps: ## Install Dependencies
+	pip install -U -r requirements.txt
 
-notebook:
-	jupyter notebook
+deps-upgrade: ## Interactively upgrade requirements.txt
+	pip-upgrade --skip-virtualenv-check requirements.txt
 
-clean:
+clean: ## Clean environment
 	rm -f *.zip
 	rm -f $(BYTECODE)
 	rm -f $(PYTHONCODE)
 	rm -f $(DATABASE_PATH)*
 
-# Turn Hy files into bytecode so that we can use a standard Python interpreter
-%.pyc: %.hy
+%.pyc: %.hy ## Turn Hy files into bytecode so that we can use a standard Python interpreter
 	hyc $<
 
-# Turn Hy files into Python source so that PyPy will (eventually) be happy
-%.py: %.hy
+%.py: %.hy ## Turn Hy files into Python source so that PyPy will (eventually) be happy
 	hy2py $< > $@
 
 build: $(BYTECODE) 
 
-# Experimental bundle to see if we can deploy this solely as a ZIP file
-bundle: $(HYFILES) $(PYFILES)
+bundle: $(HYFILES) $(PYFILES)  ## Experimental bundle to see if we can deploy this solely as a ZIP file
 	zip -r9 $(BUNDLE) sushy/* -i *.py *.pyc
 	rm -f sushy/*.pyc
 
-# Run with the embedded web server
-serve:
+serve: ## Run with the embedded web server
 	hy -m sushy.app
 
-# Run with uwsgi
-uwsgi: build
+uwsgi: build ## Run with uwsgi
 	uwsgi --http :$(PORT) --python-path . --wsgi sushy.app --callable app -p 1
 
-# Run with uwsgi
-uwsgi-ini: build
+uwsgi-ini: build ## Run with uwsgi
 	uwsgi --ini uwsgi.ini
 
-# Run indexer
-index:
+index: ## Run indexer
 	hy -m sushy.indexer
 
-# Run indexer and watch for changes
-index-watch:
+index-watch: ## Run indexer and watch for changes
 	hy -m sushy.indexer watch
 
-# Render pstats profiler files into nice PNGs (requires dot)
-%.png: %.pstats
+%.png: %.pstats ## Render pstats profiler files into nice PNGs (requires dot)
 	python tools/gprof2dot.py -f pstats $< | dot -Tpng -o $@
 
-profile: $(CALL_DIAGRAMS)
+profile: $(CALL_DIAGRAMS) ## Render profile
 
 debug-%: ; @echo $*=$($*)
 
-# Commands for deploying to a piku instance
-restart-production:
+restart-production: ## Restart production Piku instance
 	ssh piku@piku restart sushy
 
-deploy-production:
+deploy-production: ## Push to production Piku instance
 	git push production master
 
-reset-production:
+reset-production: ## Destroy production instance
 	ssh piku@piku destroy sushy
 
-redeploy: reset-production deploy-production restart-production
+redeploy: reset-production deploy-production restart-production ## Redeploy
 
-deploy: deploy-production restart-production
+deploy: deploy-production restart-production ## Deploy
+
+help:
+	@grep -hE '^[A-Za-z0-9_ \-]*?:.*##.*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
