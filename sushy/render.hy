@@ -6,8 +6,6 @@
     logging             [getLogger]
     lxml.etree          [Element tostring fromstring]
     markdown            [Markdown]
-    nbformat            [reads]
-    nbconvert           [HTMLExporter]
     re                  [sub]
     smartypants         [smartypants]
     textile             [Textile]
@@ -27,12 +25,6 @@
 
 (setv textile-renderer
     (Textile :html_type "html5"))
-
-
-(defn render-ipynb [raw]
-    (let [exporter (HTMLExporter)]
-        (setv (. exporter template-file) "basic")
-        (get (.from-notebook-node exporter (reads raw 4)) 0)))
 
 
 (defn render-html [raw]
@@ -61,9 +53,6 @@
 
 (setv render-map 
     {"text/plain"               render-plaintext
-;     "text/rst"                 render-restructured-text ; unofficial, but let's be lenient
-;     "text/x-rst"               render-restructured-text ; official
-;     "application/x-ipynb+json" render-ipynb
      "text/x-web-markdown"      render-markdown
      "text/x-markdown"          render-markdown
      "text/markdown"            render-markdown
@@ -73,7 +62,7 @@
     
     
 (defn render-page [page]
-    (.warn log (:headers page))
+    (.info log (:headers page))
     ((get render-map (get (:headers page) "content-type")) (:body page)))
 
 

@@ -109,9 +109,9 @@
         (setv cache {})
         (defn cached-fn [#* args #** kwargs]
             (let [now      (time)
-                  tag      (when query-field (get (.request query) query-field))
+                  tag      (when query-field (get (. request query) query-field))
                   key      (compact-hash tag args kwargs)
-                  to-check (sample (.keys cache) (int (/ (len cache) 4)))]
+                  to-check (sample (sorted (.keys cache)) (int (/ (len cache) 4)))]
                 ; check current arguments and 25% of remaining keys 
                 (.append to-check key)
 
@@ -136,7 +136,7 @@
         (try
             (do
                 (setv im (.open Image filename))
-                (let [size (.im size)]
+                (let [size im.size]
                     (.close im)
                     size))
             (except [e Exception]
@@ -155,10 +155,10 @@
                     (setv im (.filter im (.ImageFilter GaussianBlur))))
                 (when (= effect "sharpen") 
                     (setv im (.filter im (.ImageFilter UnsharpMask))))
-                (apply .save [im io] {"format" "JPEG" "progressive" true "optimize" true "quality" (int 80)})
+                (.save im io :format "JPEG" :progressive true :optimize true :quality (int 80))
                 (.getvalue io))
             (except [e Exception]
-                (.warn log (, e x y filename))
+                (.warn log f"{e} {x} {y} {filename}")
                 "")
             (finally (.close io)))))
 
@@ -173,7 +173,7 @@
     (+ (.join "" 
               (map (fn [k] 
                     (if (in k data)
-                        (% "%s: %s\n" (, k (get data k)))
+                        (% "%s: %s\n" #(k (get data k)))
                         ""))
                   ["retry" "id" "event" "data"]))
        "\n"))
@@ -228,21 +228,21 @@
           values []]
         (for [i chunks]
             (setv #(d r) (divmod interval i))
-            (.append values (, (int d) (.get READABLE_INTERVALS i)))
+            (.append values #((int d) (.get READABLE_INTERVALS i)))
             (setv interval r))
-        (filter (fn [x] (pos? (get x 0))) values)))
+        (filter (fn [x] (< 0 (get x 0))) values)))
 
 
 (defn string-plurals [chunk]
     (let [#(v s) chunk]
-        (.join " " (map str (, v (if (> v 1) (+ s "s") s))))))
+        (.join " " (map str #(v (if (> v 1) (+ s "s") s))))))
 
 
 (defn time-since [begin-interval [end-interval None]]
     (let [chunks (list (map string-plurals (time-chunks begin-interval end-interval)))]
         (if (not (len (list chunks)))
             "sometime"
-            (.join ", " (take 2 chunks)))))
+            (.join ", " (get chunks (slice 0 2))))))
         
 
 (defmacro timeit [block iterations]

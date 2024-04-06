@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 # Database models for metadata caching and full text indexing using SQLite3 
 # (handily beats Whoosh and makes for a single index file)
 
-db = SqliteExtDatabase(environ['DATABASE_PATH'])
+db = SqliteExtDatabase(environ['DATABASE_PATH'],regexp_function=True,rank_functions=True)
 
 class Page(Model):
     """Page information"""
@@ -54,13 +54,24 @@ class FTSPage(FTSModel):
         extension_options = {'tokenize': 'porter'}
 
 
+class Blob(Model):
+    name = FixedCharField(null=False, index=True, max_length=128)
+    mimetype = FixedCharField(null=False, max_length=32)
+    data = BlobField()
+
+    class Meta:
+        database = db
+
+
 def init_db():
     """Initialize the database"""
     db.execute_sql('PRAGMA journal_mode=WAL')
     try:
+        Blob.create_table()
         Page.create_table()
         Link.create_table()
         FTSPage.create_table()
+        log.debug("tables created")
     except OperationalError as e:
         log.info(e)
 
@@ -201,11 +212,48 @@ def get_all():
         yield page
 
 
+def list_blobs():
+    """Get ALL the pages"""
+    query = (Blob.select(Blob.name)
+            .dicts())
+
+    for blob in query:
+        yield blob["name"]
+
+
+def get_blob(name: str) -> dict:
+    """Simple blob retrieval"""
+    return Blobs.get(Blobs.name == name)._data
+
+
+def put_blob(**kwargs) -> Blob:
+    """Simple blob storage"""
+    with db.atomic():
+        values = {}
+        for k in [u"name", u"mimetype", u"data"]:
+            values[k] = kwargs[k]
+        try:
+            blob = Blob.create(**values)
+        except IntegrityError:
+            blob = Blob.get(Blob.name == values['name'])
+            blob.update(**values)
+        return blob
+
+
+def delete_blob(name: str) -> None:
+    """Simple blob removal"""
+    with db.atomic():   
+        try:
+            Blobs.delete().where(Blobs.name == name).execute()
+        except Exception as e:
+            log.warn(e)
+
+
 def search(qstring, limit=50):
     """Full text search"""
     query = (FTSPage.select(Page,
                             FTSPage,
-                            fn.snippet(FTSPage.as_entity()).alias('extract'),
+                            fn.snippet(FTSPage._meta.entity).alias('extract'),
                             FTSPage.bm25().alias('score'))
                     .join(Page)
                     .where(FTSPage.match(qstring))

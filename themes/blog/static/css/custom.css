@@ -456,3 +456,5 @@ footer {
         -webkit-transform: scale(1)
     }
 }
+
+a[href*="//"]:not([href*="localhost"]):after{content:"";display:inline-block;vertical-align:middle;width:1.1rem;height:1.1rem;margin:0 .2em 3px;border-radius:3px;background-size:contain;background-image:var(--url)}

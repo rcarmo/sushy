@@ -1,7 +1,7 @@
 # Set these if not defined already
 export BIND_ADDRESS?=0.0.0.0
 export PORT?=8080
-export DEBUG?=True
+export DEBUG?=False
 export PROFILER?=False
 export CONTENT_PATH?=pages
 export THEME_PATH?=themes/blog
@@ -37,6 +37,7 @@ deps-upgrade: ## Interactively upgrade requirements.txt
 
 clean: ## Clean environment
 	rm -f *.zip
+	rm -rf sushy/__pycache__
 	rm -f $(BYTECODE)
 	rm -f $(PYTHONCODE)
 	rm -f $(DATABASE_PATH)*

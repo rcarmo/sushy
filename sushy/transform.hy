@@ -1,6 +1,7 @@
 ; Perform HTML transforms
 (import
     .config             [ALIAS_PAGE ASSET_HASH INTERWIKI_PAGE LAZYLOAD_IMAGES MAX_IMAGE_SIZE MIN_IMAGE_SIZE PAGE_MEDIA_BASE PAGE_ROUTE_BASE SCALED_MEDIA_BASE SIGNED_PREFIXES]
+    .favicons           [download-favicon]
     .messages           [inline-message]
     .plugins            [plugin-tagged plugin-quicklook plugin-rating]
     .store              [asset-exists? asset-path get-page page-exists? open-asset]
@@ -127,6 +128,18 @@
     doc)
 
 
+(defn capture-favicons
+    ; ensures we preload favicons from external sites. We purposely ignore port numbers and the like
+    [doc]
+    (for [a (.xpath doc "//a[starts-with(@href,'http')]")]
+        (let [href (get a.attrib "href")
+              parts (urlsplit href)
+              schema (get parts 0)
+              netloc (get parts 1)]
+         (download-favicon f"{schema}://{netloc}")))
+    doc)
+
+
 (defn include-sources
     ; searches for `pre` tags with a `src` attribute
     [doc pagename]
@@ -195,8 +208,6 @@
                               accessor (. tag attrib)]
                             (if size
                                 (do
-                                    (.warn log size)
-                                    (.warn log accessor)
                                     (setv (get (. tag attrib) "width") (str (get size 0)))
                                     (setv (get (. tag attrib) "height") (str (get size 1))))
                                 (.replace (.getparent tag) tag
@@ -228,8 +239,8 @@
                               min-width       (max MIN_IMAGE_SIZE (/ new-width 4))
                               min-height      (max MIN_IMAGE_SIZE (/ new-height 4))
                               new-cls         (if-not (in "lazyload" cls) (+ cls " lazyload") cls)
-                              new-src         (% "%s/%d,%d,blur%s" (, SCALED_MEDIA_BASE min-width min-height base-src))
-                              data-src        (% "%s/%d,%d%s" (, SCALED_MEDIA_BASE new-width new-height base-src))
+                              new-src         f"{SCALED_MEDIA_BASE}/{min-width},{min-height},blur{base-src}"
+                              data-src        f"{SCALED_MEDIA_BASE}/{new-width},{new-height}{base-src}"
                               data-src-retina (if-not retina src retina)]
                             (setv (get (. tag attrib) "height") (str new-height))
                             (setv (get (. tag attrib) "width") (str new-width))
@@ -240,7 +251,7 @@
                         (let [min-width       (max MIN_IMAGE_SIZE (/ width 4))
                               min-height      (max MIN_IMAGE_SIZE (/ height 4))
                               new-cls         (if-not (in "lazyload" cls) (+ cls " lazyload") cls)
-                              new-src         (% "%s/%d,%d,blur%s" (, SCALED_MEDIA_BASE min-width min-height base-src))
+                              new-src         f"{SCALED_MEDIA_BASE}/{min-width},{min-height},blur{base-src}"
                               data-src        src]
                             (setv (get (. tag attrib) "class") new-cls)
                             (setv (get (. tag attrib) "src") new-src)
@@ -256,7 +267,7 @@
     (let [body (get (.xpath doc "//body") 0)
           children []]
         (for [child (.iterchildren body)]
-            (.append children (tostring child)))
+            (.append children (tostring child :encoding "unicode")))
         (.join "" children)))
 
 
@@ -295,7 +306,7 @@
     [page pagename]
     (let [doc            (apply-transforms (render-page page) pagename)
           lead-paragraph (get (.xpath doc ".//p[@class='lead']") 0)]
-        (tostring lead-paragraph)))
+        (tostring lead-paragraph :encoding "unicode")))
 
 
 (defn fix-footnotes
@@ -344,4 +355,5 @@
         (plugin-tagged)
         (plugin-rating)
         (plugin-quicklook pagename)
+        (capture-favicons)
         (sign-assets)))
