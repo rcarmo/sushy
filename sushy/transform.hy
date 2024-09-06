@@ -338,6 +338,12 @@
     doc)
 
 
+(defn blockquote-alerts
+  ; placeholder for [!NOTE|TIP|IMPORTANT|WARNING|CAUTION] handling
+  [doc]
+  ; TODO: handle first paragraph inside a blockquote
+  doc)
+
 
 (defn apply-transforms [html pagename]
     ; remember that Hy's threading macro manipulates the first argument slot
@@ -355,5 +361,6 @@
         (plugin-tagged)
         (plugin-rating)
         (plugin-quicklook pagename)
+        (blockquote-alerts)
         (capture-favicons)
         (sign-assets)))
