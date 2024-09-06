@@ -6,7 +6,8 @@
     logging             [getLogger]
     lxml.etree          [Element tostring fromstring]
     markdown            [Markdown]
-    pycmarkgfm          [gfm-to-html]
+    cmarkgfm            [github-flavored-markdown-to-html]
+    cmarkgfm._cmark.lib [CMARK_OPT_UNSAFE CMARK_OPT_SMART CMARK_OPT_NORMALIZE CMARK_OPT_FOOTNOTES CMARK_OPT_VALIDATE_UTF8 CMARK_OPT_GITHUB_PRE_LANG CMARK_OPT_TABLE_PREFER_STYLE_ATTRIBUTES]
     re                  [sub]
     smartypants         [smartypants]
     textile             [Textile]
@@ -48,7 +49,14 @@
     (.convert markdown-renderer raw))
                 
 (defn render-gfm [raw]
-    (smartypants (gfm-to-html raw)))
+    (github-flavored-markdown-to-html raw
+       :options (| CMARK_OPT_UNSAFE
+                   CMARK_OPT_SMART
+                   CMARK_OPT_NORMALIZE 
+                   CMARK_OPT_FOOTNOTES
+                   CMARK_OPT_VALIDATE_UTF8
+                   CMARK_OPT_GITHUB_PRE_LANG 
+                   CMARK_OPT_TABLE_PREFER_STYLE_ATTRIBUTES)))
 
 (defn render-textile [raw]
     (smartypants (textile-renderer.parse raw))) 
