@@ -17,5 +17,6 @@ smartypants==2.0.1
 textile==4.0.2
 watchdog==5.0.2
 python-slugify==8.0.4
+pycmarkgfm==1.2.1
 pip-upgrader
 #aiohttp[speedups]

@@ -15,7 +15,8 @@
 
 ; instantiate markdown renderer upon module load
 (setv markdown-renderer
-     (Markdown :extensions ["markdown.extensions.extra" 
+     (Markdown :extensions ["markdown.extensions.alerts"
+                            "markdown.extensions.extra" 
                             "markdown.extensions.toc" 
                             "markdown.extensions.smarty" 
                             "markdown.extensions.codehilite" 

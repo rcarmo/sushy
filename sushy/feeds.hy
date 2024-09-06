@@ -7,14 +7,12 @@
     .utils             [utc-date strip-timezone]
     cssutils           [log :as cssutils-log]
     datetime           [datetime]
+    hyrule.collections [assoc]
     inlinestyler.utils [inline-css]
     logging            [getLogger Formatter ERROR]
     lxml.etree         [Element HTML fromstring tostring]
     os.path            [abspath]
     pytz               [UTC])
-
-(require
-     hyrule.collections [assoc])
 
 (setv log (getLogger __name__))
 
