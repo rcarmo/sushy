@@ -2,7 +2,7 @@
     .models      [list-blobs put-blob get-blob]
     io           [BytesIO]
     PIL          [Image]
-    requests     [Session ConnectionTimeout]
+    requests     [Session Timeout]
     logging      [getLogger]
     urllib.parse [urlsplit urljoin]
     lxml.html    [fromstring]

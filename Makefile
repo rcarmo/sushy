@@ -30,10 +30,10 @@ repl: ## Start a Hy REPL
 	hy -i "(import sushy.app)"
 
 deps: ## Install Dependencies
-	pip install -U -r requirements.txt
+	pip install -U --break-system-packages -r requirements.txt
 
 deps-upgrade: ## Interactively upgrade requirements.txt
-	pip-upgrade --skip-virtualenv-check requirements.txt
+	pip-upgrade --skip-package-installation --skip-virtualenv-check requirements.txt
 
 clean: ## Clean environment
 	rm -f *.zip
