@@ -6,6 +6,7 @@
     logging             [getLogger]
     lxml.etree          [Element tostring fromstring]
     markdown            [Markdown]
+    pycmarkgfm          [gfm-to-html]
     re                  [sub]
     smartypants         [smartypants]
     textile             [Textile]
@@ -15,8 +16,7 @@
 
 ; instantiate markdown renderer upon module load
 (setv markdown-renderer
-     (Markdown :extensions ["markdown.extensions.alerts"
-                            "markdown.extensions.extra" 
+     (Markdown :extensions ["markdown.extensions.extra" 
                             "markdown.extensions.toc" 
                             "markdown.extensions.smarty" 
                             "markdown.extensions.codehilite" 
@@ -47,6 +47,8 @@
     (.reset markdown-renderer)
     (.convert markdown-renderer raw))
                 
+(defn render-gfm [raw]
+    (smartypants (gfm-to-html raw)))
 
 (defn render-textile [raw]
     (smartypants (textile-renderer.parse raw))) 
@@ -54,9 +56,9 @@
 
 (setv render-map 
     {"text/plain"               render-plaintext
-     "text/x-web-markdown"      render-markdown
-     "text/x-markdown"          render-markdown
-     "text/markdown"            render-markdown
+     "text/x-web-markdown"      render-gfm
+     "text/x-markdown"          render-gfm
+     "text/markdown"            render-gfm
      "text/textile"             render-textile
      "text/x-textile"           render-textile
      "text/html"                render-html})
