@@ -1,7 +1,7 @@
 # Set these if not defined already
 export BIND_ADDRESS?=0.0.0.0
 export PORT?=8080
-export DEBUG?=False
+export DEBUG?=True
 export PROFILER?=False
 export CONTENT_PATH?=pages
 export THEME_PATH?=themes/blog
