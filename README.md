@@ -8,7 +8,7 @@ This was formerly the site engine for [`taoofmac.com`](https://taoofmac.com) [ci
 
 Many years later, I've decided to at least clean up the legacy codebase and bring it up to date. Once done, it should again be deployable to [`piku`][piku]/[Dokku-alt][da]/[Dokku][dokku]/[Heroku][heroku].
 
-The goal is to make it run on the 2023 version of Hylang.
+The goal is to make it run on the <strike>2023</strike> 1.0.0 version of Hylang, which was finally released in September 22<sup>nd</sup> 2024.
 
 ### Roadmap
 
