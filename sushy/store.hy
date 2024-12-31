@@ -7,10 +7,10 @@
     logging  [getLogger]
     os       [walk]
     os.path  [join exists splitext getmtime]
-    .utils   [utc-date])
+    .utils   [utc-date]
+    hyrule.collections [assoc])
 
 (require hyrule.argmove [->])
-(require hyrule.collections [assoc])
 
 (setv log (getLogger __name__))
 

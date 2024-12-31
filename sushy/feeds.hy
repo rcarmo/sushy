@@ -11,10 +11,8 @@
     logging            [getLogger Formatter ERROR]
     lxml.etree         [Element HTML fromstring tostring]
     os.path            [abspath]
-    pytz               [UTC])
-
-(require
-     hyrule.collections [assoc])
+    pytz               [UTC]
+    hyrule.collections [assoc])
 
 (setv log (getLogger __name__))
 
