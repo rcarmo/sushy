@@ -41,5 +41,5 @@
         (let [src  (get tag.attrib "src")
               path (.join "/" [pagename src])]
             (.replace (.getparent tag) tag
-                (fromstring (f"<img class=\"quicklook lazyload\" width=\"{x}\" height=\"{y}\" src=\"{SCALED_MEDIA_BASE}/40,30,blur/{path}\" data-src=\"{SCALED_MEDIA_BASE}/{x},{y}/{path}\" data-src-retina=\"{SCALED_MEDIA_BASE}/{(* 2 x)},{(* 2 y)}/{path}\"/>")))))
+                (fromstring f"<img class=\"quicklook lazyload\" width=\"{x}\" height=\"{y}\" src=\"{SCALED_MEDIA_BASE}/40,30,blur/{path}\" data-src=\"{SCALED_MEDIA_BASE}/{x},{y}/{path}\" data-src-retina=\"{SCALED_MEDIA_BASE}/{(* 2 x)},{(* 2 y)}/{path}\"/>"))))
     doc)
