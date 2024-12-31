@@ -12,8 +12,9 @@ The goal is to make it run on the <strike>2023</strike> 1.0.0 version of Hylang,
 
 ### Roadmap
 
+* [ ] Add a new layout and CSS (the current one is a bit dated)
 * [ ] Switch as much as possible to `aiohttp` so we can leverage `uvloop` fully.
-* [ ] Fix all the various breaking syntax changes that the `Hy` project has gone through in the past few years
+* [x] Fix all the various breaking syntax changes that the `Hy` project has gone through in the past few years (I keep resetting this one because they keep changing things)
 * [ ] A little more documentation (there's never enough)
 * [ ] Blog archive and partial feature parity with the current `taoofmac.com` site engine
 * [ ] End-to-end syntax and linting checks
