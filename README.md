@@ -8,10 +8,11 @@ This was formerly the site engine for [`taoofmac.com`](https://taoofmac.com) [ci
 
 Many years later, I've decided to at least clean up the legacy codebase and bring it up to date. Once done, it should again be deployable to [`piku`][piku]/[Dokku-alt][da]/[Dokku][dokku]/[Heroku][heroku].
 
-The goal is to make it run on the 2023 version of Hylang.
+The goal is to make it run on the <strike>2023</strike> 1.0.0 version of Hylang, which was finally released in September 22<sup>nd</sup> 2024.
 
 ### Roadmap
 
+* [ ] Switch as much as possible to `aiohttp` so we can leverage `uvloop` fully.
 * [ ] Fix all the various breaking syntax changes that the `Hy` project has gone through in the past few years
 * [ ] A little more documentation (there's never enough)
 * [ ] Blog archive and partial feature parity with the current `taoofmac.com` site engine

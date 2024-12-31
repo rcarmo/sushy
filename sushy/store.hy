@@ -4,6 +4,7 @@
     codecs   [open]
     .config  [BASE_FILENAMES BASE_TYPES IGNORED_FOLDERS STORE_PATH TIMEZONE]
     datetime [datetime]
+    hyrule.collections [assoc]
     logging  [getLogger]
     os       [walk]
     os.path  [join exists splitext getmtime]
