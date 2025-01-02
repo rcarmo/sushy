@@ -7,7 +7,8 @@
     .store      [asset-exists? asset-path get-page]
     .transform  [apply-transforms inner-html get-link-groups get-mappings get-plaintext-lines]
     .utils      [base-url compact-hash compute-hmac get-thumbnail ttl-cache report-processing-time trace-flow utc-date]
-    bottle      [abort get :as handle-get hook http-date parse-date request redirect response static-file view :as render-view]
+    aiohttp.web [RouteTableDef HTTPFound HTTPNotFound HTTPUnauthorized]
+    aiohttp_jinja2 [template]
     datetime    [datetime]
     dateutil.relativedelta  [relativedelta]
     functools   [lru-cache]
@@ -29,15 +30,18 @@
 
 (setv FOOTER_LINKS (get-link-groups LINKS_PAGE))
 
+(setv routes (RouteTableDef))
+
 ; redirect if trailing slashes
 ; ban some user agents
-(defn [(hook "before_request")] before-request []
-    (let [path (get (. request environ) "PATH_INFO")
+(defn :async before-request [request response]
+    (let [path (. request path)
           ua   (.get (. request headers) "User-Agent" "")]
         (when (in ua BANNED_AGENTS)
-            (abort 401 "Banned."))
+            (raise (HTTPUnauthorized "Banned.")))
         (when (and (!= path "/") (= "/" (slice path -1)))
-            (redirect (slice path 0 -1) 301))))
+            (raise (HTTPFound :location (slice path 0 -1))))
+        response))
 
 
 ; grab page metadata or generate a minimal shim based on the last update
@@ -100,74 +104,75 @@
     inner)
 
 
+;aiohttp_jinja2.setup(
+;    app, enable_async=True,
+;    loader=jinja2.FileSystemLoader('/path/to/templates/folder'))
+
+
 ; root to /space
-(defn [(handle-get "/")] home-page []
-    (redirect PAGE_ROUTE_BASE 301))
+(defn :async [(.get routes "/")] home-page []
+    (raise (HTTPFound :location (PAGE_ROUTE_BASE))))
 
 
-; environment dump
-(defn [(handle-get "/env")
-       (report-processing-time)
-       (http-caching None "text/html" 0)
-       (render-view "debug")]
-    debug-dump []
-        (if DEBUG_MODE
-            {"base_url"         (base-url)
-             "environ"          (dict environ)
-             "headers"          {"title" "Environment dump"}
-             "page_route_base"  PAGE_ROUTE_BASE
-             "site_description" SITE_DESCRIPTION
-             "site_name"        SITE_NAME}
-            (abort 404 "Page Not Found")))
+(defn :async [(.get routes "/env")
+              (report-processing-time)
+              (http-caching None "text/html" 0)
+              (template "debug")]
+  env-dump [request]
+    ; environment dump
+    (if DEBUG_MODE
+      {"base_url"         (base-url)
+       "environ"          (dict environ)
+       "headers"          {"title" "Environment dump"}
+       "page_route_base"  PAGE_ROUTE_BASE
+       "site_description" SITE_DESCRIPTION
+       "site_name"        SITE_NAME}
+      (raise HTTPNotFound "Page Not Found")))
 
 
-; database stats
-(defn [(handle-get "/stats")
-       (report-processing-time)
-       (http-caching None "text/html" 0)
-       (render-view "debug")]
-     debug-dump []
-        (if DEBUG_MODE
-            {"base_url"         (base-url)
-             "environ"          (get-table-stats)
-             "headers"          {"title" "Database Statistics"}
-             "page_route_base"  PAGE_ROUTE_BASE
-             "site_description" SITE_DESCRIPTION
-             "site_name"        SITE_NAME}
-            (abort 404 "Page Not Found")))
+(defn :async [(.get routes "/stats")
+              (report-processing-time)
+              (http-caching None "text/html" 0)
+              (template "debug")]
+  debug-dump []
+    ; database stats
+    (if DEBUG_MODE
+      {"base_url"         (base-url)
+       "environ"          (get-table-stats)
+       "headers"          {"title" "Database Statistics"}
+       "page_route_base"  PAGE_ROUTE_BASE
+       "site_description" SITE_DESCRIPTION
+       "site_name"        SITE_NAME}
+      (raise HTTPNotFound "Page Not Found")))
 
 
-; RSS/atom feed
-(defn [(handle-get "/atom")
-       (handle-get "/feed")
-       (handle-get "/rss")
-       (instrumented-processing-time "feed")
-       (http-caching None "application/atom+xml" FEED_TTL)
-       (ttl-cache (/ FEED_TTL 4))
-       (render-view "atom")]
-    serve-feed []
-        (.set-header response (str "Content-Type") "application/atom+xml")
-        {"base_url"         (base-url)
-         "feed_ttl"         FEED_TTL
-         "items"            (render-feed-items (base-url))
-         "page_route_base"  PAGE_ROUTE_BASE
-         "pubdate"          (utc-date (get-last-update-time))
-         "site_copyright"   SITE_COPYRIGHT
-         "site_description" SITE_DESCRIPTION
-         "site_name"        SITE_NAME})
+(defn :async [(.get routes "/atom.xml")
+              (instrumented-processing-time "feed")
+              (http-caching None "application/atom+xml" FEED_TTL)
+              (ttl-cache (/ FEED_TTL 4))
+              (template "atom")]
+  serve-feed [request]
+    ; RSS/atom feed
+    {"base_url"         (base-url)
+     "feed_ttl"         FEED_TTL
+     "items"            (render-feed-items (base-url))
+     "page_route_base"  PAGE_ROUTE_BASE
+     "pubdate"          (utc-date (get-last-update-time))
+     "site_copyright"   SITE_COPYRIGHT
+     "site_description" SITE_DESCRIPTION
+     "site_name"        SITE_NAME})
 
 
-; Sitemap
-(defn [(handle-get "/sitemap.xml")
-       (instrumented-processing-time "sitemap")
-       (http-caching None "text/xml" FEED_TTL)
-       (ttl-cache FEED_TTL)
-       (render-view "sitemap")]
-    serve-sitemap []
-        (setv (. response content-type) "text/xml")
-        {"base_url"         (base-url)
-         "items"            (get-all)
-         "page_route_base"  PAGE_ROUTE_BASE})
+(defn :async [(.get routes "/sitemap.xml")
+              (instrumented-processing-time "sitemap")
+              (http-caching None "text/xml" FEED_TTL)
+              (ttl-cache FEED_TTL)
+              (template "sitemap")]
+  serve-sitemap []
+    ; Sitemap
+    {"base_url"         (base-url)
+     "items"            (get-all)
+     "page_route_base"  PAGE_ROUTE_BASE})
 
 
 ; junk that needs to be at root level
