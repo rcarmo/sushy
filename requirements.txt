@@ -1,4 +1,5 @@
 #aiohttp[speedups]
+beaker==1.13.0
 cmarkgfm==2024.11.20
 Markdown==3.7
 bottle==0.13.2
