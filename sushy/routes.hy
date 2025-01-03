@@ -7,7 +7,7 @@
     .store      [asset-exists? asset-path get-page]
     .transform  [apply-transforms inner-html get-link-groups get-mappings get-plaintext-lines]
     .utils      [base-url compact-hash compute-hmac get-thumbnail ttl-cache report-processing-time trace-flow utc-date]
-    aiohttp.web [RouteTableDef HTTPFound HTTPNotFound HTTPUnauthorized]
+    aiohttp.web [RouteTableDef FileResponse HTTPFound HTTPNotFound HTTPUnauthorized]
     aiohttp_jinja2 [template]
     datetime    [datetime]
     dateutil.relativedelta  [relativedelta]
@@ -176,28 +176,28 @@
 
 
 ; junk that needs to be at root level
-(defn [(handle-get (% "/<filename:re:(%s)>" ROOT_JUNK))]
+(defn :async [(.get routes (% "/{filename:%s}>" ROOT_JUNK))]
      static-root [filename]
-        (static-file filename :root (join STATIC_PATH "root")))
+        (FileResponse (join STATIC_PATH "root" filename)))
 
 
 ; robots.txt
-(defn [(handle-get "/robots.txt")
+(defn :async [(.get routes ("/robots.txt"))
        (report-processing-time)
        (http-caching None "text/plain" 3600)
        (ttl-cache 3600)
-       (render-view "robots")]
+       (template "robots")]
     serve-robots []
         {"base_url"         (base-url)
          "page_route_base"  PAGE_ROUTE_BASE})
 
 
 ; OpenSearch metadata
-(defn [(handle-get "/opensearch.xml")
+(defn :async [(.get routes "/opensearch.xml")
        (report-processing-time)
        (http-caching None "text/xml" 3600)
        (ttl-cache 3600)
-       (render-view "opensearch")]
+       (template "opensearch")]
     handle-opensearch []
         {"base_url"         (base-url)
          "site_description" SITE_DESCRIPTION
@@ -205,11 +205,11 @@
 
          
 ; search
-(defn [(handle-get "/search")
+(defn :async [(.get routes "/search")
        (instrumented-processing-time "search")
        (http-caching None "text/html" 30)
        (ttl-cache 30 "q")
-       (render-view "search")]
+       (template "search")]
     handle-search []
         (if (in "q" (.keys (. request query)))
             {"base_url"         (base-url)
