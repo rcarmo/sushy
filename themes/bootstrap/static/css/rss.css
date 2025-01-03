@@ -1,0 +1,52 @@
+body, div {
+    color: black;
+    font-size: 12pt; 
+    word-wrap: break-word; 
+    -webkit-nbsp-mode: space; 
+    -webkit-line-break: after-white-space; 
+    font-family: Georgia, Times New Roman, Times, serif;
+} 
+
+pre {
+    font-family: Menlo, Consolas, Courier New, Courier, monospace;
+}
+
+a:link {
+  color: #0000cc
+} 
+
+table {
+    background:transparent; 
+    margin: 0px; 
+    padding: 0px; 
+    border-collapse: collapse;
+}
+
+table thead tr {
+    font-size: 9pt;
+    border-top: 1px solid #aaa;
+}
+
+table thead tr th {
+    border-bottom: 1px solid black; 
+    border-top: 2px solid black; 
+    padding: 4px; 
+    font-weight: bold;
+}
+
+table tbody tr {
+    font-size: 9pt; 
+    border-top: 1px solid #aaa;
+}
+
+table tbody td {
+    min-width: 80px;
+    margin: 0px; 
+    padding: 4px; 
+    vertical-align: top; 
+    border-top: 1px solid #aaa;
+}
+
+img {
+    max-width: 100% !important; height: auto;
+} 
