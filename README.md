@@ -12,8 +12,11 @@ The goal is to make it run on the <strike>2023</strike> 1.0.0 version of Hylang,
 
 ### Roadmap
 
-* [ ] Add a new layout and CSS (the current one is a bit dated)
-* [ ] Switch as much as possible to `aiohttp` so we can leverage `uvloop` fully.
+* [ ] Add a new layout and CSS (the current one is a bit dated). Current goal is to replace an `mkdocs` instance I use for my own private documentation.
+* [ ] Get it to parse Obsidian vaults to some degree, because everyone asks for it.
+* [ ] Saner tag and archive pages
+* [ ] (Eventually) switch as much as possible to `aiohttp` so we can leverage `uvloop` fully (see `aiohttp` branch)
+* [ ] (Eventually) switch to ElementTree to remove `lxml` dependency
 * [x] Fix all the various breaking syntax changes that the `Hy` project has gone through in the past few years (I keep resetting this one because they keep changing things)
 * [ ] A little more documentation (there's never enough)
 * [ ] Blog archive and partial feature parity with the current `taoofmac.com` site engine
