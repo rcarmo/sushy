@@ -9,44 +9,44 @@
     os       [walk]
     os.path  [join exists splitext getmtime]
     .utils   [utc-date]
+    re       [compile DOTALL]
+    yaml     [safe-load]
     hyrule.collections [assoc])
 
 (require hyrule.argmove [->])
 
 (setv log (getLogger __name__))
-
+(setv header-lines (compile r"^---\s*(.*?)\s*---|^(.*?)(?:\n\n|$)" DOTALL)); be tolerant of leading whitespace and missing markers
 
 (defn strip-seq [string-sequence]
     ; strip whitespace from a sequence of strings
     (map (fn [buffer] (.strip buffer)) string-sequence))
-    
 
-(defn split-header-line [string]
-    ; parse a header line from front matter
-    (if (.startswith "---" string) ; handle Jekyll-style front matter delimiters
-       ["jekyll" "true"]
-       (let [parts (list (strip-seq (.split string ":" 1)))]
-          [(.lower (get parts 0)) (get parts 1)])))
-            
 
-(defn parse-page [buffer [content-type "text/plain"]]
+(defn ensure-defaults [headers content-type]
+    ; ensure that all required headers are present
+  (let [defaults {"title" "Untitled"
+                  "from" "Unknown Author"
+                  "content-type" content-type}
+        lheaders (dict (map (fn [i] [(.lower (get i 0)) (get i 1)]) (.items headers)))]
+        {#** defaults #** lheaders}))
+
+
+(defn parse-page [pagename buffer [content-type "text/plain"]]
     ; parse a page and return a header map and the raw markup
-    (let [unix-buffer (.replace buffer "\r\n" "\n")]
-        (try 
-            (let [delimiter    "\n\n"
-                  parts        (.split unix-buffer delimiter 1)
-                  header-lines (.splitlines (get parts 0))
-                  headers      (dict (map split-header-line header-lines))
-                  body         (.strip (get parts 1))]
-                (when (not (in "from" headers))
-                    (assoc headers "from" "Unknown Author"))
-                (when (not (in "content-type" headers))
-                    (assoc headers "content-type" content-type))
-                {"headers" headers
-                  "body"    body})
+    (let [unix-buffer (.strip (.replace buffer "\r\n" "\n"))]
+        (try
+          (let [match        (.match header-lines unix-buffer)
+                front-matter (if match
+                               (if (.group match 1) (.group match 1) (.group match 2))
+                               {})
+                headers      (ensure-defaults (safe-load front-matter) content-type)
+                body         (if match (cut unix-buffer (.end match) (len unix-buffer)) unix-buffer)]
+            {"headers" headers
+             "body"    body})
             (except [e Exception]
-                (.error log f"{e} Could not parse page")
-                (raise (RuntimeError "Could not parse page"))))))
+                (.error log f"Could not parse page {pagename}: {e}")
+                (raise (RuntimeError f"Could not parse page {pagename}: {e}"))))))
 
 
 (defn asset-path [pagename asset]
@@ -85,7 +85,7 @@
               handle       (open filename :mode "r" :encoding "utf-8")
               buffer       (.read handle)]
             (.close handle)
-            (parse-page buffer content-type))
+            (parse-page pagename buffer content-type))
         (except [e StopIteration]
             (raise (IOError f"page not found {pagename}")))))
 

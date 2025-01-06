@@ -36,7 +36,7 @@
     (reduce (fn [x y] (or x y))
         (map (fn [header]
                 (if (and (in header headers)
-                         (in (.lower (get headers header)) ["off" "no" "false"]))
+                         (get headers header))
                     True
                     False))
             ["x-index" "index" "search"])
@@ -47,7 +47,7 @@
     (reduce (fn [x y] (and x y))
         (map (fn [header]
                 (if (and (in header headers)
-                         (in (.lower (get headers header)) ["off" "no" "false"]))
+                         (get headers header))
                     False
                     True))
             ["visible" "published"])

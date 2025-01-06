@@ -14,8 +14,8 @@
     pygments            [highlight]
     pygments.lexers     [get-lexer-by-name]
     pygments.formatters [HtmlFormatter]
-    re                  [IGNORECASE sub]
-    urllib.parse        [urlsplit])
+    re                  [IGNORECASE sub] 
+    urllib.parse        [urlsplit unquote :as dequote])
 
 (require hyrule.argmove [->])
 
@@ -135,7 +135,7 @@
         (let [href (get a.attrib "href")
               parts (urlsplit href)
               schema (get parts 0)
-              netloc (get parts 1)]
+              netloc (dequote (get parts 1))] 
          (download-favicon f"{schema}://{netloc}")))
     doc)
 
@@ -362,5 +362,5 @@
         (plugin-rating)
         (plugin-quicklook pagename)
         (blockquote-alerts)
-        (capture-favicons)
+        ;(capture-favicons)
         (sign-assets)))
