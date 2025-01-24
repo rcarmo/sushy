@@ -14,7 +14,7 @@
     pygments            [highlight]
     pygments.lexers     [get-lexer-by-name]
     pygments.formatters [HtmlFormatter]
-    re                  [IGNORECASE sub] 
+    re                  [IGNORECASE sub]
     urllib.parse        [urlsplit unquote :as dequote])
 
 (require hyrule.argmove [->])
@@ -68,7 +68,7 @@
                             (setv url (sub (+ schema ":") (get INTERWIKI_MAP schema) url 1 IGNORECASE))))
                     (.append group #(url label)))))
      group))
-     
+
 
 
 
@@ -83,7 +83,7 @@
                 (let [key (.get tag.attrib "id" "_")
                       lines (.splitlines tag.text)
                       items (map (fn [x] (.split x)) lines)]
-                    (setv (get mappings key) (expand-link-group items))))                                
+                    (setv (get mappings key) (expand-link-group items))))
          mappings)))
 
 
@@ -114,7 +114,7 @@
                 (if (in "%s" (get INTERWIKI_MAP schema))
                     (setv (get a.attrib "href") (% (get INTERWIKI_MAP schema) (get parts 1)))
                     (setv (get a.attrib "href") (sub (+ schema ":") (get INTERWIKI_MAP schema) href 1 IGNORECASE))))))
-    doc)    
+    doc)
 
 
 (defn alias-links
@@ -135,7 +135,7 @@
         (let [href (get a.attrib "href")
               parts (urlsplit href)
               schema (get parts 0)
-              netloc (dequote (get parts 1))] 
+              netloc (dequote (get parts 1))]
          (download-favicon f"{schema}://{netloc}")))
     doc)
 
@@ -214,7 +214,7 @@
                                     (fromstring (inline-message "error" (% "Could not read size from '%s'" src)))))))
                     (.replace (.getparent tag) tag
                         (fromstring (inline-message "error" (% "Could not find image '%s'" src))))))
-            (when (not (= "data" schema)) 
+            (when (not (= "data" schema))
                 (setv (get (. tag attrib) "src") (join PAGE_MEDIA_BASE pagename src)))))
     doc)
 
@@ -338,10 +338,17 @@
     doc)
 
 
-(defn blockquote-alerts
+(defn blockquote-admonitions
   ; placeholder for [!NOTE|TIP|IMPORTANT|WARNING|CAUTION] handling
+  ; these need to be mapped to admonition-xxxx classes
   [doc]
   ; TODO: handle first paragraph inside a blockquote
+  (for [tag (.xpath doc "//blockquote")]
+    (let [first-paragraph (get (.xpath tag ".//p") 0)]
+      (when first-paragraph
+        (let [first-paragraph-text (tostring first-paragraph :method "text" :encoding "unicode")]
+          (when (in first-paragraph-text ["[!NOTE]" "[!TIP]" "[!IMPORTANT]" "[!WARNING]" "[!CAUTION]"])
+            (setv (get (. tag attrib) "class") (+ "admonition-" (.lower (sub first-paragraph-text 2)))))))))
   doc)
 
 
@@ -361,6 +368,6 @@
         (plugin-tagged)
         (plugin-rating)
         (plugin-quicklook pagename)
-        (blockquote-alerts)
+        (blockquote-admonitions)
         ;(capture-favicons)
         (sign-assets)))
