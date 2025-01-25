@@ -178,7 +178,7 @@
 
 
 (defn fast-start [n]
-    ; TODO: fast start indexing by peeking at the past 3 months 
+    ; TODO: fast start indexing by peeking at the past 3 months
     (let [when (.now datetime) delta (timedelta :weeks -4)]
         (for [step (range 0 4)]
            (yield (.strftime (+ when (* step delta)) "%Y/%m")))))
@@ -192,9 +192,9 @@
         ; close database connection to remove contention
         (.close db)
         (setv start-time (time))
-        
+
         (filesystem-walk STORE_PATH)
-        (.info log f"Indexing done in {(- (time) start-time)}s")
+        (.info log f"Indexing done in {(- (time) start-time):.2f}s")
         (when PROFILER
             (.disable p)
             (.info log "dumping stats")
