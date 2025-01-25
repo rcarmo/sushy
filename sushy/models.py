@@ -1,16 +1,13 @@
-import re, sys, logging
+from logging import getLogger
 from bottle import hook
 from os import environ
-import datetime
-from dateutil.relativedelta import relativedelta
-from difflib import SequenceMatcher
-from peewee import *
-from playhouse.sqlite_ext import *
-from os.path import basename
+from peewee import ForeignKeyField, FixedCharField, DateTimeField, IntegerField, CharField, TextField, BlobField, Model, SQL, fn, OperationalError, IntegrityError
+from playhouse.sqlite_ext import SqliteExtDatabase
+from playhouse.sqlite_ext import FTSModel
 
-log = logging.getLogger(__name__)
+log = getLogger(__name__)
 
-# Database models for metadata caching and full text indexing using SQLite3 
+# Database models for metadata caching and full text indexing using SQLite3
 # (handily beats Whoosh and makes for a single index file)
 
 db = SqliteExtDatabase(environ['DATABASE_PATH'],regexp_function=True,rank_functions=True)
@@ -149,7 +146,7 @@ def get_links(page_name):
             yield page
     except OperationalError as e:
         log.warn(e)
-        return        
+        return
 
 
 def get_page_indexing_time(name):
@@ -157,6 +154,7 @@ def get_page_indexing_time(name):
     try:
         return Page.get(Page.name == name).idxtime
     except Exception as e:
+        log.warn(e)
         return None
 
 
@@ -223,7 +221,7 @@ def list_blobs():
 
 def get_blob(name: str) -> dict:
     """Simple blob retrieval"""
-    return Blobs.get(Blobs.name == name)._data
+    return Blob.get(Blob.name == name)._data
 
 
 def put_blob(**kwargs) -> Blob:
@@ -242,9 +240,9 @@ def put_blob(**kwargs) -> Blob:
 
 def delete_blob(name: str) -> None:
     """Simple blob removal"""
-    with db.atomic():   
+    with db.atomic():
         try:
-            Blobs.delete().where(Blobs.name == name).execute()
+            Blob.delete().where(Blob.name == name).execute()
         except Exception as e:
             log.warn(e)
 
@@ -314,7 +312,7 @@ def get_next_by_date(name, regexp):
             .dicts())
     for p in filter(lambda x: regexp.match(x['name']), query):
         return p
-            
+
 
 def get_prev_next(name, regexp = None):
     """Get the previous/next page depending on a pattern"""
