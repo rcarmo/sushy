@@ -5,7 +5,7 @@ bottle==0.13.2
 cmarkgfm==2024.11.20
 cssutils==2.11.1
 docutils==0.21.2
-hy==1.0.0
+hy==1.1.0
 hyrule==0.7.0
 inlinestyler==0.2.5
 lxml==5.3.0
