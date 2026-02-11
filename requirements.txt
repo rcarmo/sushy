@@ -9,7 +9,7 @@ hy==1.1.0
 hyrule==1.0.0
 inlinestyler==0.2.5
 lxml==5.3.0
-nbconvert==7.16.4
+nbconvert==7.17.0
 peewee==3.17.8
 pillow==12.1.1
 pip-upgrader
