@@ -1,6 +1,6 @@
 #aiohttp[speedups]
 cmarkgfm==2024.11.20
-Markdown==3.7
+Markdown==3.8.1
 bottle==0.13.2
 cmarkgfm==2024.11.20
 cssutils==2.11.1
