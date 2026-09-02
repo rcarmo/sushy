@@ -11,7 +11,7 @@ inlinestyler==0.2.5
 lxml==6.1.0
 nbconvert==7.17.1
 peewee==3.17.8
-pillow==12.2.0
+pillow==12.3.0
 pip-upgrader
 pygments==2.20.0
 python-dateutil==2.9.0
